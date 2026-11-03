@@ -8,7 +8,7 @@ const { DISCORD_BOT_TOKEN, DISCORD_CLIENT_ID, DEV_GUILD_ID, PORT } = process.env
 if (!DISCORD_BOT_TOKEN || !DISCORD_CLIENT_ID) { console.error('Missing DISCORD_BOT_TOKEN or DISCORD_CLIENT_ID'); process.exit(1); }
 
 // Tiny web server so Render "Web Service" sees an open port (not needed for a Worker)
-if (PORT) http.createServer((q, r) => { r.writeHead(200); r.end('Uranium bot is running'); }).listen(PORT, () => console.log('Health server on ' + PORT));
+if (PORT) http.createServer((q, r) => { r.writeHead(200); r.end('Uranium bot is running. Discord ready: ' + started); }).listen(PORT, () => console.log('Health server on ' + PORT));
 
 const cats = ['member', 'message', 'channel', 'role', 'voice', 'server', 'automod', 'info'].map((n) => require('./commands/' + n));
 for (const cat of cats) cat.map = new Map(cat.commands.map((c) => [c.name, c]));
@@ -157,5 +157,10 @@ const onReady = async () => {
 client.once('clientReady', onReady);
 client.once('ready', onReady);
 client.on('error', (e) => console.error('Client error:', e));
+client.on('shardError', (e) => console.error('Shard error:', e));
+client.on('warn', (m) => console.warn('Warn:', m));
+let dbg = 0;
+client.on('debug', (m) => { if (dbg++ < 60) console.log('[debug]', String(m).split(DISCORD_BOT_TOKEN).join('***').slice(0, 220)); });
 process.on('unhandledRejection', (e) => console.error('Unhandled:', e));
-client.login(DISCORD_BOT_TOKEN);
+console.log('Logging in to Discord...');
+client.login(DISCORD_BOT_TOKEN).then(() => console.log('Login call finished')).catch((e) => console.error('Login failed:', e));
