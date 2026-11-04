@@ -1,19 +1,40 @@
 const http = require('http');
-const { Client, GatewayIntentBits, REST, Routes, SlashCommandBuilder, EmbedBuilder, ActivityType, ChannelType } = require('discord.js');
+const { Client, GatewayIntentBits, REST, Routes, SlashCommandBuilder, EmbedBuilder, ActivityType } = require('discord.js');
 const db = require('./lib/db');
 const ui = require('./lib/ui');
-const { UserError, permName, fmt } = require('./lib/util');
+require('./lib/ui2');
+const art = require('./lib/art');
+const prefix = require('./lib/prefix');
+const { UserError, permName } = require('./lib/util');
 
 const { DISCORD_BOT_TOKEN, DISCORD_CLIENT_ID, DEV_GUILD_ID, PORT } = process.env;
 if (!DISCORD_BOT_TOKEN || !DISCORD_CLIENT_ID) { console.error('Missing DISCORD_BOT_TOKEN or DISCORD_CLIENT_ID'); process.exit(1); }
 
-// Tiny web server so Render "Web Service" sees an open port (not needed for a Worker)
-if (PORT) http.createServer((q, r) => { r.writeHead(200); r.end('Uranium bot is running. Discord ready: ' + started); }).listen(PORT, () => console.log('Health server on ' + PORT));
+let client = null, started = false, contentIntent = false;
+if (PORT) http.createServer((q, r) => { r.writeHead(200); r.end('Uranium is running. Ready: ' + started); }).listen(PORT, () => console.log('Health server on ' + PORT));
 
-const cats = ['member', 'message', 'channel', 'role', 'voice', 'server', 'automod', 'info'].map((n) => require('./commands/' + n));
+const cats = ['member', 'message', 'channel', 'role', 'voice', 'server', 'automod', 'info', 'premium'].map((n) => require('./commands/' + n));
 for (const cat of cats) cat.map = new Map(cat.commands.map((c) => [c.name, c]));
 const byName = new Map(cats.map((c) => [c.name, c]));
+require('./lib/patch')(byName);
+prefix.init(cats);
+const premium = byName.get('premium');
 
+/* ---------- owner & blacklist ---------- */
+const OWNERS = new Set((process.env.OWNER_IDS || '').split(/[\s,]+/).filter(Boolean));
+const isOwner = (id) => OWNERS.has(id);
+const G = () => db.g('__global');
+const blacklisted = (id) => (G().blacklist || []).some((x) => x.id === id);
+const getPrefix = (gid) => db.g(gid).config.prefix || '!';
+async function loadOwners() {
+  try {
+    const app = await client.application.fetch(); const o = app.owner; if (!o) return;
+    if (o.members) { for (const m of o.members.values()) OWNERS.add(m.user?.id || m.id); if (o.ownerId) OWNERS.add(o.ownerId); } else OWNERS.add(o.id);
+    console.log('Owner loaded');
+  } catch (e) { console.warn('Could not load owner:', e.message); }
+}
+
+/* ---------- slash command builder ---------- */
 function addOpt(sc, x) {
   const base = (o) => o.setName(x.n).setDescription(x.d).setRequired(!!x.req);
   switch (x.t) {
@@ -43,12 +64,11 @@ function build(cat) {
   return b.toJSON();
 }
 
-const client = new Client({ intents: [GatewayIntentBits.Guilds, GatewayIntentBits.GuildVoiceStates] });
-
+/* ---------- running a command (slash or prefix) ---------- */
 function ctx(i, me) {
   const o = i.options;
-  const c = {
-    i, g: i.guild, ch: i.channel, me, cats,
+  return {
+    i, g: i.guild, ch: i.channel, me, cats, isOwner: isOwner(i.user.id), prefix: getPrefix(i.guildId), short: prefix.shortOf,
     u: (n) => o.getUser(n), s: (n) => o.getString(n), n: (n) => o.getInteger(n), b: (n) => o.getBoolean(n), c: (n) => o.getChannel(n), r: (n) => o.getRole(n),
     m: async (n) => { const u = o.getUser(n); return u ? i.guild.members.fetch(u.id).catch(() => null) : null; },
     reason: () => o.getString('reason') || 'No reason provided',
@@ -63,20 +83,16 @@ function ctx(i, me) {
       } catch { return '⚠️ DMs closed'; }
     },
   };
-  return c;
 }
-
-async function slash(i) {
-  if (!i.inGuild() || !i.guild) return i.reply({ embeds: [ui.errorEmbed('This command only works inside a server.', 'Use it in a server channel.')], flags: ui.EPH });
-  const cat = byName.get(i.commandName); const def = cat?.map.get(i.options.getSubcommand(false));
-  if (!def) return i.reply({ embeds: [ui.errorEmbed('This command does not exist.', 'It may have been removed. Use /info help to see all commands.')], flags: ui.EPH });
+async function execute(i, cat, def) {
   const label = `/${cat.name} ${def.name}`;
   await i.deferReply();
   try {
+    if (def.owner && !isOwner(i.user.id)) throw new UserError('💎 This is a **Premium** command and it is only for the bot owner.', 'Normal moderation commands are in the other groups. Use the help menu.');
     const me = await i.guild.members.fetchMe();
     if (def.perm) {
       if (!i.memberPermissions.has(def.perm)) throw new UserError(`You need the **${permName(def.perm)}** permission to use \`${label}\`.`, 'Ask a server admin to give you that permission or a role that has it.');
-      if (!me.permissions.has(def.perm)) throw new UserError(`I (Uranium) am missing the **${permName(def.perm)}** permission.`, 'Give my role that permission in Server Settings → Roles. Run /info setup-check to see everything I need.');
+      if (!me.permissions.has(def.perm)) throw new UserError(`I (Uranium) am missing the **${permName(def.perm)}** permission.`, 'Give my role that permission in Server Settings → Roles. Run the setup check to see everything I need.');
     }
     const c = ctx(i, me);
     if (def.danger && !(await ui.confirm(i, def.danger))) return;
@@ -86,7 +102,13 @@ async function slash(i) {
     modlog(i, cat, def, r);
   } catch (e) { await ui.sendError(i, e, label); }
 }
-
+async function slash(i) {
+  if (!i.inGuild() || !i.guild) return i.reply({ embeds: [ui.errorEmbed('This command only works inside a server.', 'Use it in a server channel.')], flags: ui.EPH });
+  if (blacklisted(i.user.id) && !isOwner(i.user.id)) return i.reply({ embeds: [ui.errorEmbed('You are not allowed to use this bot.')], flags: ui.EPH });
+  const cat = byName.get(i.commandName); const def = cat?.map.get(i.options.getSubcommand(false));
+  if (!def) return i.reply({ embeds: [ui.errorEmbed('This command does not exist.', 'It may have been removed. Open the help menu to see all commands.')], flags: ui.EPH });
+  return execute(i, cat, def);
+}
 async function modlog(i, cat, def, r) {
   try {
     if (!r?.case) return; const id = db.g(i.guildId).config.modlog; if (!id) return;
@@ -96,6 +118,40 @@ async function modlog(i, cat, def, r) {
   } catch { /* log channel not reachable */ }
 }
 
+/* ---------- prefix / no-prefix messages ---------- */
+async function onMessage(msg) {
+  try {
+    if (msg.author.bot || !msg.guild || !msg.content) return;
+    const px = getPrefix(msg.guild.id); const owner = isOwner(msg.author.id); let body = null, viaPrefix = true;
+    if (msg.content.startsWith(px)) body = msg.content.slice(px.length);
+    else { const m = new RegExp(`^<@!?${client.user.id}>\\s*`).exec(msg.content); if (m) body = msg.content.slice(m[0].length); }
+    if (body == null) { if (owner && G().config.np !== false) { body = msg.content; viaPrefix = false; } else return; }
+    body = body.trim();
+    if (!body) { if (viaPrefix) await msg.reply({ embeds: [ui.infoEmbed('☢️ Hi, I am Uranium', `My prefix here is \`${px}\`. Type \`${px}help\` to open the menu.`, ui.COLORS.ok)], allowedMentions: { repliedUser: false } }); return; }
+    const tokens = prefix.tokenize(body);
+    if (viaPrefix && tokens[0].text.toLowerCase() === 'prefix') return setPrefix(msg, tokens, px);
+    const hit = prefix.resolve(tokens); if (!hit) return;
+    if (blacklisted(msg.author.id) && !owner) return;
+    if (hit.def.owner && !owner) return;
+    const member = msg.member || await msg.guild.members.fetch(msg.author.id).catch(() => null); if (!member) return;
+    const vals = {}; const fi = prefix.fakeInteraction(msg, member, hit.def, vals, client);
+    const alias = prefix.shortOf(hit.cat.name, hit.def.name);
+    try {
+      Object.assign(vals, await prefix.parseArgs({ msg, client, guild: msg.guild }, hit.def, tokens.slice(hit.used), body, prefix.usage(px, alias, hit.def)));
+    } catch (e) { if (!viaPrefix) return; await msg.channel.sendTyping().catch(() => {}); return ui.sendError(fi, e, `${px}${alias}`); }
+    msg.channel.sendTyping().catch(() => {});
+    return execute(fi, hit.cat, hit.def);
+  } catch (e) { console.error('Message handler error:', e); }
+}
+async function setPrefix(msg, tokens, px) {
+  const reply = (e) => msg.reply({ embeds: [e], allowedMentions: { repliedUser: false } });
+  if (!tokens[1]) return reply(ui.infoEmbed('🔧 Prefix', `The prefix here is \`${px}\`.\nChange it with \`${px}prefix <new>\`.`));
+  if (!msg.member?.permissions.has('ManageGuild')) return reply(ui.errorEmbed('You need the **Manage Server** permission to change the prefix.'));
+  const np = tokens[1].text; if (np.length > 3 || /[`\s]/.test(np)) return reply(ui.errorEmbed('The prefix must be 1 to 3 characters.', 'Example: `!`, `?`, `u.`'));
+  db.g(msg.guild.id).config.prefix = np; db.save(); return reply(ui.okEmbed('Prefix changed', `The new prefix is \`${np}\`.`));
+}
+
+/* ---------- buttons & autocomplete ---------- */
 async function autocomplete(i) {
   try {
     const f = i.options.getFocused(true);
@@ -104,10 +160,10 @@ async function autocomplete(i) {
     await i.respond(l.map((r) => ({ name: `${r.enabled ? '🟢' : '🔴'} ${r.name}`.slice(0, 100), value: r.id })));
   } catch { await i.respond([]).catch(() => {}); }
 }
-
 async function button(i) {
   const [kind, a] = i.customId.split(':');
-  if (kind === 'cf' || kind === 'help') return; // handled by collectors
+  if (['cf', 'help', 'eb', 'lst', 'sv'].includes(kind)) return; // handled by collectors
+  if (['poll', 'gw', 'rp', 'tk'].includes(kind)) { if (i.inGuild() && blacklisted(i.user.id)) return i.reply({ content: 'You are not allowed to use this bot.', flags: ui.EPH }); return premium.onButton(i); }
   const deny = (m) => i.reply({ embeds: [ui.errorEmbed(m)], flags: ui.EPH });
   if (kind === 'dismiss') { if (i.user.id !== a) return deny('Only the moderator who ran the command can dismiss it.'); return i.update({ components: [] }); }
   if (kind === 'case') {
@@ -125,42 +181,59 @@ async function button(i) {
   }
 }
 
-client.on('interactionCreate', (i) => {
-  const run = i.isAutocomplete() ? autocomplete(i) : i.isChatInputCommand() ? slash(i) : i.isButton() ? button(i) : null;
-  run?.catch((e) => console.error('Interaction error:', e));
-});
-
+/* ---------- scheduler ---------- */
 async function tick() {
   for (const s of db.dueSchedules()) {
     try {
+      if (s.type === 'giveaway') { await premium.endGiveaway(client, s); db.dropSchedule(s.id); continue; }
       const g = await client.guilds.fetch(s.guildId);
       if (s.type === 'unban') { await g.members.unban(s.userId, 'Temp ban expired').catch(() => {}); db.addCase(s.guildId, { type: 'unban', userId: s.userId, modId: client.user.id, reason: 'Temp ban expired' }); }
       if (s.type === 'unrole') { const m = await g.members.fetch(s.userId).catch(() => null); if (m) await m.roles.remove(s.roleId, 'Temp role expired').catch(() => {}); }
+      if (s.type === 'unlock') { const ch = await g.channels.fetch(s.channelId).catch(() => null); if (ch?.permissionOverwrites) { await ch.permissionOverwrites.edit(g.roles.everyone, { SendMessages: null }, { reason: 'Timed lockdown ended' }).catch(() => {}); ch.send?.({ embeds: [ui.okEmbed('Channel unlocked', 'The timed lockdown has ended.')] }).catch(() => {}); } }
     } catch (e) { console.error('Schedule error:', e.message); }
     db.dropSchedule(s.id);
   }
 }
 
-let started = false;
+/* ---------- client ---------- */
 const onReady = async () => {
   if (started) return; started = true;
   console.log(`✅ Uranium online as ${client.user.tag}`);
-  client.user.setActivity('200 moderation commands', { type: ActivityType.Watching });
+  const st = G().config.status; const T = { playing: ActivityType.Playing, watching: ActivityType.Watching, listening: ActivityType.Listening, competing: ActivityType.Competing };
+  client.user.setActivity(st ? st.text : '/help • !help', { type: st ? T[st.type] : ActivityType.Watching });
+  if (!contentIntent) console.warn('⚠️ Message Content Intent is OFF: prefix commands only work after @mentioning the bot. Turn it on in the Developer Portal → Bot.');
+  loadOwners();
   try {
-    const rest = new REST({ version: '10' }).setToken(DISCORD_BOT_TOKEN);
-    const body = cats.map(build);
+    const rest = new REST({ version: '10' }).setToken(DISCORD_BOT_TOKEN); const body = cats.map(build);
     await rest.put(DEV_GUILD_ID ? Routes.applicationGuildCommands(DISCORD_CLIENT_ID, DEV_GUILD_ID) : Routes.applicationCommands(DISCORD_CLIENT_ID), { body });
-    console.log(`✅ Registered ${body.length} command groups (${cats.reduce((n, c) => n + c.commands.length, 0)} commands)`);
+    console.log(`✅ Registered ${body.length} command groups`);
   } catch (e) { console.error('❌ Command registration failed:', e.rawError ? JSON.stringify(e.rawError).slice(0, 800) : e); }
   setInterval(tick, 30000).unref(); tick();
+  art.build().then((ok) => ok && console.log('✅ Banner animation ready'));
 };
-client.once('clientReady', onReady);
-client.once('ready', onReady);
-client.on('error', (e) => console.error('Client error:', e));
-client.on('shardError', (e) => console.error('Shard error:', e));
-client.on('warn', (m) => console.warn('Warn:', m));
-let dbg = 0;
-client.on('debug', (m) => { if (dbg++ < 60) console.log('[debug]', String(m).split(DISCORD_BOT_TOKEN).join('***').slice(0, 220)); });
+function makeClient(withContent) {
+  contentIntent = withContent;
+  const intents = [GatewayIntentBits.Guilds, GatewayIntentBits.GuildVoiceStates, GatewayIntentBits.GuildMessages];
+  if (withContent) intents.push(GatewayIntentBits.MessageContent);
+  client = new Client({ intents });
+  client.on('interactionCreate', (i) => {
+    const run = i.isAutocomplete() ? autocomplete(i) : i.isChatInputCommand() ? slash(i) : i.isButton() ? button(i) : null;
+    run?.catch((e) => console.error('Interaction error:', e));
+  });
+  client.on('messageCreate', onMessage);
+  client.on('messageDelete', (m) => { if (m.guild && m.content && !m.author?.bot) premium.snipes.set(m.channelId, { content: m.content, author: m.author?.username || 'unknown', authorId: m.author?.id, at: Date.now() }); });
+  client.once('clientReady', onReady); client.once('ready', onReady);
+  client.on('error', (e) => console.error('Client error:', e));
+  client.on('shardError', (e) => console.error('Shard error:', e));
+  return client;
+}
 process.on('unhandledRejection', (e) => console.error('Unhandled:', e));
-console.log('Logging in to Discord...');
-client.login(DISCORD_BOT_TOKEN).then(() => console.log('Login call finished')).catch((e) => console.error('Login failed:', e));
+(async () => {
+  for (const withContent of [true, false]) {
+    const cl = makeClient(withContent);
+    try { console.log('Logging in to Discord...'); await cl.login(DISCORD_BOT_TOKEN); return; } catch (e) {
+      if (withContent && /disallowed intents/i.test(String(e?.message || e))) { console.warn('⚠️ Message Content Intent is not enabled in the Developer Portal. Retrying without it...'); try { cl.destroy(); } catch { /* ignore */ } started = false; continue; }
+      console.error('Login failed:', e); process.exit(1);
+    }
+  }
+})();
