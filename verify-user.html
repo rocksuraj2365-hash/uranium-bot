@@ -1,0 +1,54 @@
+<!DOCTYPE html>
+<html lang="en"><head>
+<meta charset="UTF-8"><meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Verify User | Uranium</title>
+<meta name="description" content="What Uranium user verification is and is not, how Discord login works, what information is requested, what to do if it fails, and how to contact server staff.">
+<meta property="og:title" content="Verify User | Uranium"><meta property="og:description" content="How verification-related steps with Uranium and Discord work."><meta property="og:type" content="website"><meta name="theme-color" content="#8b5cf6">
+<link rel="stylesheet" href="/style.css">
+</head><body class="info-page">
+<nav><a class="logo" href="/">Uranium</a><span class="nav-links"><a class="btn" href="/dashboard">Dashboard</a> <a class="btn" href="/login">Login with Discord</a></span></nav>
+<main class="doc">
+<header class="doc-hero"><p class="eyebrow">Uranium</p><h1>Verify User</h1><p class="lede">This page explains the verification-related steps a user may meet when using Uranium, and what Uranium does not do.</p><p class="updated">Last updated: 5 November 2026</p></header>
+
+<div class="note"><strong>Important:</strong> Uranium does not provide official Discord identity verification and does not verify your legal identity. In the current code there is no built-in Uranium &ldquo;verify your account&rdquo; system, no identity-document check and no separate Uranium verification form. This page must not be presented as Discord&rsquo;s own verification.</div>
+
+<section class="doc-section"><h2>What &ldquo;verification&rdquo; can mean here</h2><ul>
+<li><strong>Dashboard login:</strong> signing in through Discord OAuth. This proves to the dashboard that you control a Discord account, because Discord itself checks your login. Uranium does not check your password.</li>
+<li><strong>A server&rsquo;s Discord verification level:</strong> a Discord server setting (none, low, medium, high or very high) that Discord enforces before members can participate. An administrator with the Manage Server permission can change that Discord setting with <code>/server verification-level</code>. Uranium only changes the setting; Discord applies it.</li>
+<li><strong>Server-specific checks by staff:</strong> an individual server may ask members to follow its own rules, use a role panel or open a support ticket. Those steps belong to that server, not to an official Uranium or Discord identity programme.</li>
+</ul></section>
+
+<section class="doc-section"><h2>How to complete dashboard login</h2><ol>
+<li>Open the dashboard and choose <strong>Login with Discord</strong>. Uranium sends you to Discord&rsquo;s own authorisation page.</li>
+<li>Check that you are on Discord, check which Discord account you are using, and read the permissions (scopes) Discord shows before approving.</li>
+<li>Approve only if you recognise the request. Discord sends you back to Uranium, and Uranium opens your dashboard if the login succeeds.</li>
+<li>Log out with <strong>Logout</strong> when you are finished, especially on a shared device.</li>
+</ol>
+<p>Inside a Discord server, follow that server&rsquo;s instructions for any server-specific gate or role step. If you are unsure which step applies, ask that server&rsquo;s staff rather than guessing.</p></section>
+
+<section class="doc-section"><h2>What information is requested, and why</h2>
+<div class="table-wrap"><table><thead><tr><th>Step</th><th>Information</th><th>Why</th></tr></thead><tbody>
+<tr><td>Dashboard login (Discord OAuth, scopes <code>identify</code> and <code>guilds</code>)</td><td>Your Discord user ID, username and avatar, and a list of your Discord servers with their ID, name, icon and whether you can manage them</td><td>To show who is signed in and to list the servers you may manage in the dashboard</td></tr>
+<tr><td>Server verification level</td><td>No form is sent to Uranium. Discord applies the server&rsquo;s chosen level using your Discord account state</td><td>To reduce spam and abuse in that server, under Discord&rsquo;s rules</td></tr>
+<tr><td>Server staff checks</td><td>Only what that server&rsquo;s staff ask for under their own rules</td><td>Decided by that server, not by this page</td></tr>
+</tbody></table></div>
+<p><strong>Never requested by this page:</strong> your Discord password, a Discord user/bot token, OAuth codes to paste in, payment details or identity documents. Do not give those to anyone claiming to run &ldquo;Uranium verification&rdquo;.</p></section>
+
+<section class="doc-section"><h2>How results are handled</h2><ul>
+<li>A successful dashboard login creates a dashboard session and sends you to the dashboard. The session stores the Discord user and server list described in the <a href="/privacy-policy">Privacy Policy</a>.</li>
+<li>A failed login shows a login-failed or invalid-state message and does not open the dashboard.</li>
+<li>Changing a server&rsquo;s verification level changes a Discord server setting. It does not create an Uranium &ldquo;verified user&rdquo; badge or status.</li>
+<li>Role buttons and tickets, if a server uses them, do what they say in that server (for example toggle a role or open a private ticket channel). They are not identity checks.</li>
+</ul></section>
+
+<section class="doc-section"><h2>If verification or login fails</h2><ol>
+<li>Make sure you approved the request while signed into the correct Discord account, then try logging in again from the dashboard. An out-of-date or mismatched login attempt is rejected and must be restarted.</li>
+<li>If a server gate will not let you speak, check that server&rsquo;s rules and Discord&rsquo;s own requirements for its verification level (for example a verified email on your Discord account is a Discord requirement at some levels). Uranium support cannot override Discord&rsquo;s checks.</li>
+<li>If a button, role or ticket does not work, note the exact error message and the time, and tell server staff. Do not keep retrying a high-impact action.</li>
+<li>Never &ldquo;fix&rdquo; a failure by sending a password, token, login code or personal document to a person or a bot.</li>
+</ol></section>
+
+<section class="doc-section"><h2>Contacting server staff</h2><p>For help in a server, contact that server&rsquo;s administrators or moderators &mdash; for example through its support channel, or a ticket if that server has opened a ticket panel. Explain what you tried and quote the error message, but do not include passwords, tokens or codes. Server staff decide server-specific access; they cannot change your Discord account&rsquo;s official verification status, and neither can Uranium.</p></section>
+</main>
+<footer><div>Uranium &copy; 2026</div><div class="footer-links"><a href="/">Home</a><a href="/terms-of-service">Terms of Service</a><a href="/privacy-policy">Privacy Policy</a><a href="/verify-user">Verify User</a><a href="/interactions">Interactions</a></div></footer>
+</body></html>
