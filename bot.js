@@ -5,6 +5,10 @@ const ui = require('./lib/ui');
 require('./lib/ui2');
 const art = require('./lib/art');
 const prefix = require('./lib/prefix');
+const ai = require('./lib/ai');
+const np = require('./lib/np');
+const music = require('./lib/music');
+const emojis = require('./lib/emojis');
 const { UserError, permName } = require('./lib/util');
 
 const { DISCORD_BOT_TOKEN, DISCORD_CLIENT_ID, DEV_GUILD_ID, PORT } = process.env;
@@ -13,12 +17,18 @@ if (!DISCORD_BOT_TOKEN || !DISCORD_CLIENT_ID) { console.error('Missing DISCORD_B
 let client = null, started = false, contentIntent = false;
 if (PORT) http.createServer((q, r) => { r.writeHead(200); r.end('Uranium is running. Ready: ' + started); }).listen(PORT, () => console.log('Health server on ' + PORT));
 
-const cats = ['member', 'message', 'channel', 'role', 'voice', 'server', 'automod', 'info', 'premium'].map((n) => require('./commands/' + n));
+const cats = ['member', 'message', 'channel', 'role', 'voice', 'server', 'automod', 'info', 'music', 'ai', 'premium'].map((n) => require('./commands/' + n));
 for (const cat of cats) cat.map = new Map(cat.commands.map((c) => [c.name, c]));
 const byName = new Map(cats.map((c) => [c.name, c]));
 require('./lib/patch')(byName);
+Object.assign(prefix.CURATED, { ai: 'ai ask', aichan: 'ai channel', aion: 'ai toggle', aistatus: 'ai status', aireset: 'ai reset' });
+prefix.CAT_SHORT.ai = 'ai';
+Object.assign(prefix.CURATED, { play: 'music play', stop: 'music stop', pause: 'music pause', resume: 'music resume', vol: 'music volume', now: 'music nowplaying', radio: 'music stations', mpanel: 'music panel', mjoin: 'music join', mleave: 'music leave', m247: 'music twentyfour7', mstatus: 'music status' });
+prefix.CAT_SHORT.music = 'mu';
 prefix.init(cats);
 const premium = byName.get('premium');
+const npDef = premium.map.get('noprefix'); npDef.opts = np.opts; npDef.run = np.run; npDef.desc = 'Premium: give or remove no-prefix access';
+const aiGo = (msg, text, owner, force) => { if (blacklisted(msg.author.id) && !owner) return; if (!force && !ai.available(msg.guild.id)) return; return ai.fromMessage(msg, text, owner); };
 
 /* ---------- owner & blacklist ---------- */
 const OWNERS = new Set((process.env.OWNER_IDS || '').split(/[\s,]+/).filter(Boolean));
@@ -26,6 +36,7 @@ const isOwner = (id) => OWNERS.has(id);
 const G = () => db.g('__global');
 const blacklisted = (id) => (G().blacklist || []).some((x) => x.id === id);
 const getPrefix = (gid) => db.g(gid).config.prefix || '!';
+ai.init({ cats, byName, execute: (...a) => execute(...a), isOwner, getPrefix });
 async function loadOwners() {
   try {
     const app = await client.application.fetch(); const o = app.owner; if (!o) return;
@@ -95,12 +106,13 @@ async function execute(i, cat, def) {
       if (!me.permissions.has(def.perm)) throw new UserError(`I (Uranium) am missing the **${permName(def.perm)}** permission.`, 'Give my role that permission in Server Settings → Roles. Run the setup check to see everything I need.');
     }
     const c = ctx(i, me);
-    if (def.danger && !(await ui.confirm(i, def.danger))) return;
+    if (def.danger && !(await ui.confirm(i, def.danger))) return { ok: false, error: 'The user cancelled or did not confirm.' };
     const r = def.custom ? await def.run(c) : await ui.animate(i, label, () => def.run(c));
-    if (r?.handled) return;
+    if (r?.handled) return { ok: true, note: 'Done (the result was shown in the channel).' };
     await ui.sendResult(i, r);
     modlog(i, cat, def, r);
-  } catch (e) { await ui.sendError(i, e, label); }
+    return { ok: true, title: r.title, details: String(r.desc || '').slice(0, 300) };
+  } catch (e) { await ui.sendError(i, e, label); return { ok: false, error: String(e?.message || e).slice(0, 300) }; }
 }
 async function slash(i) {
   if (!i.inGuild() || !i.guild) return i.reply({ embeds: [ui.errorEmbed('This command only works inside a server.', 'Use it in a server channel.')], flags: ui.EPH });
@@ -122,23 +134,31 @@ async function modlog(i, cat, def, r) {
 async function onMessage(msg) {
   try {
     if (msg.author.bot || !msg.guild || !msg.content) return;
-    const px = getPrefix(msg.guild.id); const owner = isOwner(msg.author.id); let body = null, viaPrefix = true;
+    const px = getPrefix(msg.guild.id); const owner = isOwner(msg.author.id); let body = null, viaPrefix = true, mention = false, npAi = false;
     if (msg.content.startsWith(px)) body = msg.content.slice(px.length);
-    else { const m = new RegExp(`^<@!?${client.user.id}>\\s*`).exec(msg.content); if (m) body = msg.content.slice(m[0].length); }
-    if (body == null) { if (owner && G().config.np !== false) { body = msg.content; viaPrefix = false; } else return; }
+    else { const m = new RegExp(`^<@!?${client.user.id}>\\s*`).exec(msg.content); if (m) { body = msg.content.slice(m[0].length); mention = true; } }
+    if (body == null) {
+      const inAi = db.g(msg.guild.id).config.aiChannel === msg.channelId;
+      if ((owner && G().config.np !== false) || np.has(msg.author.id)) { body = msg.content; viaPrefix = false; npAi = inAi; }
+      else if (inAi) return aiGo(msg, msg.content, owner);
+      else return;
+    }
     body = body.trim();
     if (!body) { if (viaPrefix) await msg.reply({ embeds: [ui.infoEmbed('☢️ Hi, I am Uranium', `My prefix here is \`${px}\`. Type \`${px}help\` to open the menu.`, ui.COLORS.ok)], allowedMentions: { repliedUser: false } }); return; }
     const tokens = prefix.tokenize(body);
     if (viaPrefix && tokens[0].text.toLowerCase() === 'prefix') return setPrefix(msg, tokens, px);
-    const hit = prefix.resolve(tokens); if (!hit) return;
+    const hit = prefix.resolve(tokens);
+    if (!hit) { if (mention) return aiGo(msg, body, owner, true); if (npAi) return aiGo(msg, body, owner); return; }
     if (blacklisted(msg.author.id) && !owner) return;
     if (hit.def.owner && !owner) return;
     const member = msg.member || await msg.guild.members.fetch(msg.author.id).catch(() => null); if (!member) return;
-    const vals = {}; const fi = prefix.fakeInteraction(msg, member, hit.def, vals, client);
+    const vals = {}; const fi = prefix.fakeInteraction(msg, member, hit.def, vals, client); fi.srcId = msg.id;
     const alias = prefix.shortOf(hit.cat.name, hit.def.name);
     try {
       Object.assign(vals, await prefix.parseArgs({ msg, client, guild: msg.guild }, hit.def, tokens.slice(hit.used), body, prefix.usage(px, alias, hit.def)));
-    } catch (e) { if (!viaPrefix) return; await msg.channel.sendTyping().catch(() => {}); return ui.sendError(fi, e, `${px}${alias}`); }
+    } catch (e) {
+      if (mention) return aiGo(msg, body, owner, true); if (npAi) return aiGo(msg, body, owner);
+      if (!viaPrefix) return; await msg.channel.sendTyping().catch(() => {}); return ui.sendError(fi, e, `${px}${alias}`); }
     msg.channel.sendTyping().catch(() => {});
     return execute(fi, hit.cat, hit.def);
   } catch (e) { console.error('Message handler error:', e); }
@@ -147,8 +167,8 @@ async function setPrefix(msg, tokens, px) {
   const reply = (e) => msg.reply({ embeds: [e], allowedMentions: { repliedUser: false } });
   if (!tokens[1]) return reply(ui.infoEmbed('🔧 Prefix', `The prefix here is \`${px}\`.\nChange it with \`${px}prefix <new>\`.`));
   if (!msg.member?.permissions.has('ManageGuild')) return reply(ui.errorEmbed('You need the **Manage Server** permission to change the prefix.'));
-  const np = tokens[1].text; if (np.length > 3 || /[`\s]/.test(np)) return reply(ui.errorEmbed('The prefix must be 1 to 3 characters.', 'Example: `!`, `?`, `u.`'));
-  db.g(msg.guild.id).config.prefix = np; db.save(); return reply(ui.okEmbed('Prefix changed', `The new prefix is \`${np}\`.`));
+  const newPx = tokens[1].text; if (newPx.length > 3 || /[`\s]/.test(newPx)) return reply(ui.errorEmbed('The prefix must be 1 to 3 characters.', 'Example: `!`, `?`, `u.`'));
+  db.g(msg.guild.id).config.prefix = newPx; db.save(); return reply(ui.okEmbed('Prefix changed', `The new prefix is \`${newPx}\`.`));
 }
 
 /* ---------- buttons & autocomplete ---------- */
@@ -163,6 +183,8 @@ async function autocomplete(i) {
 async function button(i) {
   const [kind, a] = i.customId.split(':');
   if (['cf', 'help', 'eb', 'lst', 'sv'].includes(kind)) return; // handled by collectors
+  if (kind === 'mu') return music.onComponent(i);
+  if (kind === 'ai') { ai.resetHistory(i.channelId, i.user.id); return i.reply({ content: '🧠 I forgot our earlier messages here.', flags: ui.EPH }); }
   if (['poll', 'gw', 'rp', 'tk'].includes(kind)) { if (i.inGuild() && blacklisted(i.user.id)) return i.reply({ content: 'You are not allowed to use this bot.', flags: ui.EPH }); return premium.onButton(i); }
   const deny = (m) => i.reply({ embeds: [ui.errorEmbed(m)], flags: ui.EPH });
   if (kind === 'dismiss') { if (i.user.id !== a) return deny('Only the moderator who ran the command can dismiss it.'); return i.update({ components: [] }); }
@@ -202,7 +224,7 @@ const onReady = async () => {
   const st = G().config.status; const T = { playing: ActivityType.Playing, watching: ActivityType.Watching, listening: ActivityType.Listening, competing: ActivityType.Competing };
   client.user.setActivity(st ? st.text : '/help • !help', { type: st ? T[st.type] : ActivityType.Watching });
   if (!contentIntent) console.warn('⚠️ Message Content Intent is OFF: prefix commands only work after @mentioning the bot. Turn it on in the Developer Portal → Bot.');
-  loadOwners();
+  loadOwners(); emojis.ensure(client); music.startWatch(client);
   try {
     const rest = new REST({ version: '10' }).setToken(DISCORD_BOT_TOKEN); const body = cats.map(build);
     await rest.put(DEV_GUILD_ID ? Routes.applicationGuildCommands(DISCORD_CLIENT_ID, DEV_GUILD_ID) : Routes.applicationCommands(DISCORD_CLIENT_ID), { body });
@@ -217,7 +239,7 @@ function makeClient(withContent) {
   if (withContent) intents.push(GatewayIntentBits.MessageContent);
   client = new Client({ intents });
   client.on('interactionCreate', (i) => {
-    const run = i.isAutocomplete() ? autocomplete(i) : i.isChatInputCommand() ? slash(i) : i.isButton() ? button(i) : null;
+    const run = i.isAutocomplete() ? autocomplete(i) : i.isChatInputCommand() ? slash(i) : (i.isButton() || i.isStringSelectMenu()) ? button(i) : null;
     run?.catch((e) => console.error('Interaction error:', e));
   });
   client.on('messageCreate', onMessage);
