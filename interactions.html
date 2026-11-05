@@ -1,0 +1,74 @@
+<!DOCTYPE html>
+<html lang="en"><head>
+<meta charset="UTF-8"><meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Interactions | Uranium</title>
+<meta name="description" content="Uranium Discord interactions documented from the bot code: slash commands, buttons, select menus, modals, autocomplete, permissions and error handling.">
+<meta property="og:title" content="Interactions | Uranium"><meta property="og:description" content="Every Discord interaction type Uranium actually implements."><meta property="og:type" content="website"><meta name="theme-color" content="#8b5cf6">
+<link rel="stylesheet" href="/style.css">
+</head><body class="info-page">
+<nav><a class="logo" href="/">Uranium</a><span class="nav-links"><a class="btn" href="/dashboard">Dashboard</a> <a class="btn" href="/login">Login with Discord</a></span></nav>
+<main class="doc">
+<header class="doc-hero"><p class="eyebrow">Uranium</p><h1>Interactions</h1><p class="lede">This page documents only the Discord interactions that exist in Uranium&rsquo;s current bot code: slash commands, buttons, select menus, modals and autocomplete &mdash; and it says so where a type is not implemented.</p><p class="updated">Last updated: 5 November 2026</p></header>
+
+<section class="doc-section"><h2>Slash commands</h2>
+<p>Uranium registers <strong>11 top-level slash commands</strong>, one per category, with subcommands underneath &mdash; 242 subcommands in total in the current code. Slash commands work inside a server only, not in direct messages.</p>
+<div class="table-wrap"><table><thead><tr><th>Command</th><th>What it covers</th><th>Example</th></tr></thead><tbody>
+<tr><td><code>/member</code> (25)</td><td>Kick, ban, temp-ban, timeout, warn, notes, watchlist, mass actions and DM-ing a member</td><td><code>/member warn user:@Alex reason:Spam</code></td></tr>
+<tr><td><code>/message</code> (25)</td><td>Purges and message tools: delete, pin, reactions, say, announce and reply</td><td><code>/message purge count:50</code></td></tr>
+<tr><td><code>/channel</code> (25)</td><td>Lock/unlock, slowmode, hide, topic, rename, clone, create and thread tools</td><td><code>/channel lock</code></td></tr>
+<tr><td><code>/role</code> (25)</td><td>Give/remove roles, temporary roles, role editing, permissions and role lists</td><td><code>/role add user:@Alex role:@Member</code></td></tr>
+<tr><td><code>/voice</code> (25)</td><td>Voice mute/deafen, disconnect, move, voice-channel limits, bitrate and region</td><td><code>/voice mute user:@Alex</code></td></tr>
+<tr><td><code>/server</code> (25)</td><td>Mod-log and Uranium config, cases, audit log, invites, server settings and prune</td><td><code>/server cases</code></td></tr>
+<tr><td><code>/automod</code> (25)</td><td>Discord AutoMod rules: keywords, spam, presets, exemptions, alerts and actions</td><td><code>/automod preset-all</code></td></tr>
+<tr><td><code>/info</code> (25)</td><td>Help, ping, user/server/role/channel information, setup check and invite links</td><td><code>/info help</code> &middot; <code>/info setup-check</code></td></tr>
+<tr><td><code>/music</code> (12)</td><td>Radio and direct-stream playback, volume, 24/7 mode and the control panel</td><td><code>/music play</code> &middot; <code>/music panel</code></td></tr>
+<tr><td><code>/ai</code> (5)</td><td>Ask the AI, set or clear an AI chat channel, turn AI on/off, status and reset</td><td><code>/ai ask text:Warn @Alex for spam, politely</code></td></tr>
+<tr><td><code>/premium</code> (25)</td><td>Owner-only tools, plus polls, giveaways, role panels, ticket panels and embed builder for the operator&rsquo;s features</td><td><code>/premium poll question:Best day? options:Sat | Sun</code></td></tr>
+</tbody></table></div>
+<p>Options can be users, roles, channels, whole numbers, true/false values or text. Some text options have fixed choices, and the AutoMod &ldquo;rule&rdquo; option uses autocomplete (see below). Required options must be filled before Discord will send the command.</p>
+<p><strong>Prefix and mention commands also exist.</strong> The default text prefix is <code>!</code> (a server can change it), short forms are documented in the in-bot help &mdash; for example <code>!help</code>, <code>!b @user spam</code> (ban) and <code>!p 50</code> (purge) &mdash; and mentioning the bot can invoke commands or, where the message does not match a command, the AI. Approved &ldquo;no-prefix&rdquo; users and the bot owner have additional modes described in the in-bot help.</p></section>
+
+<section class="doc-section"><h2>Buttons</h2><p>Buttons are handled either by the message that created them (a collector, usually limited to the person who ran the command) or by the bot&rsquo;s shared button handler. Current buttons include:</p><ul>
+<li><strong>Confirm / Cancel</strong> &mdash; dangerous commands ask for confirmation and expire after 30 seconds; choosing Cancel, or letting it time out, changes nothing.</li>
+<li><strong>Undo</strong> &mdash; shown under results that support it; only the moderator who ran the command can use it, and it lasts 10 minutes.</li>
+<li><strong>Case #&hellip;</strong> &mdash; shows the saved moderation case; <strong>Dismiss</strong> removes the buttons from a result and only works for the moderator who ran it.</li>
+<li><strong>Help navigation</strong> &mdash; Home, Prev, Next, Search and Close in <code>/info help</code>; only the person who opened help can use them.</li>
+<li><strong>Polls and giveaways</strong> &mdash; vote buttons (only the poll creator can end a poll) and a giveaway Enter button that toggles your entry.</li>
+<li><strong>Role panels and tickets</strong> &mdash; a role button toggles that role on you; a ticket button opens a private ticket channel, and Close inside a ticket works for the ticket owner or a moderator with Manage Channels.</li>
+<li><strong>Music panel</strong> &mdash; pause/resume, stop, volume and 24/7 controls; most controls require you to be in the bot&rsquo;s voice channel, and 24/7 requires Manage Server.</li>
+<li><strong>AI &ldquo;Forget this chat&rdquo;</strong> &mdash; clears the in-memory AI conversation for you in that channel.</li>
+<li><strong>Link buttons</strong> &mdash; some results and member notifications include ordinary URL buttons, for example an appeal link a server has configured.</li>
+</ul></section>
+
+<section class="doc-section"><h2>Select menus</h2><ul>
+<li><strong>Help category menu</strong> &mdash; in <code>/info help</code>, choose Home, a command category or the short-form guide.</li>
+<li><strong>Music station menu</strong> &mdash; in the music panel, choose one of the listed radio stations (SomaFM and Radio Paradise streams in the code).</li>
+</ul><p>No other select menus are implemented in the current code.</p></section>
+
+<section class="doc-section"><h2>Modals (pop-up forms)</h2><ul>
+<li><strong>Search commands</strong> &mdash; the Search button in help opens a one-field form (2&ndash;30 characters) and shows matching commands.</li>
+<li><strong>Edit embed</strong> &mdash; the owner-only embed builder opens a form with title, description, colour, image URL and footer fields, then previews the embed before sending.</li>
+</ul><p>Modals are opened from those buttons and are collected by the same message; Uranium does not register standalone modal-only commands. No modal asks for a password, token or personal document.</p></section>
+
+<section class="doc-section"><h2>Context-menu commands</h2><p><strong>None are implemented.</strong> Uranium registers no right-click (context-menu) commands on users or messages in the current code. The interaction handler routes only autocomplete, slash (chat-input) commands, buttons and string select menus.</p></section>
+
+<section class="doc-section"><h2>Autocomplete</h2><p>The AutoMod <code>rule</code> option offers matching AutoMod rule names as you type, showing whether each rule is enabled. If nothing matches, no suggestions are shown.</p></section>
+
+<section class="doc-section"><h2>Interaction and bot permissions</h2><ul>
+<li>Many commands define a required Discord permission. Uranium checks <em>your</em> permission and <em>the bot&rsquo;s</em> permission before running them, and refuses with an explanation if either is missing. Examples: member moderation uses permissions such as Kick Members, Ban Members, Moderate Members and Manage Nicknames; channel tools use Manage Channels; role tools use Manage Roles; server and AutoMod settings use Manage Server; message tools use Manage Messages; voice tools use Mute/Deafen/Move Members.</li>
+<li>Role position also matters: you generally cannot moderate a member whose highest role is at or above yours, and Uranium cannot manage a member or role at or above its own highest role. Move the Uranium role higher if a role action is refused for that reason.</li>
+<li>Owner-only (&ldquo;Premium&rdquo;) commands are refused for everyone except the bot operator, and a server-wide blacklist can block a user from using the bot at all.</li>
+<li>The dashboard invite link in the code requests the <code>bot</code> and <code>applications.commands</code> scopes. Server administrators should still review the permissions Discord shows before adding any bot, and give only what their server needs.</li>
+<li>Run <code>/info setup-check</code> and <code>/info bot-permissions</code> in your server to see what Uranium can and cannot do there.</li>
+</ul></section>
+
+<section class="doc-section"><h2>Error handling and good usage</h2><ul>
+<li>Expected problems are shown as an error embed with a &ldquo;How to fix&rdquo; hint &mdash; for example missing permissions, a member or role not being found, an invalid ID (IDs are 17&ndash;20 digit numbers), an invalid duration such as <code>10m</code> or <code>1h30m</code>, or messages too old for Discord bulk deletion.</li>
+<li>Dangerous actions show the Confirm/Cancel buttons described above. Cancelled or timed-out confirmations make no change.</li>
+<li>Some interactions are personal: help, music and panel controls check that you are the right user or in the right voice channel, and replies that only you should see are sent as ephemeral (only-visible-to-you) messages.</li>
+<li>If a button has expired &mdash; for example an Undo button after 10 minutes or a poll after a bot restart &mdash; run the command again instead of retrying the old message.</li>
+<li>Usage tips: start with <code>/info help</code>, prefer slash commands so Discord shows you each option, write clear moderation reasons (they are saved in the case record), and test new AutoMod or lockdown settings in a quiet channel first.</li>
+</ul></section>
+</main>
+<footer><div>Uranium &copy; 2026</div><div class="footer-links"><a href="/">Home</a><a href="/terms-of-service">Terms of Service</a><a href="/privacy-policy">Privacy Policy</a><a href="/verify-user">Verify User</a><a href="/interactions">Interactions</a></div></footer>
+</body></html>
