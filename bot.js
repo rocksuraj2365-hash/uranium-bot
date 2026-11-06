@@ -62,11 +62,7 @@ const blacklisted = (id) => (G().blacklist || []).some((x) => x.id === id);
 const getPrefix = (gid) => db.g(gid).config.prefix || '!';
 ai.init({ cats, byName, execute: (...a) => execute(...a), isOwner, getPrefix });
 async function loadOwners() {
-  try {
-    const app = await client.application.fetch(); const o = app.owner; if (!o) return;
-    if (o.members) { for (const m of o.members.values()) OWNERS.add(m.user?.id || m.id); if (o.ownerId) OWNERS.add(o.ownerId); } else OWNERS.add(o.id);
-    console.log('Owner loaded');
-  } catch (e) { console.warn('Could not load owner:', e.message); }
+  console.log('Configured owner IDs loaded:', OWNERS.size);
 }
 
 /* ---------- slash command builder ---------- */
