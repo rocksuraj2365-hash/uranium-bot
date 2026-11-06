@@ -63,7 +63,7 @@ async function handleDM(msg) {
       return msg.reply('The confirmed action failed: ' + String(error.message || error).slice(0, 300));
     }
   }
-  return dmAi.reply(msg, owner && ownerSessionActive(id));
+  return dmAi.reply(msg, owner && ownerSessionActive(id), () => owner && ownerSessionActive(id));
 }
 /* ---------- owner & blacklist ---------- */
 const OWNERS = new Set((process.env.OWNER_IDS || '').split(/[\s,]+/).filter(Boolean));
