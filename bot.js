@@ -1,11 +1,13 @@
 const http = require('http');
-const { Client, GatewayIntentBits, REST, Routes, SlashCommandBuilder, EmbedBuilder, ActivityType } = require('discord.js');
+const { Client, GatewayIntentBits, Partials, REST, Routes, SlashCommandBuilder, EmbedBuilder, ActivityType } = require('discord.js');
 const db = require('./lib/db');
 const ui = require('./lib/ui');
 require('./lib/ui2');
 const art = require('./lib/art');
 const prefix = require('./lib/prefix');
 const ai = require('./lib/ai');
+const security = require('./lib/security');
+const dmAi = require('./lib/dm-ai');
 const np = require('./lib/np');
 const music = require('./lib/music');
 const emojis = require('./lib/emojis');
@@ -29,6 +31,28 @@ prefix.init(cats);
 const premium = byName.get('premium');
 const npDef = premium.map.get('noprefix'); npDef.opts = np.opts; npDef.run = np.run; npDef.desc = 'Premium: give or remove no-prefix access';
 const aiGo = (msg, text, owner, force) => { if (blacklisted(msg.author.id) && !owner) return; if (!force && !ai.available(msg.guild.id)) return; return ai.fromMessage(msg, text, owner); };
+const ownerSessions = new Map();
+const OWNER_SESSION_MS = 15 * 60 * 1000;
+function ownerSessionActive(id) { const until = ownerSessions.get(id) || 0; if (until <= Date.now()) { ownerSessions.delete(id); return false; } return true; }
+async function handleDM(msg) {
+  const id = msg.author.id, owner = isOwner(id), text = String(msg.content || '').trim();
+  if (!text) return;
+  if (owner && /^!owner(?:\\s|$)/i.test(text)) {
+    const parts = text.split(/\\s+/), action = (parts[1] || 'status').toLowerCase();
+    if (action === 'lock') { ownerSessions.delete(id); return msg.reply('Owner session locked.'); }
+    if (action === 'status') return msg.reply(ownerSessionActive(id) ? 'Owner session unlocked. It expires after 15 minutes.' : 'Owner session locked. Use !owner unlock followed by your 6-digit authenticator code.');
+    if (action === 'unlock') {
+      const code = parts[2] || '';
+      if (!/^\\d{6}$/.test(code)) return msg.reply('Use: !owner unlock 123456');
+      if (!security.verifyTotp(process.env.OWNER_TOTP_SECRET, code)) return msg.reply('Verification failed. Check your authenticator code.');
+      ownerSessions.set(id, Date.now() + OWNER_SESSION_MS);
+      console.log('[security] Owner DM session unlocked.');
+      return msg.reply('Owner identity verified. Session active for 15 minutes. Sensitive actions still require separate confirmation.');
+    }
+    return msg.reply('Owner controls: !owner status | !owner unlock 123456 | !owner lock');
+  }
+  return dmAi.reply(msg, owner && ownerSessionActive(id));
+}
 
 /* ---------- owner & blacklist ---------- */
 const OWNERS = new Set((process.env.OWNER_IDS || '').split(/[\s,]+/).filter(Boolean));
@@ -133,7 +157,8 @@ async function modlog(i, cat, def, r) {
 /* ---------- prefix / no-prefix messages ---------- */
 async function onMessage(msg) {
   try {
-    if (msg.author.bot || !msg.guild || !msg.content) return;
+    if (msg.author.bot || !msg.content) return;
+    if (!msg.guild) return handleDM(msg);
     const px = getPrefix(msg.guild.id); const owner = isOwner(msg.author.id); let body = null, viaPrefix = true, mention = false, npAi = false;
     if (msg.content.startsWith(px)) body = msg.content.slice(px.length);
     else { const m = new RegExp(`^<@!?${client.user.id}>\\s*`).exec(msg.content); if (m) { body = msg.content.slice(m[0].length); mention = true; } }
@@ -235,9 +260,9 @@ const onReady = async () => {
 };
 function makeClient(withContent) {
   contentIntent = withContent;
-  const intents = [GatewayIntentBits.Guilds, GatewayIntentBits.GuildVoiceStates, GatewayIntentBits.GuildMessages];
+  const intents = [GatewayIntentBits.Guilds, GatewayIntentBits.GuildVoiceStates, GatewayIntentBits.GuildMessages, GatewayIntentBits.DirectMessages];
   if (withContent) intents.push(GatewayIntentBits.MessageContent);
-  client = new Client({ intents });
+  client = new Client({ intents, partials: [Partials.Channel] });
   client.on('interactionCreate', (i) => {
     const run = i.isAutocomplete() ? autocomplete(i) : i.isChatInputCommand() ? slash(i) : (i.isButton() || i.isStringSelectMenu()) ? button(i) : null;
     run?.catch((e) => console.error('Interaction error:', e));
