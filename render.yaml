@@ -31,3 +31,7 @@ services:
         sync: false
       - key: AI_MODEL
         sync: false
+      - key: OWNER_IDS
+        sync: false
+      - key: OWNER_TOTP_SECRET
+        sync: false
