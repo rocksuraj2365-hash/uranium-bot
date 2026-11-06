@@ -19,9 +19,9 @@ services:
     name: uranium-bot
     runtime: node
     plan: free
-    healthCheckPath: /health
     buildCommand: npm install
     startCommand: node bot.js
+    healthCheckPath: /health
     envVars:
       - key: DISCORD_CLIENT_ID
         sync: false
@@ -30,8 +30,14 @@ services:
       - key: GEMINI_API_KEY
         sync: false
       - key: AI_MODEL
-        sync: false
+        value: gemini-3.8-flash
+      - key: AI_FALLBACK_MODELS
+        value: gemini-3.6-flash,gemini-2.5-flash
       - key: OWNER_IDS
         sync: false
       - key: OWNER_TOTP_SECRET
+        sync: false
+      - key: GITHUB_TOKEN
+        sync: false
+      - key: RENDER_API_KEY
         sync: false
