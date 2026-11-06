@@ -15,14 +15,19 @@ services:
         generateValue: true
       - key: PUBLIC_BASE_URL
         sync: false
-  - type: worker
+  - type: web
     name: uranium-bot
     runtime: node
-    plan: starter
+    plan: free
+    healthCheckPath: /health
     buildCommand: npm install
     startCommand: node bot.js
     envVars:
       - key: DISCORD_CLIENT_ID
         sync: false
       - key: DISCORD_BOT_TOKEN
+        sync: false
+      - key: GEMINI_API_KEY
+        sync: false
+      - key: AI_MODEL
         sync: false
