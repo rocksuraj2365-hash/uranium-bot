@@ -89,7 +89,7 @@
     const nav=e.target.closest('[data-view]');if(nav){go(nav.dataset.view);return;}
     const jump=e.target.closest('[data-go]');if(jump){go(jump.dataset.go);return;}
     const filter=e.target.closest('[data-filter]');if(filter){state.filter=filter.dataset.filter;$$('[data-filter]').forEach(x=>x.classList.toggle('active',x===filter));renderServers();return;}
-    const copy=e.target.closest('[data-copy]');if(copy){navigator.clipboard?.writeText(copy.dataset.copy).then(()=>toast('Server ID copied')).catch(()=>toast('Could not copy.'));return;}
+    const copy=e.target.closest('[data-copy]');if(copy){if(!navigator.clipboard?.writeText){toast('Clipboard is unavailable in this browser.');return;}navigator.clipboard.writeText(copy.dataset.copy).then(()=>toast('Server ID copied')).catch(()=>toast('Could not copy.'));return;}
   });
   $('#serverSearch').addEventListener('input',e=>{state.query=e.target.value;renderServers();});
   $('#commandSearch').addEventListener('input',e=>renderCommands(e.target.value));
