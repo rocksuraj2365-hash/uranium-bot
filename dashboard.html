@@ -1,14 +1,82 @@
 <!DOCTYPE html>
-<html lang="en"><head>
-<meta charset="UTF-8"><meta name="viewport" content="width=device-width, initial-scale=1">
-<title>Uranium Dashboard</title><link rel="stylesheet" href="/style.css">
-</head><body>
-<nav><a class="logo" href="/" style="text-decoration:none">Uranium</a><a class="btn" href="/logout">Logout</a></nav>
-<main>
-<h2 id="hello">Loading...</h2>
-<p style="color:var(--mute)">Servers where you can manage things:</p>
-<div class="list" id="guilds"></div>
-</main>
-<script src="/dashboard.js"></script>
-<footer><div>Uranium &copy; 2026</div><div class="footer-links"><a href="/">Home</a><a href="/terms-of-service">Terms of Service</a><a href="/privacy-policy">Privacy Policy</a><a href="/verify-user">Verify User</a><a href="/interactions">Interactions</a></div></footer>
-</body></html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <meta name="theme-color" content="#090711">
+  <meta name="description" content="Manage your Discord servers with the Uranium dashboard.">
+  <title>Uranium • Dashboard</title>
+  <link rel="stylesheet" href="/style.css">
+</head>
+<body class="dashboard-page">
+  <div class="dash-shell">
+    <aside class="sidebar" id="sidebar">
+      <a class="brand" href="/"><span class="brand-mark">☢</span><span>URANIUM<small>CONTROL CENTER</small></span></a>
+      <div class="side-label">WORKSPACE</div>
+      <button class="side-link active" data-view="overview"><span>◈</span> Overview</button>
+      <button class="side-link" data-view="servers"><span>▦</span> My servers</button>
+      <button class="side-link" data-view="commands"><span>⌘</span> Command library</button>
+      <div class="side-label side-label-gap">RESOURCES</div>
+      <a class="side-link" href="/interactions"><span>✧</span> Interactions</a>
+      <a class="side-link" href="/verify-user"><span>✓</span> Verification</a>
+      <a class="side-link" href="/terms-of-service"><span>▤</span> Terms & policies</a>
+      <div class="sidebar-bottom">
+        <div class="side-status"><i></i><span>Dashboard connected</span></div>
+        <a class="side-link logout-link" href="/logout"><span>↪</span> Sign out</a>
+      </div>
+    </aside>
+
+    <main class="dash-main">
+      <header class="dash-topbar">
+        <button class="mobile-menu" id="menuBtn" aria-label="Open navigation">☰</button>
+        <div class="crumb"><span>Uranium</span><b>/</b><strong id="pageCrumb">Overview</strong></div>
+        <div class="top-actions">
+          <button class="icon-btn" id="refreshBtn" title="Refresh server list" aria-label="Refresh">↻</button>
+          <div class="profile" id="profile"><span class="avatar-fallback">U</span><span id="profileName">Loading…</span></div>
+        </div>
+      </header>
+
+      <section class="view active" id="view-overview">
+        <div class="welcome-row">
+          <div><div class="eyebrow">YOUR COMMAND DECK</div><h1>Welcome back<span class="purple-dot">.</span></h1><p class="muted">Your servers, your tools, one control centre.</p></div>
+          <a class="button button-primary" href="/invite">＋ Add Uranium</a>
+        </div>
+        <div class="stats-grid">
+          <article class="stat-card"><div class="stat-icon violet">▦</div><span class="stat-label">Servers you can access</span><strong id="statTotal">—</strong><small>From your Discord account</small></article>
+          <article class="stat-card"><div class="stat-icon green">✓</div><span class="stat-label">Manageable servers</span><strong id="statManageable">—</strong><small>Permission detected by Discord</small></article>
+          <article class="stat-card"><div class="stat-icon blue">⌘</div><span class="stat-label">Command groups</span><strong>11</strong><small>Moderation, utility, music & more</small></article>
+          <article class="stat-card"><div class="stat-icon amber">✦</div><span class="stat-label">Dashboard account</span><strong class="account-state">Connected</strong><small>Discord OAuth session</small></article>
+        </div>
+        <div class="section-heading"><div><div class="eyebrow">QUICK ACCESS</div><h2>Jump back in</h2></div><button class="text-button" data-go="servers">View all servers ↗</button></div>
+        <div class="server-grid" id="featuredServers"><div class="skeleton-card"></div><div class="skeleton-card"></div><div class="skeleton-card"></div></div>
+        <div class="bottom-grid">
+          <article class="panel"><div class="panel-heading"><div><div class="eyebrow">BOT TOOLKIT</div><h3>Built for server teams</h3></div><span class="panel-emoji">☢</span></div><div class="tool-list">
+            <div><span class="tool-icon">🛡️</span><section><b>Moderation</b><small>Member actions, cases and server safety commands.</small></section><span class="tool-arrow">›</span></div>
+            <div><span class="tool-icon">⚙️</span><section><b>Auto moderation</b><small>Rule-based protection and automated checks.</small></section><span class="tool-arrow">›</span></div>
+            <div><span class="tool-icon">🤖</span><section><b>Uranium AI</b><small>Ask questions and use supported bot commands.</small></section><span class="tool-arrow">›</span></div>
+          </div></article>
+          <article class="panel help-panel"><div class="eyebrow">NEED A HAND?</div><h3>Make your server safer.</h3><p class="muted">Explore the command library to see what Uranium can do. Dashboard controls will appear here as their secure bot API becomes available.</p><button class="button button-secondary" data-go="commands">Explore commands ↗</button></article>
+        </div>
+      </section>
+
+      <section class="view" id="view-servers">
+        <div class="view-heading"><div><div class="eyebrow">DISCORD CONNECTION</div><h1>Your servers</h1><p class="muted">Choose a server where your Discord permissions allow management.</p></div><a class="button button-primary" href="/invite">＋ Add Uranium</a></div>
+        <div class="filter-bar"><label class="search-box"><span>⌕</span><input id="serverSearch" type="search" placeholder="Search servers…" autocomplete="off"></label><div class="filter-pills"><button class="filter-pill active" data-filter="manageable">Manageable</button><button class="filter-pill" data-filter="all">All servers</button></div></div>
+        <div class="result-line" id="serverCount">Loading your servers…</div>
+        <div class="server-grid server-grid-large" id="allServers"><div class="skeleton-card"></div><div class="skeleton-card"></div></div>
+      </section>
+
+      <section class="view" id="view-commands">
+        <div class="view-heading"><div><div class="eyebrow">DISCOVER THE TOOLKIT</div><h1>Command library</h1><p class="muted">A quick guide to Uranium's command groups. Run commands inside Discord.</p></div></div>
+        <label class="search-box command-search"><span>⌕</span><input id="commandSearch" type="search" placeholder="Search command groups…" autocomplete="off"></label>
+        <div class="command-grid" id="commandGrid"></div>
+        <div class="notice"><span>ⓘ</span><p><b>Heads up:</b> This library is an information page. Server moderation actions and configuration changes are currently performed through the bot's Discord commands, not from these dashboard cards.</p></div>
+      </section>
+
+      <footer class="dash-footer"><span>☢ Uranium Dashboard <span class="footer-muted">• Built for communities</span></span><div><a href="/terms-of-service">Terms</a><a href="/privacy-policy">Privacy</a><a href="/interactions">Interactions</a></div></footer>
+    </main>
+  </div>
+  <div class="toast" id="toast" role="status" aria-live="polite"></div>
+  <script src="/dashboard.js"></script>
+</body>
+</html>
