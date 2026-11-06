@@ -19,3 +19,39 @@ main{max-width:900px;margin:auto;padding:18px}
 .tag{font-size:.8rem;color:var(--accent)}
 footer{text-align:center;color:var(--mute);padding:24px;font-size:.85rem}
 @media(min-width:700px){.features{grid-template-columns:repeat(3,1fr)}}
+
+/* Public legal & information pages (purple/black Uranium identity) */
+:root{--purple:#8b5cf6;--purple-2:#a78bfa;--purple-dark:#2e1065}
+.info-page{background:radial-gradient(1000px 500px at 50% -100px,#2e1065 0%,#0d1117 55%)}
+.info-page .logo{color:var(--purple-2)}
+.info-page .btn.primary{background:var(--purple);border-color:var(--purple);color:#fff}
+.nav-links{display:flex;gap:8px;flex-wrap:wrap}
+.doc{max-width:900px;margin:auto;padding:24px 18px 48px;line-height:1.65}
+.doc-hero{padding:28px 0 8px}
+.doc-hero h1{font-size:clamp(1.9rem,6vw,2.8rem);margin:0 0 12px;line-height:1.15}
+.eyebrow{color:var(--purple-2);font-weight:700;letter-spacing:.12em;text-transform:uppercase;font-size:.78rem;margin:0 0 8px}
+.lede{color:var(--text);font-size:1.08rem;max-width:720px}
+.updated{color:var(--mute);font-size:.9rem}
+.doc-section{background:var(--card);border:1px solid var(--line);border-radius:12px;padding:20px;margin:16px 0}
+.doc-section h2{margin:0 0 10px;font-size:1.25rem;color:var(--purple-2)}
+.doc-section p,.doc-section li{color:var(--text)}
+.doc-section ul,.doc-section ol{padding-left:1.3rem}
+.doc-section li{margin:6px 0}
+.doc a{color:var(--purple-2)}
+.doc code{background:#0d1117;border:1px solid var(--line);border-radius:6px;padding:.08em .35em;word-break:break-word}
+.note{border:1px solid var(--purple);border-left:6px solid var(--purple);background:#1b1030;border-radius:10px;padding:16px 18px;margin:18px 0}
+.table-wrap{overflow-x:auto;-webkit-overflow-scrolling:touch}
+.doc table{border-collapse:collapse;width:100%;min-width:560px}
+.doc th,.doc td{border:1px solid var(--line);padding:10px;text-align:left;vertical-align:top}
+.doc th{background:#1b1030;color:var(--purple-2)}
+footer a{color:var(--purple-2)}
+.footer-links{display:flex;flex-wrap:wrap;gap:8px 18px;justify-content:center;margin-top:8px}
+.footer-links a{text-decoration:none}
+.footer-links a:hover{text-decoration:underline}
+@media(max-width:600px){
+  nav{flex-wrap:wrap;gap:10px}
+  .doc{padding:16px 12px 36px}
+  .doc-section{padding:16px 14px}
+  .doc table{min-width:520px}
+  .btn{padding:9px 12px}
+}

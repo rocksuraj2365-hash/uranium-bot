@@ -32,6 +32,10 @@ const pages = {
   '/dashboard': 'dashboard.html',
   '/style.css': 'style.css',
   '/dashboard.js': 'dashboard.js',
+  '/terms-of-service': 'terms-of-service.html',
+  '/privacy-policy': 'privacy-policy.html',
+  '/verify-user': 'verify-user.html',
+  '/interactions': 'interactions.html',
 };
 for (const [route, file] of Object.entries(pages)) {
   app.get(route, (req, res) => res.sendFile(path.join(__dirname, file)));

@@ -1,0 +1,90 @@
+<!DOCTYPE html>
+<html lang="en"><head>
+<meta charset="UTF-8"><meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Privacy Policy | Uranium</title>
+<meta name="description" content="How the Uranium Discord bot and dashboard handle Discord IDs, moderation records, OAuth sessions and AI requests, based on the current source code.">
+<meta property="og:title" content="Privacy Policy | Uranium"><meta property="og:description" content="Uranium data practices confirmed from its source code."><meta property="og:type" content="website"><meta name="theme-color" content="#8b5cf6">
+<link rel="stylesheet" href="/style.css">
+</head><body class="info-page">
+<nav><a class="logo" href="/">Uranium</a><span class="nav-links"><a class="btn" href="/dashboard">Dashboard</a> <a class="btn" href="/login">Login with Discord</a></span></nav>
+<main class="doc">
+<header class="doc-hero"><p class="eyebrow">Uranium</p><h1>Privacy Policy</h1><p class="lede">This policy describes the data practices that are confirmed by Uranium&rsquo;s current source code. If a practice is not in the code, it is not claimed here.</p><p class="updated">Last updated: 5 November 2026</p></header>
+
+<div class="note"><strong>Scope and limits:</strong> This page was written from the bot, dashboard and storage code in the Uranium repository. A live deployment could run different code or settings, and the operator of that deployment is responsible for keeping this policy accurate. Items marked <em>&ldquo;needs owner confirmation&rdquo;</em> are not decided in the code and are listed again in the pull request for this page.</div>
+
+<section class="doc-section"><h2>1. Discord IDs and basic information</h2><p>Uranium works with Discord identifiers because Discord bots cannot function without them. Depending on the feature used, the code processes:</p><ul>
+<li>Discord user IDs, server (guild) IDs, channel IDs, role IDs and message IDs.</li>
+<li>Usernames where a feature displays or sends them &mdash; for example the signed-in dashboard user, a giveaway host name saved with a giveaway, the author name kept briefly with a deleted message for the &ldquo;snipe&rdquo; feature, and usernames included in an AI request context (see section 5).</li>
+<li>Server names, channel names, icons and avatars returned by Discord, where a command or the dashboard displays them.</li>
+</ul></section>
+
+<section class="doc-section"><h2>2. Moderation cases, warnings, notes and configuration</h2><p>Uranium&rsquo;s storage library saves a JSON data file (see section 6). For each Discord server it can store:</p>
+<div class="table-wrap"><table><thead><tr><th>Record</th><th>Fields in the code</th><th>Created by</th></tr></thead><tbody>
+<tr><td>Moderation cases</td><td>Case ID, timestamp, action type, target user ID, moderator user ID and reason, plus action-specific details</td><td>Moderation commands such as ban, kick, timeout and warn</td></tr>
+<tr><td>Warnings</td><td>Warning ID, timestamp, target user ID, moderator user ID and reason</td><td><code>/member warn</code></td></tr>
+<tr><td>Moderator notes</td><td>Note ID, timestamp, target user ID, moderator user ID and the note text</td><td><code>/member note-add</code></td></tr>
+<tr><td>Watchlist entries</td><td>Entry ID, timestamp, target user ID, moderator user ID and reason</td><td><code>/member watch-add</code></td></tr>
+<tr><td>Server configuration</td><td>Settings such as the custom command prefix, moderation-log channel ID, ban-appeal link, AI on/off state, AI chat channel ID and 24/7 music settings (channel, station and volume)</td><td>Server administrators using Uranium commands</td></tr>
+<tr><td>Giveaways</td><td>Prize, number of winners, end time, channel ID, ended state, host username and the user IDs of entrants</td><td><code>/premium giveaway</code> and its Enter button</td></tr>
+<tr><td>Scheduled actions</td><td>Schedule ID, due time and the IDs needed for the action (server, and as applicable user, role, channel or message)</td><td>Temporary bans, temporary roles, timed lockdowns and giveaways</td></tr>
+<tr><td>Operator-level records</td><td>A bot-wide blacklist of user IDs with reason and timestamp, bot status text, and no-prefix settings</td><td>Owner-only commands</td></tr>
+</tbody></table></div>
+<p>Moderation reasons and note text are written by moderators. Do not put sensitive personal information in reasons or notes.</p></section>
+
+<section class="doc-section"><h2>3. Message content</h2><ul>
+<li>Uranium receives message content to run prefix and mention commands, and &mdash; in a channel an administrator has set as the AI chat channel &mdash; to answer messages with AI.</li>
+<li>If a message is deleted, the bot keeps the last deleted message for that channel in memory only (its text, author username and ID, and the time) so the owner-only snipe command can show it. This is held in a running-process map, not written to the data file.</li>
+<li>Poll votes are also held in memory only (which option each user ID chose). Giveaway entrants, by contrast, are saved in the data file as described above.</li>
+<li>Message content is not written to the moderation data file merely because a message was sent. It can be saved if a moderator puts it in a reason or note, or if it becomes part of another record described here.</li>
+</ul></section>
+
+<section class="doc-section"><h2>4. Discord OAuth and dashboard sessions</h2><ul>
+<li>The dashboard login uses Discord OAuth with the <code>identify</code> and <code>guilds</code> scopes. Uranium exchanges the login code with Discord, then requests your Discord profile and server list from Discord&rsquo;s API.</li>
+<li>The dashboard session stores your Discord user ID, display username and avatar, and for each server its ID, name, icon and whether you can manage it (owner, or having the relevant Discord permissions). The OAuth access token itself is used for those requests and is not stored in the session object in the code.</li>
+<li>The session cookie is set as HTTP-only, with SameSite=Lax, is marked Secure when the site is served over HTTPS, and has a maximum age of seven days in the code. Sessions use the in-memory session store in the current code; the project README describes this as a starter setup.</li>
+<li>The dashboard API endpoints for your profile and server list reject requests that are not logged in. Logging out destroys the session.</li>
+<li>Uranium never asks for, and you must never give it, your Discord password or a Discord token.</li>
+</ul></section>
+
+<section class="doc-section"><h2>5. AI requests and Anthropic</h2><ul>
+<li>AI features are optional. They do nothing unless the bot operator has set an Anthropic API key, and a server administrator can turn AI off for that server.</li>
+<li>When AI is used, Uranium sends a request to Anthropic&rsquo;s API (<code>api.anthropic.com</code>). The request contains the text you asked (the code truncates a request to 1,500 characters), a short context line containing the server name, channel name, your username and user ID, your relevant Discord permission names and the server prefix, and &mdash; if you replied to a message &mdash; that message&rsquo;s author username and text, marked as untrusted and truncated.</li>
+<li>Uranium also sends Anthropic a list of available Uranium commands so the AI can choose one. If it runs a command for you, that command runs with your own Discord permissions and can create the normal records for that command (for example a moderation case).</li>
+<li>Recent AI conversation turns are kept in a running-process memory map, keyed by channel and user, holding up to the last ten messages. You can clear them with the AI reset command or the &ldquo;Forget this chat&rdquo; button. The code does not write AI chat history to the data file.</li>
+<li>This policy does not describe Anthropic&rsquo;s own handling of API requests. Anthropic is a separate provider with its own policies &mdash; <em>its retention and training terms for this deployment need owner confirmation.</em></li>
+</ul></section>
+
+<section class="doc-section"><h2>6. Storage, retention and deletion</h2><ul>
+<li>Bot records are stored in a JSON file named <code>db.json</code> in a data directory chosen by the operator&rsquo;s environment (<code>DATA_DIR</code>) or a default <code>data</code> folder next to the code. The file is written by the bot process; it is not a hosted database in the current code.</li>
+<li><strong>No automatic retention period is defined in the code.</strong> Cases, warnings, notes, watchlist entries and configuration remain until they are deleted or changed with Uranium&rsquo;s commands, the data file is removed by the operator, or the server record is otherwise cleared. <em>A retention period, if the operator wants one, needs owner confirmation.</em></li>
+<li>Deletion tools that exist in the code include deleting a case, removing or clearing warnings, removing a note, removing a watchlist entry, clearing a moderation-log setting, turning off AI or its chat channel, clearing AI chat memory, and logging out of the dashboard. Scheduled actions are removed after they run.</li>
+<li>There is no self-service data-export or account-deletion page in the current dashboard code. To ask about records in a server, contact that server&rsquo;s administrators; for deployment-level records, contact the bot operator. <em>A published contact route for privacy requests needs owner confirmation.</em></li>
+</ul></section>
+
+<section class="doc-section"><h2>7. Third-party services</h2>
+<div class="table-wrap"><table><thead><tr><th>Service</th><th>Role in the code</th></tr></thead><tbody>
+<tr><td>Discord</td><td>Bot and dashboard platform; OAuth login, profile and server-list API calls, and all in-Discord actions</td></tr>
+<tr><td>Anthropic</td><td>AI provider, only when the operator has configured an API key and AI is used</td></tr>
+<tr><td>Render</td><td>Hosting described in the project&rsquo;s deployment files: one web service for this site and one background worker for the bot</td></tr>
+<tr><td>SomaFM and Radio Paradise</td><td>Public audio streams listed in the music feature; a server member may also supply a direct audio-stream link</td></tr>
+</tbody></table></div>
+<p>Each provider handles data under its own terms and policies. Uranium&rsquo;s code also loads Discord-hosted avatars, icons and emoji images in the normal way Discord clients and embeds do.</p></section>
+
+<section class="doc-section"><h2>8. Security &mdash; what the code does, and what it does not promise</h2><ul>
+<li>Secrets such as the Discord client secret, bot token, session secret and Anthropic API key are read from environment variables. The project README instructs that secrets go in the hosting environment settings, never in GitHub. No secret values are included in these public pages.</li>
+<li>Dashboard sessions use the cookie settings described in section 4, OAuth login uses a random state value that is checked on return, and dashboard APIs require a logged-in session.</li>
+<li>Commands check the Discord permissions of the user running them and, where a command defines one, of the bot as well.</li>
+<li><strong>No other security guarantee is made.</strong> The code does not claim encryption of the JSON data file, a persistent or hardened session store, independent audits or certifications. The operator is responsible for securing the host, the data file and all environment secrets. <em>Any stronger security statement needs owner confirmation and must be true of the live deployment first.</em></li>
+</ul></section>
+
+<section class="doc-section"><h2>9. Your privacy choices and rights</h2><ul>
+<li>You can choose not to use AI features, not to sign into the dashboard, and to leave any server that uses Uranium.</li>
+<li>Server members can ask that server&rsquo;s administrators about moderation records about them. Administrators have commands to view and delete cases, warnings and notes as described in section 6.</li>
+<li>Depending on where you live, you may have legal rights over your personal information. Uranium&rsquo;s code does not provide an automated rights-request system, so requests must go to the relevant server administrators or the bot operator. <em>The operator&rsquo;s contact details and response process need owner confirmation before any specific promise can be made here.</em></li>
+<li>If you believe a record contains someone else&rsquo;s sensitive information, tell the server&rsquo;s administrators so they can remove it with the deletion commands above.</li>
+</ul></section>
+
+<section class="doc-section"><h2>10. Changes</h2><p>This policy may be updated when the code or deployment changes. The &ldquo;Last updated&rdquo; date shows when it last changed. Practices that are not confirmed by the code should not be added to this page.</p></section>
+</main>
+<footer><div>Uranium &copy; 2026</div><div class="footer-links"><a href="/">Home</a><a href="/terms-of-service">Terms of Service</a><a href="/privacy-policy">Privacy Policy</a><a href="/verify-user">Verify User</a><a href="/interactions">Interactions</a></div></footer>
+</body></html>
