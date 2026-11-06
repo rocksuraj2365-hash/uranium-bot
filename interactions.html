@@ -11,19 +11,19 @@
 <header class="doc-hero"><p class="eyebrow">Uranium</p><h1>Interactions</h1><p class="lede">This page documents only the Discord interactions that exist in Uranium&rsquo;s current bot code: slash commands, buttons, select menus, modals and autocomplete &mdash; and it says so where a type is not implemented.</p><p class="updated">Last updated: 5 November 2026</p></header>
 
 <section class="doc-section"><h2>Slash commands</h2>
-<p>Uranium registers <strong>11 top-level slash commands</strong>, one per category, with subcommands underneath &mdash; 242 subcommands in total in the current code. Slash commands work inside a server only, not in direct messages.</p>
+<p>Uranium registers one top-level slash command per category, with subcommands underneath. Slash commands work inside a server only, not in direct messages.</p>
 <div class="table-wrap"><table><thead><tr><th>Command</th><th>What it covers</th><th>Example</th></tr></thead><tbody>
-<tr><td><code>/member</code> (25)</td><td>Kick, ban, temp-ban, timeout, warn, notes, watchlist, mass actions and DM-ing a member</td><td><code>/member warn user:@Alex reason:Spam</code></td></tr>
-<tr><td><code>/message</code> (25)</td><td>Purges and message tools: delete, pin, reactions, say, announce and reply</td><td><code>/message purge count:50</code></td></tr>
-<tr><td><code>/channel</code> (25)</td><td>Lock/unlock, slowmode, hide, topic, rename, clone, create and thread tools</td><td><code>/channel lock</code></td></tr>
-<tr><td><code>/role</code> (25)</td><td>Give/remove roles, temporary roles, role editing, permissions and role lists</td><td><code>/role add user:@Alex role:@Member</code></td></tr>
-<tr><td><code>/voice</code> (25)</td><td>Voice mute/deafen, disconnect, move, voice-channel limits, bitrate and region</td><td><code>/voice mute user:@Alex</code></td></tr>
-<tr><td><code>/server</code> (25)</td><td>Mod-log and Uranium config, cases, audit log, invites, server settings and prune</td><td><code>/server cases</code></td></tr>
-<tr><td><code>/automod</code> (25)</td><td>Discord AutoMod rules: keywords, spam, presets, exemptions, alerts and actions</td><td><code>/automod preset-all</code></td></tr>
-<tr><td><code>/info</code> (25)</td><td>Help, ping, user/server/role/channel information, setup check and invite links</td><td><code>/info help</code> &middot; <code>/info setup-check</code></td></tr>
-<tr><td><code>/music</code> (12)</td><td>Radio and direct-stream playback, volume, 24/7 mode and the control panel</td><td><code>/music play</code> &middot; <code>/music panel</code></td></tr>
-<tr><td><code>/ai</code> (5)</td><td>Ask the AI, set or clear an AI chat channel, turn AI on/off, status and reset</td><td><code>/ai ask text:Warn @Alex for spam, politely</code></td></tr>
-<tr><td><code>/premium</code> (25)</td><td>Owner-only tools, plus polls, giveaways, role panels, ticket panels and embed builder for the operator&rsquo;s features</td><td><code>/premium poll question:Best day? options:Sat | Sun</code></td></tr>
+<tr><td><code>/member</code></td><td>Kick, ban, temp-ban, timeout, warn, notes, watchlist, mass actions and DM-ing a member</td><td><code>/member warn user:@Alex reason:Spam</code></td></tr>
+<tr><td><code>/message</code></td><td>Purges and message tools: delete, pin, reactions, say, announce and reply</td><td><code>/message purge count:50</code></td></tr>
+<tr><td><code>/channel</code></td><td>Lock/unlock, slowmode, hide, topic, rename, clone, create and thread tools</td><td><code>/channel lock</code></td></tr>
+<tr><td><code>/role</code></td><td>Give/remove roles, temporary roles, role editing, permissions and role lists</td><td><code>/role add user:@Alex role:@Member</code></td></tr>
+<tr><td><code>/voice</code></td><td>Voice mute/deafen, disconnect, move, voice-channel limits, bitrate and region</td><td><code>/voice mute user:@Alex</code></td></tr>
+<tr><td><code>/server</code></td><td>Mod-log and Uranium config, cases, audit log, invites, server settings and prune</td><td><code>/server cases</code></td></tr>
+<tr><td><code>/automod</code></td><td>Discord AutoMod rules: keywords, spam, presets, exemptions, alerts and actions</td><td><code>/automod preset-all</code></td></tr>
+<tr><td><code>/info</code></td><td>Help, ping, user/server/role/channel information, setup check and invite links</td><td><code>/info help</code> &middot; <code>/info setup-check</code></td></tr>
+<tr><td><code>/music</code></td><td>Radio and direct-stream playback, volume, 24/7 mode and the control panel</td><td><code>/music play</code> &middot; <code>/music panel</code></td></tr>
+<tr><td><code>/ai</code></td><td>Ask the AI, set or clear an AI chat channel, turn AI on/off, status and reset</td><td><code>/ai ask text:Warn @Alex for spam, politely</code></td></tr>
+<tr><td><code>/premium</code></td><td>Owner-only tools, plus polls, giveaways, role panels, ticket panels and embed builder for the operator&rsquo;s features</td><td><code>/premium poll question:Best day? options:Sat | Sun</code></td></tr>
 </tbody></table></div>
 <p>Options can be users, roles, channels, whole numbers, true/false values or text. Some text options have fixed choices, and the AutoMod &ldquo;rule&rdquo; option uses autocomplete (see below). Required options must be filled before Discord will send the command.</p>
 <p><strong>Prefix and mention commands also exist.</strong> The default text prefix is <code>!</code> (a server can change it), short forms are documented in the in-bot help &mdash; for example <code>!help</code>, <code>!b @user spam</code> (ban) and <code>!p 50</code> (purge) &mdash; and mentioning the bot can invoke commands or, where the message does not match a command, the AI. Approved &ldquo;no-prefix&rdquo; users and the bot owner have additional modes described in the in-bot help.</p></section>
