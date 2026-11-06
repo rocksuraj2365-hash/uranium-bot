@@ -37,13 +37,13 @@ function ownerSessionActive(id) { const until = ownerSessions.get(id) || 0; if (
 async function handleDM(msg) {
   const id = msg.author.id, owner = isOwner(id), text = String(msg.content || '').trim();
   if (!text) return;
-  if (owner && /^!owner(?:\\s|$)/i.test(text)) {
-    const parts = text.split(/\\s+/), action = (parts[1] || 'status').toLowerCase();
+  if (owner && /^!owner(?:\s|$)/i.test(text)) {
+    const parts = text.split(/\s+/), action = (parts[1] || 'status').toLowerCase();
     if (action === 'lock') { ownerSessions.delete(id); return msg.reply('Owner session locked.'); }
     if (action === 'status') return msg.reply(ownerSessionActive(id) ? 'Owner session unlocked. It expires after 15 minutes.' : 'Owner session locked. Use !owner unlock followed by your 6-digit authenticator code.');
     if (action === 'unlock') {
       const code = parts[2] || '';
-      if (!/^\\d{6}$/.test(code)) return msg.reply('Use: !owner unlock 123456');
+      if (!/^\d{6}$/.test(code)) return msg.reply('Use: !owner unlock 123456');
       if (!security.verifyTotp(process.env.OWNER_TOTP_SECRET, code)) return msg.reply('Verification failed. Check your authenticator code.');
       ownerSessions.set(id, Date.now() + OWNER_SESSION_MS);
       console.log('[security] Owner DM session unlocked.');
@@ -161,7 +161,7 @@ async function onMessage(msg) {
     if (!msg.guild) return handleDM(msg);
     const px = getPrefix(msg.guild.id); const owner = isOwner(msg.author.id); let body = null, viaPrefix = true, mention = false, npAi = false;
     if (msg.content.startsWith(px)) body = msg.content.slice(px.length);
-    else { const m = new RegExp(`^<@!?${client.user.id}>\\s*`).exec(msg.content); if (m) { body = msg.content.slice(m[0].length); mention = true; } }
+    else { const m = new RegExp(`^<@!?${client.user.id}>\s*`).exec(msg.content); if (m) { body = msg.content.slice(m[0].length); mention = true; } }
     if (body == null) {
       const inAi = db.g(msg.guild.id).config.aiChannel === msg.channelId;
       if ((owner && G().config.np !== false) || np.has(msg.author.id)) { body = msg.content; viaPrefix = false; npAi = inAi; }
