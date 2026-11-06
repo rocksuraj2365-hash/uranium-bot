@@ -38,13 +38,13 @@ function ownerSessionActive(id) { const until = ownerSessions.get(id) || 0; if (
 async function handleDM(msg) {
   const id = msg.author.id, owner = isOwner(id), text = String(msg.content || '').trim();
   if (!text) return;
-  if (owner && /^!owner(?:\\s|$)/i.test(text)) {
-    const parts = text.split(/\\s+/), action = (parts[1] || 'status').toLowerCase();
+  if (owner && /^!owner(?:\s|$)/i.test(text)) {
+    const parts = text.split(/\s+/), action = (parts[1] || 'status').toLowerCase();
     if (action === 'lock') { ownerSessions.delete(id); return msg.reply('Owner session locked.'); }
     if (action === 'status') return msg.reply(ownerSessionActive(id) ? 'Owner session unlocked. It expires after 15 minutes.' : 'Owner session locked. Use !owner unlock followed by your 6-digit authenticator code.');
     if (action === 'unlock') {
       const code = parts[2] || '';
-      if (!/^\\d{6}$/.test(code)) return msg.reply('Use: !owner unlock 123456');
+      if (!/^\d{6}$/.test(code)) return msg.reply('Use: !owner unlock 123456');
       if (!security.verifyTotp(process.env.OWNER_TOTP_SECRET, code)) return msg.reply('Verification failed. Check your authenticator code.');
       ownerSessions.set(id, Date.now() + OWNER_SESSION_MS);
       console.log('[security] Owner DM session unlocked.');
@@ -52,12 +52,12 @@ async function handleDM(msg) {
     }
     return msg.reply('Owner controls: !owner status | !owner unlock 123456 | !owner lock');
   }
-  if (owner && /^!dev\\s+confirm\\s+\\d{6}$/i.test(text)) {
+  if (owner && /^!dev\s+confirm\s+\d{6}$/i.test(text)) {
     if (!ownerSessionActive(id)) return msg.reply('Owner session is locked. Unlock first with !owner unlock 123456.');
-    const code = text.split(/\\s+/)[2];
+    const code = text.split(/\s+/)[2];
     try {
       const result = await devTools.confirm(id, code);
-      return msg.reply({ content: 'Developer action result:\\n' + JSON.stringify(result).slice(0, 1800), allowedMentions: { parse: [] } });
+      return msg.reply({ content: 'Developer action result:\n' + JSON.stringify(result).slice(0, 1800), allowedMentions: { parse: [] } });
     } catch (error) {
       console.error('[DEV TOOL CONFIRM]', error);
       return msg.reply('The confirmed action failed: ' + String(error.message || error).slice(0, 300));
