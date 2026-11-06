@@ -244,7 +244,7 @@ function makeClient(withContent) {
   });
   client.on('messageCreate', onMessage);
   client.on('messageDelete', (m) => { if (m.guild && m.content && !m.author?.bot) premium.snipes.set(m.channelId, { content: m.content, author: m.author?.username || 'unknown', authorId: m.author?.id, at: Date.now() }); });
-  client.once('clientReady', onReady); client.once('ready', onReady);
+  client.once('clientReady', onReady);
   client.on('error', (e) => console.error('Client error:', e));
   client.on('shardError', (e) => console.error('Shard error:', e));
   return client;
