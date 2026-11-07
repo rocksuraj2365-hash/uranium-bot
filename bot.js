@@ -320,10 +320,10 @@ const onReady = async () => {
 };
 function makeClient(withContent) {
   contentIntent = withContent;
-  const intents = [GatewayIntentBits.Guilds, GatewayIntentBits.GuildVoiceStates, GatewayIntentBits.GuildMessages, GatewayIntentBits.DirectMessages];
+  const intents = [GatewayIntentBits.Guilds, GatewayIntentBits.GuildVoiceStates, GatewayIntentBits.GuildMessages, GatewayIntentBits.GuildMessageReactions, GatewayIntentBits.DirectMessages];
   if (withContent) intents.push(GatewayIntentBits.MessageContent);
   if (process.env.ENABLE_GUILD_MEMBERS_INTENT === 'true') intents.push(GatewayIntentBits.GuildMembers);
-  client = new Client({ intents, partials: [Partials.Channel] });
+  client = new Client({ intents, partials: [Partials.Channel, Partials.Message, Partials.Reaction, Partials.User] });
   client.on('interactionCreate', (i) => {
     const run = i.isAutocomplete() ? autocomplete(i) : i.isChatInputCommand() ? slash(i) : (i.isButton() || i.isStringSelectMenu()) ? button(i) : null;
     run?.catch((e) => console.error('Interaction error:', e));
@@ -348,6 +348,25 @@ function makeClient(withContent) {
       const content = String(cfg.goodbyeMessage || '**{username}** has left **{server}**.').replaceAll('{user}', member.user.username).replaceAll('{username}', member.user.username).replaceAll('{server}', member.guild.name).replaceAll('{memberCount}', String(member.guild.memberCount));
       await ch.send({ content, allowedMentions: { parse: [] } });
     } catch (e) { console.error('[goodbye]', e.message); }
+  });
+  client.on('messageReactionAdd', async (reaction, user) => {
+    try {
+      if (user.bot) return;
+      if (reaction.partial) await reaction.fetch();
+      const msg = reaction.message, guild = msg.guild;
+      if (!guild || !['⭐', '🌟'].includes(reaction.emoji.name) || reaction.count < 3) return;
+      const cfg = db.g(guild.id).config, channelId = cfg.starboardChannel;
+      if (!channelId || msg.channelId === channelId) return;
+      const data = db.g(guild.id); data.starboard ||= {};
+      if (data.starboard[msg.id]) return;
+      const dest = await guild.channels.fetch(channelId).catch(() => null);
+      if (!dest?.isTextBased()) return;
+      const embed = new EmbedBuilder().setColor(0xffd166).setAuthor({ name: msg.author?.tag || 'Unknown member', iconURL: msg.author?.displayAvatarURL?.() }).setDescription((msg.content || '[No text content]').slice(0, 3500)).addFields({ name: 'Source', value: '<#' + msg.channelId + '>', inline: true }, { name: 'Jump', value: '[Open message](' + msg.url + ')', inline: true }).setFooter({ text: '⭐ ' + reaction.count + ' stars' }).setTimestamp(msg.createdAt);
+      const attachment = msg.attachments?.find(a => a.contentType?.startsWith('image/'));
+      if (attachment) embed.setImage(attachment.url);
+      const posted = await dest.send({ embeds: [embed], allowedMentions: { parse: [] } });
+      data.starboard[msg.id] = posted.id; db.save();
+    } catch (e) { console.error('[starboard]', e.message); }
   });
   client.on('messageDelete', (m) => { if (m.guild && m.content && !m.author?.bot) premium.snipes.set(m.channelId, { content: m.content, author: m.author?.username || 'unknown', authorId: m.author?.id, at: Date.now() }); });
   client.once('clientReady', onReady);
