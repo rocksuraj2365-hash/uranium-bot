@@ -161,9 +161,9 @@ module.exports = {
       return own('Premium revoked', `**${user.username}** no longer has server Premium access in **${c.g.name}**.`, { icon: '🔒', user });
     }, O),
     C('access', 'Check Premium access in this server', [U(false, 'user', 'Member to check (default: you)')], null, async (c) => {
-      const user = c.u('user') || c.i.user; const active = this.hasAccess(c.g.id, user.id);
+      const user = c.u('user') || c.i.user; const active = db.g(c.g.id).premiumUsers?.includes(user.id) || false;
       return own('Premium access', `**${user.username}**: ${active ? '✅ Premium active' : '❌ No Premium'} in **${c.g.name}**.`, { icon: active ? '💎' : '🔒', user });
-    }, P),
+    }),
     C('profile', 'Customize Uranium branding for this server', [
       S('name', 'Bot nickname / brand name', false, { max: 80 }),
       S('bio', 'Server-specific profile bio', false, { max: 300 }),
