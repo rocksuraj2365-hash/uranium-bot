@@ -1,0 +1,2524 @@
+{
+  "version": 1,
+  "generatedFrom": "commands/*.js",
+  "total": 345,
+  "categories": [
+    {
+      "name": "member",
+      "description": "Member moderation, warnings, notes and account actions.",
+      "commands": [
+        {
+          "name": "kick",
+          "description": "Remove a member from the server (they can rejoin)",
+          "slash": "/member kick",
+          "prefix": "!member kick",
+          "access": "Available subject to command permissions"
+        },
+        {
+          "name": "ban",
+          "description": "Ban a user (works even if they already left)",
+          "slash": "/member ban",
+          "prefix": "!member ban",
+          "access": "Available subject to command permissions"
+        },
+        {
+          "name": "unban",
+          "description": "Remove a ban",
+          "slash": "/member unban",
+          "prefix": "!member unban",
+          "access": "Available subject to command permissions"
+        },
+        {
+          "name": "softban",
+          "description": "Ban and instantly unban to wipe their recent messages",
+          "slash": "/member softban",
+          "prefix": "!member softban",
+          "access": "Available subject to command permissions"
+        },
+        {
+          "name": "tempban",
+          "description": "Ban for a limited time, then auto unban",
+          "slash": "/member tempban",
+          "prefix": "!member tempban",
+          "access": "Available subject to command permissions"
+        },
+        {
+          "name": "timeout",
+          "description": "Mute a member for a set time (max 28 days)",
+          "slash": "/member timeout",
+          "prefix": "!member timeout",
+          "access": "Available subject to command permissions"
+        },
+        {
+          "name": "untimeout",
+          "description": "Remove a timeout",
+          "slash": "/member untimeout",
+          "prefix": "!member untimeout",
+          "access": "Available subject to command permissions"
+        },
+        {
+          "name": "warn",
+          "description": "Warn a member (saved in their record)",
+          "slash": "/member warn",
+          "prefix": "!member warn",
+          "access": "Available subject to command permissions"
+        },
+        {
+          "name": "unwarn",
+          "description": "Remove one warning by its ID",
+          "slash": "/member unwarn",
+          "prefix": "!member unwarn",
+          "access": "Available subject to command permissions"
+        },
+        {
+          "name": "warnings",
+          "description": "Show a member's warnings",
+          "slash": "/member warnings",
+          "prefix": "!member warnings",
+          "access": "Available subject to command permissions"
+        },
+        {
+          "name": "clear-warnings",
+          "description": "Delete all warnings of a member",
+          "slash": "/member clear-warnings",
+          "prefix": "!member clear-warnings",
+          "access": "Available subject to command permissions"
+        },
+        {
+          "name": "nick",
+          "description": "Change a member's nickname",
+          "slash": "/member nick",
+          "prefix": "!member nick",
+          "access": "Available subject to command permissions"
+        },
+        {
+          "name": "reset-nick",
+          "description": "Remove a member's nickname",
+          "slash": "/member reset-nick",
+          "prefix": "!member reset-nick",
+          "access": "Available subject to command permissions"
+        },
+        {
+          "name": "note-add",
+          "description": "Add a private mod note about a member",
+          "slash": "/member note-add",
+          "prefix": "!member note-add",
+          "access": "Available subject to command permissions"
+        },
+        {
+          "name": "notes",
+          "description": "Show mod notes and watchlist state of a member",
+          "slash": "/member notes",
+          "prefix": "!member notes",
+          "access": "Available subject to command permissions"
+        },
+        {
+          "name": "note-remove",
+          "description": "Delete a note by its ID",
+          "slash": "/member note-remove",
+          "prefix": "!member note-remove",
+          "access": "Available subject to command permissions"
+        },
+        {
+          "name": "massban",
+          "description": "Ban up to 25 user IDs at once",
+          "slash": "/member massban",
+          "prefix": "!member massban",
+          "access": "Available subject to command permissions"
+        },
+        {
+          "name": "mass-kick",
+          "description": "Kick up to 25 members by ID at once",
+          "slash": "/member mass-kick",
+          "prefix": "!member mass-kick",
+          "access": "Available subject to command permissions"
+        },
+        {
+          "name": "ban-list",
+          "description": "Show the latest banned users",
+          "slash": "/member ban-list",
+          "prefix": "!member ban-list",
+          "access": "Available subject to command permissions"
+        },
+        {
+          "name": "ban-check",
+          "description": "Check if a user is banned",
+          "slash": "/member ban-check",
+          "prefix": "!member ban-check",
+          "access": "Available subject to command permissions"
+        },
+        {
+          "name": "timeout-extend",
+          "description": "Add more time to an active timeout",
+          "slash": "/member timeout-extend",
+          "prefix": "!member timeout-extend",
+          "access": "Available subject to command permissions"
+        },
+        {
+          "name": "timeout-check",
+          "description": "See how long a member's timeout has left",
+          "slash": "/member timeout-check",
+          "prefix": "!member timeout-check",
+          "access": "Available subject to command permissions"
+        },
+        {
+          "name": "watch-add",
+          "description": "Put a member on the mod watchlist",
+          "slash": "/member watch-add",
+          "prefix": "!member watch-add",
+          "access": "Available subject to command permissions"
+        },
+        {
+          "name": "watch-remove",
+          "description": "Take a member off the mod watchlist",
+          "slash": "/member watch-remove",
+          "prefix": "!member watch-remove",
+          "access": "Available subject to command permissions"
+        }
+      ]
+    },
+    {
+      "name": "message",
+      "description": "Message cleanup, pins, announcements and replies.",
+      "commands": [
+        {
+          "name": "purge",
+          "description": "Delete the latest messages in this channel",
+          "slash": "/message purge",
+          "prefix": "!message purge",
+          "access": "Available subject to command permissions"
+        },
+        {
+          "name": "purge-user",
+          "description": "Delete messages from one user",
+          "slash": "/message purge-user",
+          "prefix": "!message purge-user",
+          "access": "Available subject to command permissions"
+        },
+        {
+          "name": "purge-bots",
+          "description": "Delete messages sent by bots",
+          "slash": "/message purge-bots",
+          "prefix": "!message purge-bots",
+          "access": "Available subject to command permissions"
+        },
+        {
+          "name": "purge-humans",
+          "description": "Delete messages sent by humans",
+          "slash": "/message purge-humans",
+          "prefix": "!message purge-humans",
+          "access": "Available subject to command permissions"
+        },
+        {
+          "name": "purge-links",
+          "description": "Delete messages that contain links",
+          "slash": "/message purge-links",
+          "prefix": "!message purge-links",
+          "access": "Available subject to command permissions"
+        },
+        {
+          "name": "purge-images",
+          "description": "Delete messages that have images",
+          "slash": "/message purge-images",
+          "prefix": "!message purge-images",
+          "access": "Available subject to command permissions"
+        },
+        {
+          "name": "purge-attachments",
+          "description": "Delete messages that have files",
+          "slash": "/message purge-attachments",
+          "prefix": "!message purge-attachments",
+          "access": "Available subject to command permissions"
+        },
+        {
+          "name": "purge-embeds",
+          "description": "Delete messages that have embeds",
+          "slash": "/message purge-embeds",
+          "prefix": "!message purge-embeds",
+          "access": "Available subject to command permissions"
+        },
+        {
+          "name": "purge-contains",
+          "description": "Delete messages containing some text",
+          "slash": "/message purge-contains",
+          "prefix": "!message purge-contains",
+          "access": "Available subject to command permissions"
+        },
+        {
+          "name": "purge-startswith",
+          "description": "Delete messages that start with some text",
+          "slash": "/message purge-startswith",
+          "prefix": "!message purge-startswith",
+          "access": "Available subject to command permissions"
+        },
+        {
+          "name": "purge-before",
+          "description": "Delete messages sent before a message",
+          "slash": "/message purge-before",
+          "prefix": "!message purge-before",
+          "access": "Available subject to command permissions"
+        },
+        {
+          "name": "purge-after",
+          "description": "Delete messages sent after a message",
+          "slash": "/message purge-after",
+          "prefix": "!message purge-after",
+          "access": "Available subject to command permissions"
+        },
+        {
+          "name": "purge-mentions",
+          "description": "Delete messages that mention people or roles",
+          "slash": "/message purge-mentions",
+          "prefix": "!message purge-mentions",
+          "access": "Available subject to command permissions"
+        },
+        {
+          "name": "purge-invites",
+          "description": "Delete messages that contain Discord invites",
+          "slash": "/message purge-invites",
+          "prefix": "!message purge-invites",
+          "access": "Available subject to command permissions"
+        },
+        {
+          "name": "delete-message",
+          "description": "Delete one message by its ID",
+          "slash": "/message delete-message",
+          "prefix": "!message delete-message",
+          "access": "Available subject to command permissions"
+        },
+        {
+          "name": "pin-message",
+          "description": "Pin a message by ID",
+          "slash": "/message pin-message",
+          "prefix": "!message pin-message",
+          "access": "Available subject to command permissions"
+        },
+        {
+          "name": "unpin-message",
+          "description": "Unpin a message by ID",
+          "slash": "/message unpin-message",
+          "prefix": "!message unpin-message",
+          "access": "Available subject to command permissions"
+        },
+        {
+          "name": "clear-reactions",
+          "description": "Remove all reactions from a message",
+          "slash": "/message clear-reactions",
+          "prefix": "!message clear-reactions",
+          "access": "Available subject to command permissions"
+        },
+        {
+          "name": "add-reaction",
+          "description": "Make the bot react to a message",
+          "slash": "/message add-reaction",
+          "prefix": "!message add-reaction",
+          "access": "Available subject to command permissions"
+        },
+        {
+          "name": "say",
+          "description": "Make the bot send a message",
+          "slash": "/message say",
+          "prefix": "!message say",
+          "access": "Available subject to command permissions"
+        },
+        {
+          "name": "say-embed",
+          "description": "Make the bot send a nice embed",
+          "slash": "/message say-embed",
+          "prefix": "!message say-embed",
+          "access": "Available subject to command permissions"
+        },
+        {
+          "name": "announce",
+          "description": "Post an announcement embed (optionally ping a role)",
+          "slash": "/message announce",
+          "prefix": "!message announce",
+          "access": "Available subject to command permissions"
+        },
+        {
+          "name": "edit-bot-message",
+          "description": "Edit a message the bot sent",
+          "slash": "/message edit-bot-message",
+          "prefix": "!message edit-bot-message",
+          "access": "Available subject to command permissions"
+        },
+        {
+          "name": "message-info",
+          "description": "Show details about a message",
+          "slash": "/message message-info",
+          "prefix": "!message message-info",
+          "access": "Available subject to command permissions"
+        },
+        {
+          "name": "reply",
+          "description": "Make the bot reply to a message",
+          "slash": "/message reply",
+          "prefix": "!message reply",
+          "access": "Available subject to command permissions"
+        }
+      ]
+    },
+    {
+      "name": "channel",
+      "description": "Channel configuration, permissions, threads and cleanup.",
+      "commands": [
+        {
+          "name": "lock",
+          "description": "Stop @everyone from sending messages",
+          "slash": "/channel lock",
+          "prefix": "!channel lock",
+          "access": "Available subject to command permissions"
+        },
+        {
+          "name": "unlock",
+          "description": "Let @everyone send messages again",
+          "slash": "/channel unlock",
+          "prefix": "!channel unlock",
+          "access": "Available subject to command permissions"
+        },
+        {
+          "name": "lockdown-all",
+          "description": "Lock every text channel in the server",
+          "slash": "/channel lockdown-all",
+          "prefix": "!channel lockdown-all",
+          "access": "Available subject to command permissions"
+        },
+        {
+          "name": "unlock-all",
+          "description": "Unlock every text channel in the server",
+          "slash": "/channel unlock-all",
+          "prefix": "!channel unlock-all",
+          "access": "Available subject to command permissions"
+        },
+        {
+          "name": "slowmode",
+          "description": "Set slowmode (seconds between messages)",
+          "slash": "/channel slowmode",
+          "prefix": "!channel slowmode",
+          "access": "Available subject to command permissions"
+        },
+        {
+          "name": "slowmode-off",
+          "description": "Turn slowmode off",
+          "slash": "/channel slowmode-off",
+          "prefix": "!channel slowmode-off",
+          "access": "Available subject to command permissions"
+        },
+        {
+          "name": "hide",
+          "description": "Hide a channel from @everyone",
+          "slash": "/channel hide",
+          "prefix": "!channel hide",
+          "access": "Available subject to command permissions"
+        },
+        {
+          "name": "unhide",
+          "description": "Show a hidden channel again",
+          "slash": "/channel unhide",
+          "prefix": "!channel unhide",
+          "access": "Available subject to command permissions"
+        },
+        {
+          "name": "topic",
+          "description": "Change the channel topic",
+          "slash": "/channel topic",
+          "prefix": "!channel topic",
+          "access": "Available subject to command permissions"
+        },
+        {
+          "name": "rename",
+          "description": "Rename a channel",
+          "slash": "/channel rename",
+          "prefix": "!channel rename",
+          "access": "Available subject to command permissions"
+        },
+        {
+          "name": "nsfw-on",
+          "description": "Mark a channel as age-restricted",
+          "slash": "/channel nsfw-on",
+          "prefix": "!channel nsfw-on",
+          "access": "Available subject to command permissions"
+        },
+        {
+          "name": "nsfw-off",
+          "description": "Remove the age restriction",
+          "slash": "/channel nsfw-off",
+          "prefix": "!channel nsfw-off",
+          "access": "Available subject to command permissions"
+        },
+        {
+          "name": "clone",
+          "description": "Make a copy of a channel",
+          "slash": "/channel clone",
+          "prefix": "!channel clone",
+          "access": "Available subject to command permissions"
+        },
+        {
+          "name": "delete",
+          "description": "Delete a channel",
+          "slash": "/channel delete",
+          "prefix": "!channel delete",
+          "access": "Available subject to command permissions"
+        },
+        {
+          "name": "create-text",
+          "description": "Create a text channel",
+          "slash": "/channel create-text",
+          "prefix": "!channel create-text",
+          "access": "Available subject to command permissions"
+        },
+        {
+          "name": "create-voice",
+          "description": "Create a voice channel",
+          "slash": "/channel create-voice",
+          "prefix": "!channel create-voice",
+          "access": "Available subject to command permissions"
+        },
+        {
+          "name": "create-category",
+          "description": "Create a category",
+          "slash": "/channel create-category",
+          "prefix": "!channel create-category",
+          "access": "Available subject to command permissions"
+        },
+        {
+          "name": "nuke",
+          "description": "Wipe a text channel by cloning it and deleting the old one",
+          "slash": "/channel nuke",
+          "prefix": "!channel nuke",
+          "access": "Available subject to command permissions"
+        },
+        {
+          "name": "lock-reactions",
+          "description": "Stop @everyone from adding reactions",
+          "slash": "/channel lock-reactions",
+          "prefix": "!channel lock-reactions",
+          "access": "Available subject to command permissions"
+        },
+        {
+          "name": "lock-attachments",
+          "description": "Stop @everyone from uploading files",
+          "slash": "/channel lock-attachments",
+          "prefix": "!channel lock-attachments",
+          "access": "Available subject to command permissions"
+        },
+        {
+          "name": "lock-embeds",
+          "description": "Stop @everyone from embedding links",
+          "slash": "/channel lock-embeds",
+          "prefix": "!channel lock-embeds",
+          "access": "Available subject to command permissions"
+        },
+        {
+          "name": "lock-threads",
+          "description": "Stop @everyone from creating threads",
+          "slash": "/channel lock-threads",
+          "prefix": "!channel lock-threads",
+          "access": "Available subject to command permissions"
+        },
+        {
+          "name": "reset-perms",
+          "description": "Remove the @everyone overwrite from a channel",
+          "slash": "/channel reset-perms",
+          "prefix": "!channel reset-perms",
+          "access": "Available subject to command permissions"
+        },
+        {
+          "name": "archive-thread",
+          "description": "Archive the thread you are in",
+          "slash": "/channel archive-thread",
+          "prefix": "!channel archive-thread",
+          "access": "Available subject to command permissions"
+        },
+        {
+          "name": "lock-thread",
+          "description": "Lock the thread you are in",
+          "slash": "/channel lock-thread",
+          "prefix": "!channel lock-thread",
+          "access": "Available subject to command permissions"
+        }
+      ]
+    },
+    {
+      "name": "role",
+      "description": "Role management, permissions and member assignments.",
+      "commands": [
+        {
+          "name": "add",
+          "description": "Give a role to a member",
+          "slash": "/role add",
+          "prefix": "!role add",
+          "access": "Available subject to command permissions"
+        },
+        {
+          "name": "remove",
+          "description": "Take a role from a member",
+          "slash": "/role remove",
+          "prefix": "!role remove",
+          "access": "Available subject to command permissions"
+        },
+        {
+          "name": "temp-add",
+          "description": "Give a role for a limited time",
+          "slash": "/role temp-add",
+          "prefix": "!role temp-add",
+          "access": "Available subject to command permissions"
+        },
+        {
+          "name": "create",
+          "description": "Create a new role",
+          "slash": "/role create",
+          "prefix": "!role create",
+          "access": "Available subject to command permissions"
+        },
+        {
+          "name": "delete",
+          "description": "Delete a role",
+          "slash": "/role delete",
+          "prefix": "!role delete",
+          "access": "Available subject to command permissions"
+        },
+        {
+          "name": "rename",
+          "description": "Rename a role",
+          "slash": "/role rename",
+          "prefix": "!role rename",
+          "access": "Available subject to command permissions"
+        },
+        {
+          "name": "color",
+          "description": "Change a role color",
+          "slash": "/role color",
+          "prefix": "!role color",
+          "access": "Available subject to command permissions"
+        },
+        {
+          "name": "hoist-on",
+          "description": "Show a role separately in the member list",
+          "slash": "/role hoist-on",
+          "prefix": "!role hoist-on",
+          "access": "Available subject to command permissions"
+        },
+        {
+          "name": "hoist-off",
+          "description": "Stop showing a role separately",
+          "slash": "/role hoist-off",
+          "prefix": "!role hoist-off",
+          "access": "Available subject to command permissions"
+        },
+        {
+          "name": "mentionable-on",
+          "description": "Let everyone mention a role",
+          "slash": "/role mentionable-on",
+          "prefix": "!role mentionable-on",
+          "access": "Available subject to command permissions"
+        },
+        {
+          "name": "mentionable-off",
+          "description": "Stop everyone from mentioning a role",
+          "slash": "/role mentionable-off",
+          "prefix": "!role mentionable-off",
+          "access": "Available subject to command permissions"
+        },
+        {
+          "name": "position",
+          "description": "Move a role to a position number",
+          "slash": "/role position",
+          "prefix": "!role position",
+          "access": "Available subject to command permissions"
+        },
+        {
+          "name": "clone",
+          "description": "Copy a role with the same permissions",
+          "slash": "/role clone",
+          "prefix": "!role clone",
+          "access": "Available subject to command permissions"
+        },
+        {
+          "name": "perms-view",
+          "description": "See which permissions a role has",
+          "slash": "/role perms-view",
+          "prefix": "!role perms-view",
+          "access": "Available subject to command permissions"
+        },
+        {
+          "name": "perm-grant",
+          "description": "Add one permission to a role",
+          "slash": "/role perm-grant",
+          "prefix": "!role perm-grant",
+          "access": "Available subject to command permissions"
+        },
+        {
+          "name": "perm-revoke",
+          "description": "Remove one permission from a role",
+          "slash": "/role perm-revoke",
+          "prefix": "!role perm-revoke",
+          "access": "Available subject to command permissions"
+        },
+        {
+          "name": "perm-reset",
+          "description": "Remove all permissions from a role",
+          "slash": "/role perm-reset",
+          "prefix": "!role perm-reset",
+          "access": "Available subject to command permissions"
+        },
+        {
+          "name": "swap",
+          "description": "Replace one role with another on a member",
+          "slash": "/role swap",
+          "prefix": "!role swap",
+          "access": "Available subject to command permissions"
+        },
+        {
+          "name": "add-multiple",
+          "description": "Give up to 3 roles at once",
+          "slash": "/role add-multiple",
+          "prefix": "!role add-multiple",
+          "access": "Available subject to command permissions"
+        },
+        {
+          "name": "remove-multiple",
+          "description": "Take up to 3 roles at once",
+          "slash": "/role remove-multiple",
+          "prefix": "!role remove-multiple",
+          "access": "Available subject to command permissions"
+        },
+        {
+          "name": "muted-setup",
+          "description": "Create a Muted role and block it in every channel",
+          "slash": "/role muted-setup",
+          "prefix": "!role muted-setup",
+          "access": "Available subject to command permissions"
+        },
+        {
+          "name": "has-role",
+          "description": "Check if a member has a role",
+          "slash": "/role has-role",
+          "prefix": "!role has-role",
+          "access": "Available subject to command permissions"
+        },
+        {
+          "name": "list",
+          "description": "List all server roles",
+          "slash": "/role list",
+          "prefix": "!role list",
+          "access": "Available subject to command permissions"
+        },
+        {
+          "name": "member-roles",
+          "description": "List the roles of a member",
+          "slash": "/role member-roles",
+          "prefix": "!role member-roles",
+          "access": "Available subject to command permissions"
+        },
+        {
+          "name": "manageable-check",
+          "description": "Check if I and you can manage a role",
+          "slash": "/role manageable-check",
+          "prefix": "!role manageable-check",
+          "access": "Available subject to command permissions"
+        }
+      ]
+    },
+    {
+      "name": "voice",
+      "description": "Voice moderation, channel controls and member movement.",
+      "commands": [
+        {
+          "name": "mute",
+          "description": "Server-mute a member in voice",
+          "slash": "/voice mute",
+          "prefix": "!voice mute",
+          "access": "Available subject to command permissions"
+        },
+        {
+          "name": "unmute",
+          "description": "Remove a voice mute",
+          "slash": "/voice unmute",
+          "prefix": "!voice unmute",
+          "access": "Available subject to command permissions"
+        },
+        {
+          "name": "deafen",
+          "description": "Server-deafen a member in voice",
+          "slash": "/voice deafen",
+          "prefix": "!voice deafen",
+          "access": "Available subject to command permissions"
+        },
+        {
+          "name": "undeafen",
+          "description": "Remove a voice deafen",
+          "slash": "/voice undeafen",
+          "prefix": "!voice undeafen",
+          "access": "Available subject to command permissions"
+        },
+        {
+          "name": "disconnect",
+          "description": "Kick a member out of voice",
+          "slash": "/voice disconnect",
+          "prefix": "!voice disconnect",
+          "access": "Available subject to command permissions"
+        },
+        {
+          "name": "move",
+          "description": "Move a member to another voice channel",
+          "slash": "/voice move",
+          "prefix": "!voice move",
+          "access": "Available subject to command permissions"
+        },
+        {
+          "name": "move-all",
+          "description": "Move everyone from one voice channel to another",
+          "slash": "/voice move-all",
+          "prefix": "!voice move-all",
+          "access": "Available subject to command permissions"
+        },
+        {
+          "name": "disconnect-all",
+          "description": "Disconnect everyone from a voice channel",
+          "slash": "/voice disconnect-all",
+          "prefix": "!voice disconnect-all",
+          "access": "Available subject to command permissions"
+        },
+        {
+          "name": "mute-all",
+          "description": "Mute everyone in a voice channel",
+          "slash": "/voice mute-all",
+          "prefix": "!voice mute-all",
+          "access": "Available subject to command permissions"
+        },
+        {
+          "name": "unmute-all",
+          "description": "Unmute everyone in a voice channel",
+          "slash": "/voice unmute-all",
+          "prefix": "!voice unmute-all",
+          "access": "Available subject to command permissions"
+        },
+        {
+          "name": "deafen-all",
+          "description": "Deafen everyone in a voice channel",
+          "slash": "/voice deafen-all",
+          "prefix": "!voice deafen-all",
+          "access": "Available subject to command permissions"
+        },
+        {
+          "name": "undeafen-all",
+          "description": "Undeafen everyone in a voice channel",
+          "slash": "/voice undeafen-all",
+          "prefix": "!voice undeafen-all",
+          "access": "Available subject to command permissions"
+        },
+        {
+          "name": "lock",
+          "description": "Stop @everyone from joining a voice channel",
+          "slash": "/voice lock",
+          "prefix": "!voice lock",
+          "access": "Available subject to command permissions"
+        },
+        {
+          "name": "unlock",
+          "description": "Let @everyone join a voice channel",
+          "slash": "/voice unlock",
+          "prefix": "!voice unlock",
+          "access": "Available subject to command permissions"
+        },
+        {
+          "name": "hide",
+          "description": "Hide a voice channel from @everyone",
+          "slash": "/voice hide",
+          "prefix": "!voice hide",
+          "access": "Available subject to command permissions"
+        },
+        {
+          "name": "unhide",
+          "description": "Show a voice channel again",
+          "slash": "/voice unhide",
+          "prefix": "!voice unhide",
+          "access": "Available subject to command permissions"
+        },
+        {
+          "name": "limit",
+          "description": "Set the user limit (0 = unlimited)",
+          "slash": "/voice limit",
+          "prefix": "!voice limit",
+          "access": "Available subject to command permissions"
+        },
+        {
+          "name": "rename",
+          "description": "Rename a voice channel",
+          "slash": "/voice rename",
+          "prefix": "!voice rename",
+          "access": "Available subject to command permissions"
+        },
+        {
+          "name": "bitrate",
+          "description": "Set voice quality in kbps (8-384)",
+          "slash": "/voice bitrate",
+          "prefix": "!voice bitrate",
+          "access": "Available subject to command permissions"
+        },
+        {
+          "name": "region",
+          "description": "Set the voice server region",
+          "slash": "/voice region",
+          "prefix": "!voice region",
+          "access": "Available subject to command permissions"
+        },
+        {
+          "name": "permit",
+          "description": "Allow one member to join a locked voice channel",
+          "slash": "/voice permit",
+          "prefix": "!voice permit",
+          "access": "Available subject to command permissions"
+        },
+        {
+          "name": "ban-from-vc",
+          "description": "Stop one member from joining a voice channel",
+          "slash": "/voice ban-from-vc",
+          "prefix": "!voice ban-from-vc",
+          "access": "Available subject to command permissions"
+        },
+        {
+          "name": "unban-from-vc",
+          "description": "Remove a member voice block",
+          "slash": "/voice unban-from-vc",
+          "prefix": "!voice unban-from-vc",
+          "access": "Available subject to command permissions"
+        },
+        {
+          "name": "pull",
+          "description": "Pull a member into your voice channel",
+          "slash": "/voice pull",
+          "prefix": "!voice pull",
+          "access": "Available subject to command permissions"
+        },
+        {
+          "name": "who",
+          "description": "See who is in a voice channel",
+          "slash": "/voice who",
+          "prefix": "!voice who",
+          "access": "Available subject to command permissions"
+        }
+      ]
+    },
+    {
+      "name": "server",
+      "description": "Server configuration, moderation cases, audit logs and invites.",
+      "commands": [
+        {
+          "name": "set-modlog",
+          "description": "Choose the channel where mod actions are logged",
+          "slash": "/server set-modlog",
+          "prefix": "!server set-modlog",
+          "access": "Available subject to command permissions"
+        },
+        {
+          "name": "clear-modlog",
+          "description": "Stop logging mod actions",
+          "slash": "/server clear-modlog",
+          "prefix": "!server clear-modlog",
+          "access": "Available subject to command permissions"
+        },
+        {
+          "name": "config",
+          "description": "Show Uranium settings of this server",
+          "slash": "/server config",
+          "prefix": "!server config",
+          "access": "Available subject to command permissions"
+        },
+        {
+          "name": "cases",
+          "description": "List recent moderation cases",
+          "slash": "/server cases",
+          "prefix": "!server cases",
+          "access": "Available subject to command permissions"
+        },
+        {
+          "name": "case",
+          "description": "Show one case",
+          "slash": "/server case",
+          "prefix": "!server case",
+          "access": "Available subject to command permissions"
+        },
+        {
+          "name": "case-reason",
+          "description": "Edit the reason of a case",
+          "slash": "/server case-reason",
+          "prefix": "!server case-reason",
+          "access": "Available subject to command permissions"
+        },
+        {
+          "name": "case-delete",
+          "description": "Delete a case",
+          "slash": "/server case-delete",
+          "prefix": "!server case-delete",
+          "access": "Available subject to command permissions"
+        },
+        {
+          "name": "stats",
+          "description": "Moderation statistics",
+          "slash": "/server stats",
+          "prefix": "!server stats",
+          "access": "Available subject to command permissions"
+        },
+        {
+          "name": "audit-log",
+          "description": "Show the latest audit log entries",
+          "slash": "/server audit-log",
+          "prefix": "!server audit-log",
+          "access": "Available subject to command permissions"
+        },
+        {
+          "name": "invite-list",
+          "description": "List active invites",
+          "slash": "/server invite-list",
+          "prefix": "!server invite-list",
+          "access": "Available subject to command permissions"
+        },
+        {
+          "name": "invite-delete",
+          "description": "Delete an invite by its code",
+          "slash": "/server invite-delete",
+          "prefix": "!server invite-delete",
+          "access": "Available subject to command permissions"
+        },
+        {
+          "name": "invite-create",
+          "description": "Create an invite link",
+          "slash": "/server invite-create",
+          "prefix": "!server invite-create",
+          "access": "Available subject to command permissions"
+        },
+        {
+          "name": "verification-level",
+          "description": "Set the server verification level",
+          "slash": "/server verification-level",
+          "prefix": "!server verification-level",
+          "access": "Available subject to command permissions"
+        },
+        {
+          "name": "default-notifications",
+          "description": "Set default notification level",
+          "slash": "/server default-notifications",
+          "prefix": "!server default-notifications",
+          "access": "Available subject to command permissions"
+        },
+        {
+          "name": "rename",
+          "description": "Rename the server",
+          "slash": "/server rename",
+          "prefix": "!server rename",
+          "access": "Available subject to command permissions"
+        },
+        {
+          "name": "afk-channel",
+          "description": "Set the AFK voice channel",
+          "slash": "/server afk-channel",
+          "prefix": "!server afk-channel",
+          "access": "Available subject to command permissions"
+        },
+        {
+          "name": "afk-timeout",
+          "description": "Set AFK timeout",
+          "slash": "/server afk-timeout",
+          "prefix": "!server afk-timeout",
+          "access": "Available subject to command permissions"
+        },
+        {
+          "name": "system-channel",
+          "description": "Set the system messages channel",
+          "slash": "/server system-channel",
+          "prefix": "!server system-channel",
+          "access": "Available subject to command permissions"
+        },
+        {
+          "name": "emoji-list",
+          "description": "List custom emojis",
+          "slash": "/server emoji-list",
+          "prefix": "!server emoji-list",
+          "access": "Available subject to command permissions"
+        },
+        {
+          "name": "emoji-delete",
+          "description": "Delete a custom emoji",
+          "slash": "/server emoji-delete",
+          "prefix": "!server emoji-delete",
+          "access": "Available subject to command permissions"
+        },
+        {
+          "name": "webhook-list",
+          "description": "List server webhooks",
+          "slash": "/server webhook-list",
+          "prefix": "!server webhook-list",
+          "access": "Available subject to command permissions"
+        },
+        {
+          "name": "webhook-delete",
+          "description": "Delete a webhook by ID",
+          "slash": "/server webhook-delete",
+          "prefix": "!server webhook-delete",
+          "access": "Available subject to command permissions"
+        },
+        {
+          "name": "prune-preview",
+          "description": "See how many inactive members a prune would kick",
+          "slash": "/server prune-preview",
+          "prefix": "!server prune-preview",
+          "access": "Available subject to command permissions"
+        },
+        {
+          "name": "prune-run",
+          "description": "Kick members inactive for N days",
+          "slash": "/server prune-run",
+          "prefix": "!server prune-run",
+          "access": "Available subject to command permissions"
+        },
+        {
+          "name": "set-appeal-link",
+          "description": "Set a ban appeal link shown in DMs",
+          "slash": "/server set-appeal-link",
+          "prefix": "!server set-appeal-link",
+          "access": "Available subject to command permissions"
+        }
+      ]
+    },
+    {
+      "name": "automod",
+      "description": "Discord AutoMod rules and message filters.",
+      "commands": [
+        {
+          "name": "rules",
+          "description": "List all AutoMod rules",
+          "slash": "/automod rules",
+          "prefix": "!automod rules",
+          "access": "Available subject to command permissions"
+        },
+        {
+          "name": "keyword-create",
+          "description": "Block messages that contain certain words",
+          "slash": "/automod keyword-create",
+          "prefix": "!automod keyword-create",
+          "access": "Available subject to command permissions"
+        },
+        {
+          "name": "keyword-add",
+          "description": "Add words to a keyword rule",
+          "slash": "/automod keyword-add",
+          "prefix": "!automod keyword-add",
+          "access": "Available subject to command permissions"
+        },
+        {
+          "name": "keyword-remove",
+          "description": "Remove words from a keyword rule",
+          "slash": "/automod keyword-remove",
+          "prefix": "!automod keyword-remove",
+          "access": "Available subject to command permissions"
+        },
+        {
+          "name": "spam-enable",
+          "description": "Block spam messages automatically",
+          "slash": "/automod spam-enable",
+          "prefix": "!automod spam-enable",
+          "access": "Available subject to command permissions"
+        },
+        {
+          "name": "mention-spam",
+          "description": "Block messages with too many mentions",
+          "slash": "/automod mention-spam",
+          "prefix": "!automod mention-spam",
+          "access": "Available subject to command permissions"
+        },
+        {
+          "name": "preset-profanity",
+          "description": "Turn on Discord's profanity filter",
+          "slash": "/automod preset-profanity",
+          "prefix": "!automod preset-profanity",
+          "access": "Available subject to command permissions"
+        },
+        {
+          "name": "preset-sexual",
+          "description": "Turn on Discord's sexual content filter",
+          "slash": "/automod preset-sexual",
+          "prefix": "!automod preset-sexual",
+          "access": "Available subject to command permissions"
+        },
+        {
+          "name": "preset-slurs",
+          "description": "Turn on Discord's slurs filter",
+          "slash": "/automod preset-slurs",
+          "prefix": "!automod preset-slurs",
+          "access": "Available subject to command permissions"
+        },
+        {
+          "name": "preset-all",
+          "description": "Turn on all Discord word filters",
+          "slash": "/automod preset-all",
+          "prefix": "!automod preset-all",
+          "access": "Available subject to command permissions"
+        },
+        {
+          "name": "rule-delete",
+          "description": "Delete an AutoMod rule",
+          "slash": "/automod rule-delete",
+          "prefix": "!automod rule-delete",
+          "access": "Available subject to command permissions"
+        },
+        {
+          "name": "rule-enable",
+          "description": "Turn a rule on",
+          "slash": "/automod rule-enable",
+          "prefix": "!automod rule-enable",
+          "access": "Available subject to command permissions"
+        },
+        {
+          "name": "rule-disable",
+          "description": "Turn a rule off",
+          "slash": "/automod rule-disable",
+          "prefix": "!automod rule-disable",
+          "access": "Available subject to command permissions"
+        },
+        {
+          "name": "rule-view",
+          "description": "Show details of a rule",
+          "slash": "/automod rule-view",
+          "prefix": "!automod rule-view",
+          "access": "Available subject to command permissions"
+        },
+        {
+          "name": "rule-rename",
+          "description": "Rename a rule",
+          "slash": "/automod rule-rename",
+          "prefix": "!automod rule-rename",
+          "access": "Available subject to command permissions"
+        },
+        {
+          "name": "exempt-role",
+          "description": "Make a role ignore a rule",
+          "slash": "/automod exempt-role",
+          "prefix": "!automod exempt-role",
+          "access": "Available subject to command permissions"
+        },
+        {
+          "name": "exempt-channel",
+          "description": "Make a channel ignore a rule",
+          "slash": "/automod exempt-channel",
+          "prefix": "!automod exempt-channel",
+          "access": "Available subject to command permissions"
+        },
+        {
+          "name": "unexempt-role",
+          "description": "Make a role follow a rule again",
+          "slash": "/automod unexempt-role",
+          "prefix": "!automod unexempt-role",
+          "access": "Available subject to command permissions"
+        },
+        {
+          "name": "unexempt-channel",
+          "description": "Make a channel follow a rule again",
+          "slash": "/automod unexempt-channel",
+          "prefix": "!automod unexempt-channel",
+          "access": "Available subject to command permissions"
+        },
+        {
+          "name": "alert-channel",
+          "description": "Send an alert to a channel when a rule triggers",
+          "slash": "/automod alert-channel",
+          "prefix": "!automod alert-channel",
+          "access": "Available subject to command permissions"
+        },
+        {
+          "name": "action-timeout",
+          "description": "Timeout people who trigger a rule",
+          "slash": "/automod action-timeout",
+          "prefix": "!automod action-timeout",
+          "access": "Available subject to command permissions"
+        },
+        {
+          "name": "action-block-message",
+          "description": "Change the text shown when a message is blocked",
+          "slash": "/automod action-block-message",
+          "prefix": "!automod action-block-message",
+          "access": "Available subject to command permissions"
+        },
+        {
+          "name": "block-links",
+          "description": "Block messages that contain links",
+          "slash": "/automod block-links",
+          "prefix": "!automod block-links",
+          "access": "Available subject to command permissions"
+        },
+        {
+          "name": "block-invites",
+          "description": "Block Discord invite links",
+          "slash": "/automod block-invites",
+          "prefix": "!automod block-invites",
+          "access": "Available subject to command permissions"
+        },
+        {
+          "name": "block-everyone",
+          "description": "Block @everyone and @here text pings",
+          "slash": "/automod block-everyone",
+          "prefix": "!automod block-everyone",
+          "access": "Available subject to command permissions"
+        }
+      ]
+    },
+    {
+      "name": "info",
+      "description": "Bot, member and server information, help and reports.",
+      "commands": [
+        {
+          "name": "help",
+          "description": "Browse all Uranium commands",
+          "slash": "/info help",
+          "prefix": "!info help",
+          "access": "Available subject to command permissions"
+        },
+        {
+          "name": "ping",
+          "description": "Check the bot speed",
+          "slash": "/info ping",
+          "prefix": "!info ping",
+          "access": "Available subject to command permissions"
+        },
+        {
+          "name": "uptime",
+          "description": "How long the bot has been running",
+          "slash": "/info uptime",
+          "prefix": "!info uptime",
+          "access": "Available subject to command permissions"
+        },
+        {
+          "name": "about",
+          "description": "About Uranium",
+          "slash": "/info about",
+          "prefix": "!info about",
+          "access": "Available subject to command permissions"
+        },
+        {
+          "name": "botinfo",
+          "description": "Technical bot info",
+          "slash": "/info botinfo",
+          "prefix": "!info botinfo",
+          "access": "Available subject to command permissions"
+        },
+        {
+          "name": "userinfo",
+          "description": "Info about a member",
+          "slash": "/info userinfo",
+          "prefix": "!info userinfo",
+          "access": "Available subject to command permissions"
+        },
+        {
+          "name": "avatar",
+          "description": "Show a profile picture",
+          "slash": "/info avatar",
+          "prefix": "!info avatar",
+          "access": "Available subject to command permissions"
+        },
+        {
+          "name": "banner",
+          "description": "Show a profile banner",
+          "slash": "/info banner",
+          "prefix": "!info banner",
+          "access": "Available subject to command permissions"
+        },
+        {
+          "name": "serverinfo",
+          "description": "Info about this server",
+          "slash": "/info serverinfo",
+          "prefix": "!info serverinfo",
+          "access": "Available subject to command permissions"
+        },
+        {
+          "name": "server-icon",
+          "description": "Show the server icon",
+          "slash": "/info server-icon",
+          "prefix": "!info server-icon",
+          "access": "Available subject to command permissions"
+        },
+        {
+          "name": "roleinfo",
+          "description": "Info about a role",
+          "slash": "/info roleinfo",
+          "prefix": "!info roleinfo",
+          "access": "Available subject to command permissions"
+        },
+        {
+          "name": "channelinfo",
+          "description": "Info about a channel",
+          "slash": "/info channelinfo",
+          "prefix": "!info channelinfo",
+          "access": "Available subject to command permissions"
+        },
+        {
+          "name": "membercount",
+          "description": "How many members the server has",
+          "slash": "/info membercount",
+          "prefix": "!info membercount",
+          "access": "Available subject to command permissions"
+        },
+        {
+          "name": "boosts",
+          "description": "Server boost status",
+          "slash": "/info boosts",
+          "prefix": "!info boosts",
+          "access": "Available subject to command permissions"
+        },
+        {
+          "name": "snowflake",
+          "description": "Turn a Discord ID into a date",
+          "slash": "/info snowflake",
+          "prefix": "!info snowflake",
+          "access": "Available subject to command permissions"
+        },
+        {
+          "name": "account-age",
+          "description": "How old an account is",
+          "slash": "/info account-age",
+          "prefix": "!info account-age",
+          "access": "Available subject to command permissions"
+        },
+        {
+          "name": "permissions",
+          "description": "See permissions of a member in this channel",
+          "slash": "/info permissions",
+          "prefix": "!info permissions",
+          "access": "Available subject to command permissions"
+        },
+        {
+          "name": "bot-permissions",
+          "description": "See what permissions the bot has here",
+          "slash": "/info bot-permissions",
+          "prefix": "!info bot-permissions",
+          "access": "Available subject to command permissions"
+        },
+        {
+          "name": "setup-check",
+          "description": "Check if the bot has everything it needs",
+          "slash": "/info setup-check",
+          "prefix": "!info setup-check",
+          "access": "Available subject to command permissions"
+        },
+        {
+          "name": "invite-bot",
+          "description": "Get the bot invite link",
+          "slash": "/info invite-bot",
+          "prefix": "!info invite-bot",
+          "access": "Available subject to command permissions"
+        },
+        {
+          "name": "dashboard",
+          "description": "Open the web dashboard",
+          "slash": "/info dashboard",
+          "prefix": "!info dashboard",
+          "access": "Available subject to command permissions"
+        },
+        {
+          "name": "commands-list",
+          "description": "Count commands per category",
+          "slash": "/info commands-list",
+          "prefix": "!info commands-list",
+          "access": "Available subject to command permissions"
+        },
+        {
+          "name": "time",
+          "description": "Show the current time in Discord format",
+          "slash": "/info time",
+          "prefix": "!info time",
+          "access": "Available subject to command permissions"
+        },
+        {
+          "name": "id-lookup",
+          "description": "Find a user by ID",
+          "slash": "/info id-lookup",
+          "prefix": "!info id-lookup",
+          "access": "Available subject to command permissions"
+        },
+        {
+          "name": "mod-guide",
+          "description": "Quick moderation tips",
+          "slash": "/info mod-guide",
+          "prefix": "!info mod-guide",
+          "access": "Available subject to command permissions"
+        }
+      ]
+    },
+    {
+      "name": "music",
+      "description": "Voice playback, radio stations and 24/7 sessions.",
+      "commands": [
+        {
+          "name": "join",
+          "description": "Join your voice channel",
+          "slash": "/music join",
+          "prefix": "!music join",
+          "access": "Available subject to command permissions"
+        },
+        {
+          "name": "play",
+          "description": "Play a radio station or a direct audio link",
+          "slash": "/music play",
+          "prefix": "!music play",
+          "access": "Available subject to command permissions"
+        },
+        {
+          "name": "stop",
+          "description": "Stop the music (stays in the channel)",
+          "slash": "/music stop",
+          "prefix": "!music stop",
+          "access": "Available subject to command permissions"
+        },
+        {
+          "name": "pause",
+          "description": "Pause the music",
+          "slash": "/music pause",
+          "prefix": "!music pause",
+          "access": "Available subject to command permissions"
+        },
+        {
+          "name": "resume",
+          "description": "Resume the music",
+          "slash": "/music resume",
+          "prefix": "!music resume",
+          "access": "Available subject to command permissions"
+        },
+        {
+          "name": "volume",
+          "description": "Change the volume (1-100)",
+          "slash": "/music volume",
+          "prefix": "!music volume",
+          "access": "Available subject to command permissions"
+        },
+        {
+          "name": "nowplaying",
+          "description": "Show what is playing with a live equalizer",
+          "slash": "/music nowplaying",
+          "prefix": "!music nowplaying",
+          "access": "Available subject to command permissions"
+        },
+        {
+          "name": "stations",
+          "description": "List all radio stations",
+          "slash": "/music stations",
+          "prefix": "!music stations",
+          "access": "Available subject to command permissions"
+        },
+        {
+          "name": "panel",
+          "description": "Post an interactive music control panel",
+          "slash": "/music panel",
+          "prefix": "!music panel",
+          "access": "Available subject to command permissions"
+        },
+        {
+          "name": "twentyfour7",
+          "description": "Keep the music running 24/7 (auto-rejoin)",
+          "slash": "/music twentyfour7",
+          "prefix": "!music twentyfour7",
+          "access": "Available subject to command permissions"
+        },
+        {
+          "name": "leave",
+          "description": "Leave the voice channel (also turns 24/7 off)",
+          "slash": "/music leave",
+          "prefix": "!music leave",
+          "access": "Available subject to command permissions"
+        },
+        {
+          "name": "status",
+          "description": "Show music status and the last error",
+          "slash": "/music status",
+          "prefix": "!music status",
+          "access": "Available subject to command permissions"
+        }
+      ]
+    },
+    {
+      "name": "ai",
+      "description": "AI assistant commands. AI is currently disabled pending provider compliance review.",
+      "commands": [
+        {
+          "name": "ask",
+          "description": "Talk to Uranium AI (it can run commands for you)",
+          "slash": "/ai ask",
+          "prefix": "!ai ask",
+          "access": "Available subject to command permissions"
+        },
+        {
+          "name": "channel",
+          "description": "Set a channel where the AI answers every message",
+          "slash": "/ai channel",
+          "prefix": "!ai channel",
+          "access": "Available subject to command permissions"
+        },
+        {
+          "name": "toggle",
+          "description": "Turn the AI on or off in this server",
+          "slash": "/ai toggle",
+          "prefix": "!ai toggle",
+          "access": "Available subject to command permissions"
+        },
+        {
+          "name": "status",
+          "description": "Show AI status and usage today",
+          "slash": "/ai status",
+          "prefix": "!ai status",
+          "access": "Available subject to command permissions"
+        },
+        {
+          "name": "reset",
+          "description": "Make the AI forget this chat",
+          "slash": "/ai reset",
+          "prefix": "!ai reset",
+          "access": "Available subject to command permissions"
+        }
+      ]
+    },
+    {
+      "name": "premium",
+      "description": "Premium and owner-managed server features.",
+      "commands": [
+        {
+          "name": "noprefix",
+          "description": "Premium: use commands without any prefix",
+          "slash": "/premium noprefix",
+          "prefix": "!premium noprefix",
+          "access": "Restricted: Premium or bot-owner access"
+        },
+        {
+          "name": "servers",
+          "description": "Premium: list all servers the bot is in",
+          "slash": "/premium servers",
+          "prefix": "!premium servers",
+          "access": "Restricted: Premium or bot-owner access"
+        },
+        {
+          "name": "server-info",
+          "description": "Premium: details of a server by ID",
+          "slash": "/premium server-info",
+          "prefix": "!premium server-info",
+          "access": "Restricted: Premium or bot-owner access"
+        },
+        {
+          "name": "leave",
+          "description": "Premium: make the bot leave a server",
+          "slash": "/premium leave",
+          "prefix": "!premium leave",
+          "access": "Restricted: Premium or bot-owner access"
+        },
+        {
+          "name": "gban",
+          "description": "Premium: ban a user in every server",
+          "slash": "/premium gban",
+          "prefix": "!premium gban",
+          "access": "Restricted: Premium or bot-owner access"
+        },
+        {
+          "name": "ungban",
+          "description": "Premium: unban a user in every server",
+          "slash": "/premium ungban",
+          "prefix": "!premium ungban",
+          "access": "Restricted: Premium or bot-owner access"
+        },
+        {
+          "name": "blacklist",
+          "description": "Premium: block a user from using the bot",
+          "slash": "/premium blacklist",
+          "prefix": "!premium blacklist",
+          "access": "Restricted: Premium or bot-owner access"
+        },
+        {
+          "name": "unblacklist",
+          "description": "Premium: allow a blocked user again",
+          "slash": "/premium unblacklist",
+          "prefix": "!premium unblacklist",
+          "access": "Restricted: Premium or bot-owner access"
+        },
+        {
+          "name": "status",
+          "description": "Premium: change what the bot is doing",
+          "slash": "/premium status",
+          "prefix": "!premium status",
+          "access": "Restricted: Premium or bot-owner access"
+        },
+        {
+          "name": "bot-avatar",
+          "description": "Premium: change the bot profile picture",
+          "slash": "/premium bot-avatar",
+          "prefix": "!premium bot-avatar",
+          "access": "Restricted: Premium or bot-owner access"
+        },
+        {
+          "name": "restart",
+          "description": "Premium: restart the bot",
+          "slash": "/premium restart",
+          "prefix": "!premium restart",
+          "access": "Restricted: Premium or bot-owner access"
+        },
+        {
+          "name": "live-stats",
+          "description": "Premium: live animated bot statistics",
+          "slash": "/premium live-stats",
+          "prefix": "!premium live-stats",
+          "access": "Restricted: Premium or bot-owner access"
+        },
+        {
+          "name": "emoji-add",
+          "description": "Premium: add an emoji to this server",
+          "slash": "/premium emoji-add",
+          "prefix": "!premium emoji-add",
+          "access": "Restricted: Premium or bot-owner access"
+        },
+        {
+          "name": "embed-builder",
+          "description": "Premium: build and send a custom embed with buttons",
+          "slash": "/premium embed-builder",
+          "prefix": "!premium embed-builder",
+          "access": "Restricted: Premium or bot-owner access"
+        },
+        {
+          "name": "poll",
+          "description": "Premium: live poll with buttons",
+          "slash": "/premium poll",
+          "prefix": "!premium poll",
+          "access": "Restricted: Premium or bot-owner access"
+        },
+        {
+          "name": "giveaway",
+          "description": "Premium: giveaway with an enter button",
+          "slash": "/premium giveaway",
+          "prefix": "!premium giveaway",
+          "access": "Restricted: Premium or bot-owner access"
+        },
+        {
+          "name": "role-panel",
+          "description": "Premium: button panel to pick roles",
+          "slash": "/premium role-panel",
+          "prefix": "!premium role-panel",
+          "access": "Restricted: Premium or bot-owner access"
+        },
+        {
+          "name": "ticket-panel",
+          "description": "Premium: support ticket panel with a button",
+          "slash": "/premium ticket-panel",
+          "prefix": "!premium ticket-panel",
+          "access": "Restricted: Premium or bot-owner access"
+        },
+        {
+          "name": "backup",
+          "description": "Premium: download this server layout as a file",
+          "slash": "/premium backup",
+          "prefix": "!premium backup",
+          "access": "Restricted: Premium or bot-owner access"
+        },
+        {
+          "name": "export-cases",
+          "description": "Premium: download cases, warnings and notes as a file",
+          "slash": "/premium export-cases",
+          "prefix": "!premium export-cases",
+          "access": "Restricted: Premium or bot-owner access"
+        },
+        {
+          "name": "lockdown-timer",
+          "description": "Premium: lock a channel and unlock it automatically",
+          "slash": "/premium lockdown-timer",
+          "prefix": "!premium lockdown-timer",
+          "access": "Restricted: Premium or bot-owner access"
+        },
+        {
+          "name": "history",
+          "description": "Premium: full moderation history of a user",
+          "slash": "/premium history",
+          "prefix": "!premium history",
+          "access": "Restricted: Premium or bot-owner access"
+        },
+        {
+          "name": "leaderboard",
+          "description": "Premium: top moderators by actions",
+          "slash": "/premium leaderboard",
+          "prefix": "!premium leaderboard",
+          "access": "Restricted: Premium or bot-owner access"
+        },
+        {
+          "name": "snipe",
+          "description": "Premium: see the last deleted message here",
+          "slash": "/premium snipe",
+          "prefix": "!premium snipe",
+          "access": "Restricted: Premium or bot-owner access"
+        }
+      ]
+    },
+    {
+      "name": "license",
+      "description": "Server Premium access and server-specific bot profile.",
+      "commands": [
+        {
+          "name": "grant",
+          "description": "Owner: grant Premium access to a member in this server",
+          "slash": "/license grant",
+          "prefix": "!license grant",
+          "access": "Bot owner only"
+        },
+        {
+          "name": "revoke",
+          "description": "Owner: revoke Premium access from a member in this server",
+          "slash": "/license revoke",
+          "prefix": "!license revoke",
+          "access": "Bot owner only"
+        },
+        {
+          "name": "access",
+          "description": "Check Premium access in this server",
+          "slash": "/license access",
+          "prefix": "!license access",
+          "access": "Available subject to command permissions"
+        },
+        {
+          "name": "profile",
+          "description": "Customize Uranium branding for this server",
+          "slash": "/license profile",
+          "prefix": "!license profile",
+          "access": "Server Premium"
+        }
+      ]
+    },
+    {
+      "name": "utility",
+      "description": "Calculators, text tools, timestamps and server counts.",
+      "commands": [
+        {
+          "name": "calculate",
+          "description": "Evaluate a basic arithmetic expression",
+          "slash": "/utility calculate",
+          "prefix": "!utility calculate",
+          "access": "Available subject to command permissions"
+        },
+        {
+          "name": "random-number",
+          "description": "Generate a random integer",
+          "slash": "/utility random-number",
+          "prefix": "!utility random-number",
+          "access": "Available subject to command permissions"
+        },
+        {
+          "name": "choose",
+          "description": "Choose one item from a list",
+          "slash": "/utility choose",
+          "prefix": "!utility choose",
+          "access": "Available subject to command permissions"
+        },
+        {
+          "name": "coinflip",
+          "description": "Flip a coin",
+          "slash": "/utility coinflip",
+          "prefix": "!utility coinflip",
+          "access": "Available subject to command permissions"
+        },
+        {
+          "name": "dice-roll",
+          "description": "Roll dice",
+          "slash": "/utility dice-roll",
+          "prefix": "!utility dice-roll",
+          "access": "Available subject to command permissions"
+        },
+        {
+          "name": "reverse-text",
+          "description": "Reverse text",
+          "slash": "/utility reverse-text",
+          "prefix": "!utility reverse-text",
+          "access": "Available subject to command permissions"
+        },
+        {
+          "name": "uppercase",
+          "description": "Convert text to uppercase",
+          "slash": "/utility uppercase",
+          "prefix": "!utility uppercase",
+          "access": "Available subject to command permissions"
+        },
+        {
+          "name": "lowercase",
+          "description": "Convert text to lowercase",
+          "slash": "/utility lowercase",
+          "prefix": "!utility lowercase",
+          "access": "Available subject to command permissions"
+        },
+        {
+          "name": "title-case",
+          "description": "Convert text to title case",
+          "slash": "/utility title-case",
+          "prefix": "!utility title-case",
+          "access": "Available subject to command permissions"
+        },
+        {
+          "name": "word-count",
+          "description": "Count words and characters",
+          "slash": "/utility word-count",
+          "prefix": "!utility word-count",
+          "access": "Available subject to command permissions"
+        },
+        {
+          "name": "timestamp",
+          "description": "Format a Unix timestamp",
+          "slash": "/utility timestamp",
+          "prefix": "!utility timestamp",
+          "access": "Available subject to command permissions"
+        },
+        {
+          "name": "snowflake-time",
+          "description": "Find creation time of a Discord ID",
+          "slash": "/utility snowflake-time",
+          "prefix": "!utility snowflake-time",
+          "access": "Available subject to command permissions"
+        },
+        {
+          "name": "server-age",
+          "description": "Show how old this server is",
+          "slash": "/utility server-age",
+          "prefix": "!utility server-age",
+          "access": "Available subject to command permissions"
+        },
+        {
+          "name": "member-joined",
+          "description": "Show when a member joined",
+          "slash": "/utility member-joined",
+          "prefix": "!utility member-joined",
+          "access": "Available subject to command permissions"
+        },
+        {
+          "name": "member-created",
+          "description": "Show when a Discord account was created",
+          "slash": "/utility member-created",
+          "prefix": "!utility member-created",
+          "access": "Available subject to command permissions"
+        },
+        {
+          "name": "channel-count",
+          "description": "Count channels by type",
+          "slash": "/utility channel-count",
+          "prefix": "!utility channel-count",
+          "access": "Available subject to command permissions"
+        },
+        {
+          "name": "role-count",
+          "description": "Count server roles",
+          "slash": "/utility role-count",
+          "prefix": "!utility role-count",
+          "access": "Available subject to command permissions"
+        },
+        {
+          "name": "emoji-count",
+          "description": "Count custom server emojis",
+          "slash": "/utility emoji-count",
+          "prefix": "!utility emoji-count",
+          "access": "Available subject to command permissions"
+        },
+        {
+          "name": "boost-info",
+          "description": "Show server boost details",
+          "slash": "/utility boost-info",
+          "prefix": "!utility boost-info",
+          "access": "Available subject to command permissions"
+        },
+        {
+          "name": "channel-topic",
+          "description": "Show this channel topic",
+          "slash": "/utility channel-topic",
+          "prefix": "!utility channel-topic",
+          "access": "Available subject to command permissions"
+        },
+        {
+          "name": "color-info",
+          "description": "Show details for a hex color",
+          "slash": "/utility color-info",
+          "prefix": "!utility color-info",
+          "access": "Available subject to command permissions"
+        },
+        {
+          "name": "avatar-link",
+          "description": "Get a member avatar link",
+          "slash": "/utility avatar-link",
+          "prefix": "!utility avatar-link",
+          "access": "Available subject to command permissions"
+        },
+        {
+          "name": "server-icon-link",
+          "description": "Get this server icon link",
+          "slash": "/utility server-icon-link",
+          "prefix": "!utility server-icon-link",
+          "access": "Available subject to command permissions"
+        },
+        {
+          "name": "server-banner-link",
+          "description": "Get this server banner link",
+          "slash": "/utility server-banner-link",
+          "prefix": "!utility server-banner-link",
+          "access": "Available subject to command permissions"
+        },
+        {
+          "name": "member-status",
+          "description": "Show a member status summary",
+          "slash": "/utility member-status",
+          "prefix": "!utility member-status",
+          "access": "Available subject to command permissions"
+        }
+      ]
+    },
+    {
+      "name": "community",
+      "description": "Welcome, rules, suggestions, starboard, FAQs and reputation.",
+      "commands": [
+        {
+          "name": "welcome-channel",
+          "description": "Set the welcome channel",
+          "slash": "/community welcome-channel",
+          "prefix": "!community welcome-channel",
+          "access": "Available subject to command permissions"
+        },
+        {
+          "name": "welcome-message",
+          "description": "Set the welcome message",
+          "slash": "/community welcome-message",
+          "prefix": "!community welcome-message",
+          "access": "Available subject to command permissions"
+        },
+        {
+          "name": "welcome-config",
+          "description": "View welcome settings",
+          "slash": "/community welcome-config",
+          "prefix": "!community welcome-config",
+          "access": "Available subject to command permissions"
+        },
+        {
+          "name": "welcome-test",
+          "description": "Send a welcome preview",
+          "slash": "/community welcome-test",
+          "prefix": "!community welcome-test",
+          "access": "Available subject to command permissions"
+        },
+        {
+          "name": "goodbye-channel",
+          "description": "Set the goodbye channel",
+          "slash": "/community goodbye-channel",
+          "prefix": "!community goodbye-channel",
+          "access": "Available subject to command permissions"
+        },
+        {
+          "name": "goodbye-message",
+          "description": "Set the goodbye message",
+          "slash": "/community goodbye-message",
+          "prefix": "!community goodbye-message",
+          "access": "Available subject to command permissions"
+        },
+        {
+          "name": "goodbye-test",
+          "description": "Preview the goodbye message",
+          "slash": "/community goodbye-test",
+          "prefix": "!community goodbye-test",
+          "access": "Available subject to command permissions"
+        },
+        {
+          "name": "rules-set",
+          "description": "Save the server rules",
+          "slash": "/community rules-set",
+          "prefix": "!community rules-set",
+          "access": "Available subject to command permissions"
+        },
+        {
+          "name": "rules",
+          "description": "Display the saved server rules",
+          "slash": "/community rules",
+          "prefix": "!community rules",
+          "access": "Available subject to command permissions"
+        },
+        {
+          "name": "intro-channel",
+          "description": "Set the introductions channel",
+          "slash": "/community intro-channel",
+          "prefix": "!community intro-channel",
+          "access": "Available subject to command permissions"
+        },
+        {
+          "name": "intro",
+          "description": "Post your introduction",
+          "slash": "/community intro",
+          "prefix": "!community intro",
+          "access": "Available subject to command permissions"
+        },
+        {
+          "name": "suggestion-channel",
+          "description": "Set the suggestions channel",
+          "slash": "/community suggestion-channel",
+          "prefix": "!community suggestion-channel",
+          "access": "Available subject to command permissions"
+        },
+        {
+          "name": "suggest",
+          "description": "Submit a server suggestion",
+          "slash": "/community suggest",
+          "prefix": "!community suggest",
+          "access": "Available subject to command permissions"
+        },
+        {
+          "name": "starboard-channel",
+          "description": "Set the starboard channel",
+          "slash": "/community starboard-channel",
+          "prefix": "!community starboard-channel",
+          "access": "Available subject to command permissions"
+        },
+        {
+          "name": "starboard-config",
+          "description": "Show starboard configuration",
+          "slash": "/community starboard-config",
+          "prefix": "!community starboard-config",
+          "access": "Available subject to command permissions"
+        },
+        {
+          "name": "faq-set",
+          "description": "Save a frequently asked question",
+          "slash": "/community faq-set",
+          "prefix": "!community faq-set",
+          "access": "Available subject to command permissions"
+        },
+        {
+          "name": "faq",
+          "description": "Search saved FAQs",
+          "slash": "/community faq",
+          "prefix": "!community faq",
+          "access": "Available subject to command permissions"
+        },
+        {
+          "name": "faq-list",
+          "description": "List saved FAQ questions",
+          "slash": "/community faq-list",
+          "prefix": "!community faq-list",
+          "access": "Available subject to command permissions"
+        },
+        {
+          "name": "birthday-set",
+          "description": "Save your birthday month and day",
+          "slash": "/community birthday-set",
+          "prefix": "!community birthday-set",
+          "access": "Available subject to command permissions"
+        },
+        {
+          "name": "birthday-check",
+          "description": "Check a member birthday",
+          "slash": "/community birthday-check",
+          "prefix": "!community birthday-check",
+          "access": "Available subject to command permissions"
+        },
+        {
+          "name": "birthday-list",
+          "description": "List saved birthdays",
+          "slash": "/community birthday-list",
+          "prefix": "!community birthday-list",
+          "access": "Available subject to command permissions"
+        },
+        {
+          "name": "rep-give",
+          "description": "Give a member one reputation point",
+          "slash": "/community rep-give",
+          "prefix": "!community rep-give",
+          "access": "Available subject to command permissions"
+        },
+        {
+          "name": "rep-check",
+          "description": "Check reputation points",
+          "slash": "/community rep-check",
+          "prefix": "!community rep-check",
+          "access": "Available subject to command permissions"
+        },
+        {
+          "name": "rep-top",
+          "description": "Show the reputation leaderboard",
+          "slash": "/community rep-top",
+          "prefix": "!community rep-top",
+          "access": "Available subject to command permissions"
+        },
+        {
+          "name": "community-config",
+          "description": "Show community feature settings",
+          "slash": "/community community-config",
+          "prefix": "!community community-config",
+          "access": "Available subject to command permissions"
+        }
+      ]
+    },
+    {
+      "name": "fun",
+      "description": "Non-wagering community mini-games and text utilities.",
+      "commands": [
+        {
+          "name": "joke",
+          "description": "Tell a random joke",
+          "slash": "/fun joke",
+          "prefix": "!fun joke",
+          "access": "Available subject to command permissions"
+        },
+        {
+          "name": "fact",
+          "description": "Share a random fact",
+          "slash": "/fun fact",
+          "prefix": "!fun fact",
+          "access": "Available subject to command permissions"
+        },
+        {
+          "name": "compliment",
+          "description": "Send a positive message",
+          "slash": "/fun compliment",
+          "prefix": "!fun compliment",
+          "access": "Available subject to command permissions"
+        },
+        {
+          "name": "truth",
+          "description": "Get a safe truth prompt",
+          "slash": "/fun truth",
+          "prefix": "!fun truth",
+          "access": "Available subject to command permissions"
+        },
+        {
+          "name": "dare",
+          "description": "Get a harmless dare",
+          "slash": "/fun dare",
+          "prefix": "!fun dare",
+          "access": "Available subject to command permissions"
+        },
+        {
+          "name": "eight-ball",
+          "description": "Ask the magic eight ball",
+          "slash": "/fun eight-ball",
+          "prefix": "!fun eight-ball",
+          "access": "Available subject to command permissions"
+        },
+        {
+          "name": "rps",
+          "description": "Play rock paper scissors",
+          "slash": "/fun rps",
+          "prefix": "!fun rps",
+          "access": "Available subject to command permissions"
+        },
+        {
+          "name": "rate",
+          "description": "Rate something out of 10",
+          "slash": "/fun rate",
+          "prefix": "!fun rate",
+          "access": "Available subject to command permissions"
+        },
+        {
+          "name": "percent",
+          "description": "Generate a random percentage",
+          "slash": "/fun percent",
+          "prefix": "!fun percent",
+          "access": "Available subject to command permissions"
+        },
+        {
+          "name": "would-you-rather",
+          "description": "Get a would-you-rather question",
+          "slash": "/fun would-you-rather",
+          "prefix": "!fun would-you-rather",
+          "access": "Available subject to command permissions"
+        },
+        {
+          "name": "random-color",
+          "description": "Generate a random hex color",
+          "slash": "/fun random-color",
+          "prefix": "!fun random-color",
+          "access": "Available subject to command permissions"
+        },
+        {
+          "name": "mock-text",
+          "description": "Convert text to alternating case",
+          "slash": "/fun mock-text",
+          "prefix": "!fun mock-text",
+          "access": "Available subject to command permissions"
+        },
+        {
+          "name": "clap-text",
+          "description": "Add claps between words",
+          "slash": "/fun clap-text",
+          "prefix": "!fun clap-text",
+          "access": "Available subject to command permissions"
+        },
+        {
+          "name": "emoji-vibe",
+          "description": "Get a random emoji vibe",
+          "slash": "/fun emoji-vibe",
+          "prefix": "!fun emoji-vibe",
+          "access": "Available subject to command permissions"
+        },
+        {
+          "name": "fortune",
+          "description": "Get a positive fortune",
+          "slash": "/fun fortune",
+          "prefix": "!fun fortune",
+          "access": "Available subject to command permissions"
+        },
+        {
+          "name": "number-guess",
+          "description": "Start or play a number guessing game",
+          "slash": "/fun number-guess",
+          "prefix": "!fun number-guess",
+          "access": "Available subject to command permissions"
+        },
+        {
+          "name": "dice-duel",
+          "description": "Roll a dice against Uranium",
+          "slash": "/fun dice-duel",
+          "prefix": "!fun dice-duel",
+          "access": "Available subject to command permissions"
+        },
+        {
+          "name": "coin-streak",
+          "description": "Try for a heads streak",
+          "slash": "/fun coin-streak",
+          "prefix": "!fun coin-streak",
+          "access": "Available subject to command permissions"
+        },
+        {
+          "name": "word-shuffle",
+          "description": "Shuffle the letters in a word",
+          "slash": "/fun word-shuffle",
+          "prefix": "!fun word-shuffle",
+          "access": "Available subject to command permissions"
+        },
+        {
+          "name": "initials",
+          "description": "Create initials from a phrase",
+          "slash": "/fun initials",
+          "prefix": "!fun initials",
+          "access": "Available subject to command permissions"
+        },
+        {
+          "name": "countdown-vibe",
+          "description": "Get a random countdown",
+          "slash": "/fun countdown-vibe",
+          "prefix": "!fun countdown-vibe",
+          "access": "Available subject to command permissions"
+        },
+        {
+          "name": "mini-trivia",
+          "description": "Get a quick trivia question",
+          "slash": "/fun mini-trivia",
+          "prefix": "!fun mini-trivia",
+          "access": "Available subject to command permissions"
+        },
+        {
+          "name": "quote",
+          "description": "Get an original motivational quote",
+          "slash": "/fun quote",
+          "prefix": "!fun quote",
+          "access": "Available subject to command permissions"
+        },
+        {
+          "name": "emoji-decode",
+          "description": "Explain common emoji symbols",
+          "slash": "/fun emoji-decode",
+          "prefix": "!fun emoji-decode",
+          "access": "Available subject to command permissions"
+        },
+        {
+          "name": "chat-challenge",
+          "description": "Get a friendly community chat prompt",
+          "slash": "/fun chat-challenge",
+          "prefix": "!fun chat-challenge",
+          "access": "Available subject to command permissions"
+        }
+      ]
+    },
+    {
+      "name": "servertools",
+      "description": "Threads, events and channel utilities.",
+      "commands": [
+        {
+          "name": "thread-create",
+          "description": "Create a thread from this channel",
+          "slash": "/servertools thread-create",
+          "prefix": "!servertools thread-create",
+          "access": "Available subject to command permissions"
+        },
+        {
+          "name": "thread-archive",
+          "description": "Archive the current thread",
+          "slash": "/servertools thread-archive",
+          "prefix": "!servertools thread-archive",
+          "access": "Available subject to command permissions"
+        },
+        {
+          "name": "thread-unarchive",
+          "description": "Unarchive the current thread",
+          "slash": "/servertools thread-unarchive",
+          "prefix": "!servertools thread-unarchive",
+          "access": "Available subject to command permissions"
+        },
+        {
+          "name": "thread-lock",
+          "description": "Lock the current thread",
+          "slash": "/servertools thread-lock",
+          "prefix": "!servertools thread-lock",
+          "access": "Available subject to command permissions"
+        },
+        {
+          "name": "thread-unlock",
+          "description": "Unlock the current thread",
+          "slash": "/servertools thread-unlock",
+          "prefix": "!servertools thread-unlock",
+          "access": "Available subject to command permissions"
+        },
+        {
+          "name": "thread-rename",
+          "description": "Rename the current thread",
+          "slash": "/servertools thread-rename",
+          "prefix": "!servertools thread-rename",
+          "access": "Available subject to command permissions"
+        },
+        {
+          "name": "thread-add-member",
+          "description": "Add a member to the current thread",
+          "slash": "/servertools thread-add-member",
+          "prefix": "!servertools thread-add-member",
+          "access": "Available subject to command permissions"
+        },
+        {
+          "name": "thread-remove-member",
+          "description": "Remove a member from the current thread",
+          "slash": "/servertools thread-remove-member",
+          "prefix": "!servertools thread-remove-member",
+          "access": "Available subject to command permissions"
+        },
+        {
+          "name": "thread-join",
+          "description": "Join the current thread",
+          "slash": "/servertools thread-join",
+          "prefix": "!servertools thread-join",
+          "access": "Available subject to command permissions"
+        },
+        {
+          "name": "thread-leave",
+          "description": "Leave the current thread",
+          "slash": "/servertools thread-leave",
+          "prefix": "!servertools thread-leave",
+          "access": "Available subject to command permissions"
+        },
+        {
+          "name": "thread-delete",
+          "description": "Delete the current thread",
+          "slash": "/servertools thread-delete",
+          "prefix": "!servertools thread-delete",
+          "access": "Available subject to command permissions"
+        },
+        {
+          "name": "thread-list",
+          "description": "List active threads in this channel",
+          "slash": "/servertools thread-list",
+          "prefix": "!servertools thread-list",
+          "access": "Available subject to command permissions"
+        },
+        {
+          "name": "event-create",
+          "description": "Create an external scheduled event",
+          "slash": "/servertools event-create",
+          "prefix": "!servertools event-create",
+          "access": "Available subject to command permissions"
+        },
+        {
+          "name": "event-list",
+          "description": "List upcoming scheduled events",
+          "slash": "/servertools event-list",
+          "prefix": "!servertools event-list",
+          "access": "Available subject to command permissions"
+        },
+        {
+          "name": "event-info",
+          "description": "Show scheduled event details",
+          "slash": "/servertools event-info",
+          "prefix": "!servertools event-info",
+          "access": "Available subject to command permissions"
+        },
+        {
+          "name": "event-cancel",
+          "description": "Cancel a scheduled event",
+          "slash": "/servertools event-cancel",
+          "prefix": "!servertools event-cancel",
+          "access": "Available subject to command permissions"
+        },
+        {
+          "name": "event-complete",
+          "description": "Mark a scheduled event completed",
+          "slash": "/servertools event-complete",
+          "prefix": "!servertools event-complete",
+          "access": "Available subject to command permissions"
+        },
+        {
+          "name": "event-delete",
+          "description": "Delete a scheduled event",
+          "slash": "/servertools event-delete",
+          "prefix": "!servertools event-delete",
+          "access": "Available subject to command permissions"
+        },
+        {
+          "name": "server-description",
+          "description": "Set the server description",
+          "slash": "/servertools server-description",
+          "prefix": "!servertools server-description",
+          "access": "Available subject to command permissions"
+        },
+        {
+          "name": "channel-topic-set",
+          "description": "Set this channel topic",
+          "slash": "/servertools channel-topic-set",
+          "prefix": "!servertools channel-topic-set",
+          "access": "Available subject to command permissions"
+        },
+        {
+          "name": "channel-topic-clear",
+          "description": "Clear this channel topic",
+          "slash": "/servertools channel-topic-clear",
+          "prefix": "!servertools channel-topic-clear",
+          "access": "Available subject to command permissions"
+        },
+        {
+          "name": "channel-slowmode-set",
+          "description": "Set this channel slowmode",
+          "slash": "/servertools channel-slowmode-set",
+          "prefix": "!servertools channel-slowmode-set",
+          "access": "Available subject to command permissions"
+        },
+        {
+          "name": "channel-slowmode-clear",
+          "description": "Clear this channel slowmode",
+          "slash": "/servertools channel-slowmode-clear",
+          "prefix": "!servertools channel-slowmode-clear",
+          "access": "Available subject to command permissions"
+        },
+        {
+          "name": "channel-announce",
+          "description": "Post an announcement to a channel",
+          "slash": "/servertools channel-announce",
+          "prefix": "!servertools channel-announce",
+          "access": "Available subject to command permissions"
+        },
+        {
+          "name": "channel-poll",
+          "description": "Create a simple yes/no poll",
+          "slash": "/servertools channel-poll",
+          "prefix": "!servertools channel-poll",
+          "access": "Available subject to command permissions"
+        }
+      ]
+    },
+    {
+      "name": "support",
+      "description": "Report Uranium issues and policy concerns.",
+      "commands": [
+        {
+          "name": "report",
+          "description": "Privately report a Uranium issue or policy concern",
+          "slash": "/support report",
+          "prefix": "!support report",
+          "access": "Available subject to command permissions"
+        }
+      ]
+    }
+  ]
+}

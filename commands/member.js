@@ -134,11 +134,6 @@ module.exports = {
       const on = m.isCommunicationDisabled();
       return res(on ? 'Timeout active' : 'No timeout', on ? `**${m.user.username}** can talk again ${ts(m.communicationDisabledUntilTimestamp)}.` : `**${m.user.username}** is not timed out.`, { icon: on ? '🔇' : '🟢', color: on ? 0xffb84d : 0x39d98a, user: m.user });
     }),
-    C('dm-user', 'Send an official mod message to a member\'s DMs', [U(), S('message', 'What to send', true, { max: 1500 })], P.ModerateMembers, async (c) => {
-      const u = c.u('user'); const r = await c.notify(u, `📩 Message from ${c.g.name} moderators`, c.s('message'), 0x5b8cff, false);
-      if (r.startsWith('⚠️')) throw new UserError(`I could not DM **${u.username}**`, 'They have DMs closed or blocked the bot.');
-      return res('DM sent', `Your message was delivered to **${u.username}**.`, { icon: '📩', user: u });
-    }),
     C('watch-add', 'Put a member on the mod watchlist', [U(), RS()], P.ModerateMembers, async (c) => {
       const u = c.u('user'); const d = db.g(c.g.id);
       if (d.watch.some((x) => x.userId === u.id)) throw new UserError(`**${u.username}** is already on the watchlist`, 'Use /member notes to see why.');

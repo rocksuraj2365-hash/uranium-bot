@@ -46,13 +46,16 @@ if (PORT) http.createServer(async (req, res) => {
     if (req.method === 'GET') {
       await guild.channels.fetch().catch(() => {});
       const channels = [...guild.channels.cache.values()].filter(ch => [0, 5].includes(ch.type)).sort((a,b) => a.rawPosition-b.rawPosition).map(ch => ({ id: ch.id, name: ch.name, type: ch.type }));
-      return sendJson(res, 200, { settings: { ai: config.ai !== false, prefix: config.prefix || '!', aiChannel: config.aiChannel || '', modlog: config.modlog || '' }, channels });
+      const aiLocked = process.env.AI_ENABLED !== 'true' || !process.env.GEMINI_API_KEY;
+      return sendJson(res, 200, { settings: { ai: !aiLocked && ai.available(guild.id), aiLocked, prefix: config.prefix || '!', aiChannel: config.aiChannel || '', modlog: config.modlog || '' }, channels });
     }
     let raw = '';
     for await (const chunk of req) { raw += chunk; if (raw.length > 12000) return sendJson(res, 413, { error: 'Request too large' }); }
     const input = JSON.parse(raw || '{}');
     const nextPrefix = String(input.prefix ?? config.prefix ?? '!');
     if (!nextPrefix || nextPrefix.length > 3 || /[`\s]/.test(nextPrefix)) return sendJson(res, 400, { error: 'Prefix must be 1 to 3 characters with no spaces.' });
+    const aiLocked = process.env.AI_ENABLED !== 'true' || !process.env.GEMINI_API_KEY;
+    if (aiLocked && input.ai === true) return sendJson(res, 403, { error: 'AI is globally disabled while provider compliance is reviewed.' });
     const selected = {};
     for (const key of ['aiChannel', 'modlog']) {
       const id = String(input[key] || '');
@@ -61,16 +64,16 @@ if (PORT) http.createServer(async (req, res) => {
       if (!channel || ![0, 5].includes(channel.type)) return sendJson(res, 400, { error: 'Choose a valid text channel from this server.' });
       selected[key] = channel.id;
     }
-    config.ai = input.ai !== false; config.prefix = nextPrefix;
+    config.ai = aiLocked ? false : input.ai !== false; config.prefix = nextPrefix;
     if (selected.aiChannel) config.aiChannel = selected.aiChannel; else delete config.aiChannel;
     if (selected.modlog) config.modlog = selected.modlog; else delete config.modlog;
     db.save();
-    return sendJson(res, 200, { ok: true, settings: { ai: config.ai !== false, prefix: config.prefix, aiChannel: config.aiChannel || '', modlog: config.modlog || '' } });
+    return sendJson(res, 200, { ok: true, settings: { ai: !aiLocked && ai.available(guild.id), aiLocked, prefix: config.prefix, aiChannel: config.aiChannel || '', modlog: config.modlog || '' } });
   } catch (error) { console.error('[dashboard control]', error.message); return sendJson(res, 502, { error: 'Could not reach that server through Uranium.' }); }
 }).listen(PORT, () => console.log('Bot API listening on ' + PORT));
 
-const cats = ['member', 'message', 'channel', 'role', 'voice', 'server', 'automod', 'info', 'music', 'ai', 'premium', 'license', 'utility', 'community', 'fun', 'servertools'].map((n) => require('./commands/' + n));
-prefix.CAT_SHORT.utility = 'ut'; prefix.CAT_SHORT.community = 'cm'; prefix.CAT_SHORT.fun = 'fn'; prefix.CAT_SHORT.servertools = 'st';
+const cats = ['member', 'message', 'channel', 'role', 'voice', 'server', 'automod', 'info', 'music', 'ai', 'premium', 'license', 'utility', 'community', 'fun', 'servertools', 'support'].map((n) => require('./commands/' + n));
+prefix.CAT_SHORT.utility = 'ut'; prefix.CAT_SHORT.community = 'cm'; prefix.CAT_SHORT.fun = 'fn'; prefix.CAT_SHORT.servertools = 'st'; prefix.CAT_SHORT.support = 'sp';
 for (const cat of cats) cat.map = new Map(cat.commands.map((c) => [c.name, c]));
 const byName = new Map(cats.map((c) => [c.name, c]));
 require('./lib/patch')(byName);

@@ -8,36 +8,8 @@ const link = (label, url) => new ButtonBuilder().setLabel(label).setStyle(Button
 const tu = (c) => c.u('user') || c.i.user;
 const needsLook = ['SendMessages', 'ViewChannel', 'ManageMessages', 'KickMembers', 'BanMembers', 'ModerateMembers', 'ManageRoles', 'ManageChannels', 'ManageGuild', 'ManageNicknames', 'ViewAuditLog', 'MuteMembers', 'DeafenMembers', 'MoveMembers', 'EmbedLinks'];
 
-async function help(c) {
-  const cats = c.cats; let page = 0; const total = cats.length + 1;
-  const build = () => {
-    const e = new EmbedBuilder().setColor(COLORS.ok).setFooter({ text: `${FOOT} • Page ${page + 1}/${total}` });
-    if (page === 0) {
-      e.setTitle('☢️ Uranium — Command Center').setDescription('Browse moderation, utility, community, fun, server tools, music and AI commands. Prefix commands work too.\nUse `/info setup-check` first to see if I have all permissions.')
-        .addFields(cats.map((x) => ({ name: `/${x.name}`, value: `${x.description}\n**${x.commands.length}** commands`, inline: true })));
-    } else {
-      const x = cats[page - 1];
-      e.setTitle(`/${x.name} — ${x.description}`).setDescription(trunc(x.commands.map((s) => `\`/${x.name} ${s.name}\` — ${s.desc}`).join('\n'), 4000));
-    }
-    return e;
-  };
-  const row = (off) => new ActionRowBuilder().addComponents(
-    new ButtonBuilder().setCustomId('help:home').setEmoji('🏠').setStyle(ButtonStyle.Primary).setDisabled(off || page === 0),
-    new ButtonBuilder().setCustomId('help:prev').setEmoji('◀️').setLabel('Prev').setStyle(ButtonStyle.Secondary).setDisabled(off || page === 0),
-    new ButtonBuilder().setCustomId('help:next').setEmoji('▶️').setLabel('Next').setStyle(ButtonStyle.Secondary).setDisabled(off || page === total - 1),
-    new ButtonBuilder().setCustomId('help:close').setEmoji('✖️').setStyle(ButtonStyle.Danger).setDisabled(off));
-  const msg = await c.i.editReply({ embeds: [build()], components: [row(false)] });
-  const col = msg.createMessageComponentCollector({ componentType: ComponentType.Button, time: 120000, filter: (b) => b.customId.startsWith('help:') });
-  col.on('collect', async (b) => {
-    if (b.user.id !== c.i.user.id) return b.reply({ content: 'Only the person who opened help can use these buttons. Run `/info help` yourself.', flags: 64 });
-    const k = b.customId.split(':')[1];
-    if (k === 'close') { col.stop('closed'); return b.update({ components: [row(true)] }); }
-    page = k === 'home' ? 0 : k === 'next' ? Math.min(page + 1, total - 1) : Math.max(page - 1, 0);
-    await b.update({ embeds: [build()], components: [row(false)] });
-  });
-  col.on('end', () => c.i.editReply({ components: [row(true)] }).catch(() => {}));
-  return { handled: true };
-}
+async function help(c) { return require('../lib/help')(c); }
+
 async function memberOf(c, u) { return c.g.members.fetch(u.id).catch(() => null); }
 
 module.exports = {

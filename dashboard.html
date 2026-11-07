@@ -17,6 +17,7 @@
       <button class="side-link" data-view="servers"><span>▦</span> My servers</button>
       <button class="side-link" data-view="commands"><span>⌘</span> Command library</button>
       <div class="side-label side-label-gap">RESOURCES</div>
+      <a class="side-link" href="/commands"><span>⌘</span> Public command guide</a>
       <a class="side-link" href="/interactions"><span>✧</span> Interactions</a>
       <a class="side-link" href="/verify-user"><span>✓</span> Verification</a>
       <a class="side-link" href="/terms-of-service"><span>▤</span> Terms & policies</a>
@@ -44,7 +45,7 @@
         <div class="stats-grid">
           <article class="stat-card"><div class="stat-icon violet">▦</div><span class="stat-label">Servers you can access</span><strong id="statTotal">—</strong><small>From your Discord account</small></article>
           <article class="stat-card"><div class="stat-icon green">✓</div><span class="stat-label">Manageable servers</span><strong id="statManageable">—</strong><small>Permission detected by Discord</small></article>
-          <article class="stat-card"><div class="stat-icon blue">⌘</div><span class="stat-label">Command groups</span><strong>11</strong><small>Moderation, utility, music & more</small></article>
+          <article class="stat-card"><div class="stat-icon blue">⌘</div><span class="stat-label">Command groups</span><strong>17</strong><small>345 commands across all groups</small></article>
           <article class="stat-card"><div class="stat-icon amber">✦</div><span class="stat-label">Dashboard account</span><strong class="account-state">Connected</strong><small>Discord OAuth session</small></article>
         </div>
         <div class="section-heading"><div><div class="eyebrow">QUICK ACCESS</div><h2>Jump back in</h2></div><button class="text-button" data-go="servers">View all servers ↗</button></div>
@@ -69,7 +70,7 @@
           <p class="muted" id="settingsStatus">Loading settings from Uranium…</p>
           <div class="settings-grid">
             <label class="setting-field"><span>Server prefix</span><input id="settingPrefix" maxlength="3" value="!" autocomplete="off"></label>
-            <label class="setting-toggle"><input id="settingAI" type="checkbox" checked><span><b>Uranium AI</b><small>Allow AI responses in this server</small></span></label>
+            <label class="setting-toggle"><input id="settingAI" type="checkbox" checked><span><b>Uranium AI</b><small>Allow AI responses in this server</small></span></label><small id="settingAILockNote" class="field-note" hidden>AI is globally disabled while provider age and Discord data-use compliance are reviewed.</small>
             <label class="setting-field"><span>AI chat channel</span><select id="settingAIChannel"><option value="">No automatic AI channel</option></select></label>
             <label class="setting-field"><span>Moderation log channel</span><select id="settingModlog"><option value="">Disabled</option></select></label>
           </div>
@@ -78,10 +79,11 @@
       </section>
 
       <section class="view" id="view-commands">
-        <div class="view-heading"><div><div class="eyebrow">DISCOVER THE TOOLKIT</div><h1>Command library</h1><p class="muted">A quick guide to Uranium's command groups. Run commands inside Discord.</p></div></div>
-        <label class="search-box command-search"><span>⌕</span><input id="commandSearch" type="search" placeholder="Search command groups…" autocomplete="off"></label>
+        <div class="view-heading"><div><div class="eyebrow">DISCOVER THE TOOLKIT</div><h1>Command library</h1><p class="muted">Search all 345 implemented commands, including slash syntax, prefix examples and access notes.</p></div></div>
+        <div class="command-tools"><label class="search-box command-search"><span>⌕</span><input id="commandSearch" type="search" placeholder="Search all commands…" autocomplete="off"></label><select id="commandCategory" class="command-category"><option value="all">All categories</option></select><span class="result-line" id="commandCount">Loading command catalog…</span></div>
         <div class="command-grid" id="commandGrid"></div>
-        <div class="notice"><span>ⓘ</span><p><b>Heads up:</b> This library is an information page. Server moderation actions and configuration changes are currently performed through the bot's Discord commands, not from these dashboard cards.</p></div>
+        <div class="command-pager"><button class="button button-secondary button-small" type="button" data-cmd-page="-1" id="commandPrev">← Previous</button><span id="commandPageLabel">Page 1</span><button class="button button-secondary button-small" type="button" data-cmd-page="1" id="commandNext">Next →</button></div>
+        <div class="notice"><span>ⓘ</span><p><b>Heads up:</b> This library is read-only. Run commands in Discord using the displayed slash command or replace the example <code>!</code> with your server custom prefix. Premium and owner-only commands are labelled.</p></div>
       </section>
 
       <footer class="dash-footer"><span>☢ Uranium Dashboard <span class="footer-muted">• Built for communities</span></span><div><a href="/terms-of-service">Terms</a><a href="/privacy-policy">Privacy</a><a href="/interactions">Interactions</a></div></footer>

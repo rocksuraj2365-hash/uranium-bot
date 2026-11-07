@@ -30,6 +30,9 @@ app.use(
 // Only these files are public (server.js, bot.js etc. stay private)
 const pages = {
   '/': 'index.html',
+  '/commands': 'commands.html',
+  '/commands.js': 'commands.js',
+  '/commands.json': 'commands.json',
   '/dashboard': 'dashboard.html',
   '/style.css': 'style.css',
   '/dashboard.js': 'dashboard.js',

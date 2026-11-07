@@ -161,16 +161,6 @@ module.exports = {
       const g = c.i.client.guilds.cache.get(snowflake(c.s('id'))); if (!g) throw new UserError('I am not in that server', 'Use /premium servers to see IDs.');
       const n = g.name; await g.leave(); return own('Left server', `Uranium left **${n}**.`, { icon: '🚪' });
     }, { ...O, danger: 'The bot will **leave** that server.' }),
-    C('broadcast', 'Premium: send an announcement to every server', [S('text', 'Message', true, { max: 1500 })], null, async (c) => {
-      let ok = 0, tot = 0;
-      for (const g of c.i.client.guilds.cache.values()) {
-        tot++; try {
-          await g.channels.fetch(); const ch = g.systemChannel || g.channels.cache.find((x) => x.type === CT.GuildText && x.permissionsFor(g.members.me)?.has(P.SendMessages));
-          if (ch) { await ch.send({ embeds: [goldEmbed('📢 Announcement from Uranium', c.s('text'))] }); ok++; }
-        } catch { /* skip */ }
-      }
-      return own('Broadcast sent', `Delivered to **${ok}** of **${tot}** servers.`, { icon: '📢' });
-    }, { ...O, danger: 'This sends your message to **every server** the bot is in.' }),
     C('gban', 'Premium: ban a user in every server', [U(true, 'user', 'User to ban everywhere'), S('reason', 'Reason', false, { max: 300 })], null, async (c) => {
       const u = c.u('user'); if (u.id === c.i.user.id) throw new UserError('You cannot gban yourself');
       const r = await all((g) => g.members.ban(u.id, { reason: `GBAN: ${c.reason()}` }))(c); const ok = r.filter((x) => x[1]).length;

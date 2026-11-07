@@ -94,3 +94,32 @@ footer a{color:var(--purple-2)}
 .settings-actions{display:flex;align-items:center;gap:14px;flex-wrap:wrap;margin-top:18px}
 .settings-actions .muted{margin:0;font-size:.78rem}
 @media(max-width:600px){.settings-grid{grid-template-columns:1fr}}
+
+
+/* Public searchable command library and dashboard command pagination */
+.hero-home{display:grid;justify-items:center;gap:12px;padding-top:38px}
+.hero-home .eyebrow{margin:0;color:var(--purple-2)}
+.hero-home h1{font-size:clamp(2.4rem,8vw,4.5rem);letter-spacing:-.06em}
+.hero-art{display:grid;justify-items:center;gap:6px;margin:0 auto 8px}
+.hero-art img{width:min(210px,55vw);height:150px;object-fit:contain;border-radius:18px;filter:drop-shadow(0 0 24px #8b5cf655)}
+.hero-art span{font-size:.68rem;color:var(--mute)}
+.hero-art a{color:var(--purple-2)}
+.command-tools{display:flex;align-items:center;gap:12px;flex-wrap:wrap;margin:20px 0 12px}
+.command-tools .command-search{margin:0;flex:1;min-width:220px}
+.command-category{height:44px;min-width:160px;padding:0 12px;border:1px solid #393149;border-radius:10px;background:#151221;color:#f5f2ff;font:inherit;font-size:.8rem}
+.command-tools .result-line{margin:0 0 0 auto}
+.command-meta{display:flex;align-items:center;gap:8px;flex-wrap:wrap;margin-top:7px}
+.command-syntax{font-size:.68rem;color:#a9a0bc;background:#0d0b15;border:1px solid #302941;padding:4px 6px;border-radius:6px}
+.command-access{font-size:.62rem;color:#eac58b;background:#352713;border:1px solid #59432b;padding:4px 7px;border-radius:20px}
+.command-pager{display:flex;align-items:center;justify-content:center;gap:14px;padding:18px 0 28px;color:#aaa2b9;font-size:.78rem}
+.command-pager button:disabled{opacity:.4;cursor:not-allowed}
+.public-command-page{min-height:100vh;background:radial-gradient(ellipse at 65% -20%,rgba(124,58,237,.2),transparent 42%),#090711;color:var(--text)}
+.public-command-main{max-width:1180px;margin:auto;padding:24px 18px 40px}
+.public-command-hero{display:flex;align-items:center;justify-content:space-between;gap:24px;padding:24px 0 30px}
+.public-command-hero h1{font-size:clamp(2rem,5vw,3.2rem);margin:0;letter-spacing:-.05em}
+.public-command-hero p{max-width:650px;color:var(--mute);line-height:1.65}
+.public-command-hero .hero-art img{width:170px;height:130px}
+.public-command-main .command-grid{grid-template-columns:repeat(2,minmax(0,1fr))}
+.public-command-main .command-card{align-items:flex-start}
+.public-command-main .command-card h3{overflow-wrap:anywhere}
+@media(max-width:700px){.public-command-hero{align-items:flex-start;flex-direction:column-reverse}.public-command-main .command-grid{grid-template-columns:1fr}.command-tools .result-line{width:100%;margin:0}.command-category{width:100%}}
