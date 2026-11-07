@@ -26,7 +26,7 @@ for (const [shortcut, expected] of [['add','grant'],['remove','revoke'],['check'
   assert.equal(hit.used, 2);
 }
 const catalog = require('../commands.json');
-assert.equal(catalog.total, 347, 'Published catalog total must match the implemented command set');
+assert.equal(catalog.total, 345, 'Published catalog total must match the implemented command set');
 assert.equal(catalog.categories.length, 17, 'Every command category must be published');
 for (const entry of catalog.categories) {
   const source = require('../commands/' + entry.name);
@@ -42,5 +42,7 @@ for (const entry of catalog.categories) {
 }
 assert.equal(require('../commands/info').commands.length, 25, 'Info group must stay within Discord subcommand limit');
 assert.equal(require('../commands/support').commands.length, 1, 'Support report command must be registered');
+assert.ok(!catalog.categories.find(x => x.name === 'premium').commands.some(x => x.name === 'broadcast'), 'Global broadcast command must stay disabled');
+assert.ok(!catalog.categories.find(x => x.name === 'member').commands.some(x => x.name === 'dm-user'), 'Arbitrary member DM command must stay disabled');
 console.log('Command catalog and Discord subcommand-limit checks passed.');
 console.log('100 new prefix command and Premium shortcut smoke tests passed.');
