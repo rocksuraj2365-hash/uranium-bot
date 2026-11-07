@@ -307,6 +307,7 @@ const onReady = async () => {
   console.log(`✅ Uranium online as ${client.user.tag}`);
   const st = G().config.status; const T = { playing: ActivityType.Playing, watching: ActivityType.Watching, listening: ActivityType.Listening, competing: ActivityType.Competing };
   client.user.setActivity(st ? st.text : '/help • !help', { type: st ? T[st.type] : ActivityType.Watching });
+  if (process.env.ENABLE_GUILD_MEMBERS_INTENT !== 'true') console.warn('⚠️ Welcome/goodbye automation needs the Server Members Intent enabled in Discord Developer Portal and ENABLE_GUILD_MEMBERS_INTENT=true.');
   if (!contentIntent) console.warn('⚠️ Message Content Intent is OFF: prefix commands only work after @mentioning the bot. Turn it on in the Developer Portal → Bot.');
   loadOwners(); emojis.ensure(client); music.startWatch(client);
   try {
@@ -321,6 +322,7 @@ function makeClient(withContent) {
   contentIntent = withContent;
   const intents = [GatewayIntentBits.Guilds, GatewayIntentBits.GuildVoiceStates, GatewayIntentBits.GuildMessages, GatewayIntentBits.DirectMessages];
   if (withContent) intents.push(GatewayIntentBits.MessageContent);
+  if (process.env.ENABLE_GUILD_MEMBERS_INTENT === 'true') intents.push(GatewayIntentBits.GuildMembers);
   client = new Client({ intents, partials: [Partials.Channel] });
   client.on('interactionCreate', (i) => {
     const run = i.isAutocomplete() ? autocomplete(i) : i.isChatInputCommand() ? slash(i) : (i.isButton() || i.isStringSelectMenu()) ? button(i) : null;
