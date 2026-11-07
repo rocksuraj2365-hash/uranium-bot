@@ -64,6 +64,17 @@
         <div class="filter-bar"><label class="search-box"><span>⌕</span><input id="serverSearch" type="search" placeholder="Search servers…" autocomplete="off"></label><div class="filter-pills"><button class="filter-pill active" data-filter="manageable">Manageable</button><button class="filter-pill" data-filter="all">All servers</button></div></div>
         <div class="result-line" id="serverCount">Loading your servers…</div>
         <div class="server-grid server-grid-large" id="allServers"><div class="skeleton-card"></div><div class="skeleton-card"></div></div>
+        <section class="panel guild-settings" id="guildSettings" hidden>
+          <div class="panel-heading"><div><div class="eyebrow">LIVE BOT CONFIGURATION</div><h3 id="settingsTitle">Server settings</h3></div><button class="button button-secondary button-small" id="closeSettings" type="button">Close</button></div>
+          <p class="muted" id="settingsStatus">Loading settings from Uranium…</p>
+          <div class="settings-grid">
+            <label class="setting-field"><span>Server prefix</span><input id="settingPrefix" maxlength="3" value="!" autocomplete="off"></label>
+            <label class="setting-toggle"><input id="settingAI" type="checkbox" checked><span><b>Uranium AI</b><small>Allow AI responses in this server</small></span></label>
+            <label class="setting-field"><span>AI chat channel</span><select id="settingAIChannel"><option value="">No automatic AI channel</option></select></label>
+            <label class="setting-field"><span>Moderation log channel</span><select id="settingModlog"><option value="">Disabled</option></select></label>
+          </div>
+          <div class="settings-actions"><button class="button button-primary" id="saveSettings" type="button">Save server settings</button><span class="muted" id="settingsFeedback" role="status"></span></div>
+        </section>
       </section>
 
       <section class="view" id="view-commands">
