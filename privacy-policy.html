@@ -8,7 +8,7 @@
 </head><body class="info-page">
 <nav><a class="logo" href="/">Uranium</a><span class="nav-links"><a class="btn" href="/dashboard">Dashboard</a> <a class="btn" href="/login">Login with Discord</a></span></nav>
 <main class="doc">
-<header class="doc-hero"><p class="eyebrow">Uranium</p><h1>Privacy Policy</h1><p class="lede">This policy describes the data practices that are confirmed by Uranium&rsquo;s current source code. If a practice is not in the code, it is not claimed here.</p><p class="updated">Last updated: 5 November 2026</p></header>
+<header class="doc-hero"><p class="eyebrow">Uranium</p><h1>Privacy Policy</h1><p class="lede">This policy describes the data practices that are confirmed by Uranium&rsquo;s current source code. If a practice is not in the code, it is not claimed here.</p><p class="updated">Last updated: 7 November 2026</p></header>
 
 <div class="note"><strong>Scope and limits:</strong> This page was written from the bot, dashboard and storage code in the Uranium repository. A live deployment could run different code or settings, and the operator of that deployment is responsible for keeping this policy accurate. Items marked <em>&ldquo;needs owner confirmation&rdquo;</em> are not decided in the code and are listed again in the pull request for this page.</div>
 
@@ -35,6 +35,7 @@
 <li>Uranium receives message content to run prefix and mention commands, and &mdash; in a channel an administrator has set as the AI chat channel &mdash; to answer messages with AI.</li>
 <li>If a message is deleted, the bot keeps the last deleted message for that channel in memory only (its text, author username and ID, and the time) so the owner-only snipe command can show it. This is held in a running-process map, not written to the data file.</li>
 <li>Poll votes are also held in memory only (which option each user ID chose). Giveaway entrants, by contrast, are saved in the data file as described above.</li>
+<li>When someone uses <code>/info report</code>, the report text, reporter's Discord ID and username, server name and channel details are sent to the configured support channel (<code>BOT_REPORT_CHANNEL_ID</code>) or, if no channel is configured, to the bot owner through Discord DMs. Uranium does not write report content to its JSON database.</li>
 <li>Message content is not written to the moderation data file merely because a message was sent. It can be saved if a moderator puts it in a reason or note, or if it becomes part of another record described here.</li>
 </ul></section>
 
@@ -46,12 +47,13 @@
 <li>Uranium never asks for, and you must never give it, your Discord password or a Discord token.</li>
 </ul></section>
 
-<section class="doc-section"><h2>5. AI requests and Anthropic</h2><ul>
-<li>AI features are optional. They do nothing unless the bot operator has set an Anthropic API key, and a server administrator can turn AI off for that server.</li>
-<li>When AI is used, Uranium sends a request to Anthropic&rsquo;s API (<code>api.anthropic.com</code>). The request contains the text you asked (the code truncates a request to 1,500 characters), a short context line containing the server name, channel name, your username and user ID, your relevant Discord permission names and the server prefix, and &mdash; if you replied to a message &mdash; that message&rsquo;s author username and text, marked as untrusted and truncated.</li>
-<li>Uranium also sends Anthropic a list of available Uranium commands so the AI can choose one. If it runs a command for you, that command runs with your own Discord permissions and can create the normal records for that command (for example a moderation case).</li>
-<li>Recent AI conversation turns are kept in a running-process memory map, keyed by channel and user, holding up to the last ten messages. You can clear them with the AI reset command or the &ldquo;Forget this chat&rdquo; button. The code does not write AI chat history to the data file.</li>
-<li>This policy does not describe Anthropic&rsquo;s own handling of API requests. Anthropic is a separate provider with its own policies &mdash; <em>its retention and training terms for this deployment need owner confirmation.</em></li>
+<section class="doc-section"><h2>5. AI requests and Google Gemini</h2><ul>
+<li><strong>AI is disabled by default in the current code.</strong> Server AI and the owner DM assistant only run when the operator explicitly enables the AI feature and configures a provider key. The current deployment's billing status and provider eligibility are not established by this source code.</li>
+<li>If an eligible operator later enables the current Gemini integration, Uranium sends the user's request to Google's Gemini API. For server requests, the payload can include the request text (up to 1,100 characters), server and channel names, the requester's username and Discord ID, relevant permission names, the server prefix, a replied-to message excerpt (up to 350 characters), and recent conversation turns held in memory. For the owner DM assistant, the payload can include the DM text (up to 2,000 characters) and recent DM turns held in memory.</li>
+<li>AI conversation history is held in the running process only. Server history is limited to the most recent six message entries per channel and user; owner DM history is limited to eight entries. This history is not written to Uranium's JSON database and is cleared when the process restarts or when the server AI reset command is used where available.</li>
+<li>Google's data handling depends on whether the API project uses Unpaid Services or Paid Services. Google's current terms say Unpaid Services may use prompts and responses to improve products and machine-learning technologies and may allow human review. For Paid Services, Google says prompts and responses are not used to improve products, but may be logged for a limited period for abuse prevention and required disclosures. The operator's actual billing status is not confirmed by the code. See <a href="https://ai.google.dev/gemini-api/terms" target="_blank" rel="noopener">Gemini API Additional Terms</a> and <a href="https://ai.google.dev/gemini-api/docs/zdr" target="_blank" rel="noopener">Gemini API data retention information</a>.</li>
+<li>Discord's Developer Policy prohibits using message content obtained through Discord APIs to train AI/ML models without Discord's express permission. Do not enable an unpaid Gemini integration for Discord message content. Google's API terms also include an 18+ developer requirement and restrict use in applications likely to be accessed by under-18s. The current AI integration therefore remains disabled pending review by an eligible adult operator and confirmation of a provider whose terms permit the intended audience and data handling.</li>
+<li>Do not send passwords, authentication tokens, private credentials, or sensitive personal information to Uranium AI. This policy does not claim that Google has zero retention or that the current deployment has a paid Gemini API project.</li>
 </ul></section>
 
 <section class="doc-section"><h2>6. Storage, retention and deletion</h2><ul>
@@ -63,15 +65,16 @@
 
 <section class="doc-section"><h2>7. Third-party services</h2>
 <div class="table-wrap"><table><thead><tr><th>Service</th><th>Role in the code</th></tr></thead><tbody>
-<tr><td>Discord</td><td>Bot and dashboard platform; OAuth login, profile and server-list API calls, and all in-Discord actions</td></tr>
-<tr><td>Anthropic</td><td>AI provider, only when the operator has configured an API key and AI is used</td></tr>
-<tr><td>Render</td><td>Hosting described in the project&rsquo;s deployment files: one web service for this site and one background worker for the bot</td></tr>
+<tr><td>Discord</td><td>Bot and dashboard platform; OAuth login, profile and server-list API calls, reports, and in-Discord actions</td></tr>
+<tr><td>Google Gemini API</td><td>AI provider referenced by the code. AI is disabled by default; if an eligible operator enables it after reviewing age and data-use terms, prompts and relevant context are sent to Google's API.</td></tr>
+<tr><td>Render</td><td>Hosting described in the project's deployment files: one web service for this site and one background worker for the bot</td></tr>
 <tr><td>SomaFM and Radio Paradise</td><td>Public audio streams listed in the music feature; a server member may also supply a direct audio-stream link</td></tr>
+<tr><td>GIPHY</td><td>Provides an externally hosted decorative animated GIF on the public command-library page. Loading the image makes a request to GIPHY; its own privacy practices apply.</td></tr>
 </tbody></table></div>
-<p>Each provider handles data under its own terms and policies. Uranium&rsquo;s code also loads Discord-hosted avatars, icons and emoji images in the normal way Discord clients and embeds do.</p></section>
+<p>Each provider handles data under its own terms and policies. Uranium does not sell Discord API data or use it for advertising. External media providers may receive normal request metadata such as an IP address and browser information when their content is loaded.</p></section>
 
 <section class="doc-section"><h2>8. Security &mdash; what the code does, and what it does not promise</h2><ul>
-<li>Secrets such as the Discord client secret, bot token, session secret and Anthropic API key are read from environment variables. The project README instructs that secrets go in the hosting environment settings, never in GitHub. No secret values are included in these public pages.</li>
+<li>Secrets such as the Discord client secret, bot token, session secret and Gemini API key are read from environment variables. The project README instructs that secrets go in the hosting environment settings, never in GitHub. No secret values are included in these public pages.</li>
 <li>Dashboard sessions use the cookie settings described in section 4, OAuth login uses a random state value that is checked on return, and dashboard APIs require a logged-in session.</li>
 <li>Commands check the Discord permissions of the user running them and, where a command defines one, of the bot as well.</li>
 <li><strong>No other security guarantee is made.</strong> The code does not claim encryption of the JSON data file, a persistent or hardened session store, independent audits or certifications. The operator is responsible for securing the host, the data file and all environment secrets. <em>Any stronger security statement needs owner confirmation and must be true of the live deployment first.</em></li>
