@@ -1282,13 +1282,6 @@
           "access": "Available subject to command permissions"
         },
         {
-          "name": "report",
-          "description": "Privately report a Uranium issue or policy concern",
-          "slash": "/info report",
-          "prefix": "!info report",
-          "access": "Available subject to command permissions"
-        },
-        {
           "name": "ping",
           "description": "Check the bot speed",
           "slash": "/info ping",
@@ -2524,6 +2517,19 @@
           "description": "Create a simple yes/no poll",
           "slash": "/servertools channel-poll",
           "prefix": "!servertools channel-poll",
+          "access": "Available subject to command permissions"
+        }
+      ]
+    },
+    {
+      "name": "support",
+      "description": "Report Uranium issues and policy concerns.",
+      "commands": [
+        {
+          "name": "report",
+          "description": "Privately report a Uranium issue or policy concern",
+          "slash": "/support report",
+          "prefix": "!support report",
           "access": "Available subject to command permissions"
         }
       ]
