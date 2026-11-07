@@ -145,7 +145,8 @@ async function forwardBotControl(req, res) {
 }
 app.get('/api/guilds/:guildId/control', requireAuth, manageableGuild, forwardBotControl);
 app.post('/api/guilds/:guildId/control', requireAuth, manageableGuild, (req, res, next) => {
-  if (req.get('origin') !== BASE) return res.status(403).json({ error: 'Request origin check failed.' });
+  const expectedOrigin = `${req.protocol}://${req.get('host')}`;
+  if (req.get('origin') !== expectedOrigin) return res.status(403).json({ error: 'Request origin check failed.' });
   next();
 }, forwardBotControl);
 
