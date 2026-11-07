@@ -26,8 +26,17 @@ async function imageData(url, field) {
   if (!['image/png', 'image/jpeg', 'image/gif', 'image/webp'].includes(type)) throw new UserError(`The ${field} link must point to a PNG, JPG, GIF, or WebP image.`);
   const declared = Number(response.headers.get('content-length') || 0);
   if (declared > 8 * 1024 * 1024) throw new UserError(`The ${field} image must be 8 MB or smaller.`);
-  const bytes = Buffer.from(await response.arrayBuffer());
-  if (!bytes.length || bytes.length > 8 * 1024 * 1024) throw new UserError(`The ${field} image must be between 1 byte and 8 MB.`);
+  const reader = response.body?.getReader();
+  if (!reader) throw new UserError(`Could not read the ${field} image.`);
+  const chunks = []; let total = 0;
+  while (true) {
+    const part = await reader.read(); if (part.done) break;
+    total += part.value.byteLength;
+    if (total > 8 * 1024 * 1024) { await reader.cancel().catch(() => {}); throw new UserError(`The ${field} image must be 8 MB or smaller.`); }
+    chunks.push(Buffer.from(part.value));
+  }
+  const bytes = Buffer.concat(chunks);
+  if (!bytes.length) throw new UserError(`The ${field} image is empty.`);
   return `data:${type};base64,${bytes.toString('base64')}`;
 }
 
@@ -56,8 +65,8 @@ module.exports = {
       S('name', 'Bot nickname / display name', false, { max: 32 }),
       S('bio', 'Server-specific profile bio (max 190 characters)', false, { max: 190 }),
       S('color', 'Embed color, hex e.g. #8b5cf6', false, { max: 7 }),
-      S('avatar', 'Profile-card avatar image URL', false, { max: 500 }),
-      S('banner', 'Profile-card banner image URL', false, { max: 500 }),
+      S('avatar', 'Per-server bot avatar image URL', false, { max: 500 }),
+      S('banner', 'Per-server bot banner image URL', false, { max: 500 }),
     ], null, async (c) => {
       const d = db.g(c.g.id); const brand = d.config.branding ||= {};
       const body = {};
