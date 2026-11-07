@@ -13,7 +13,7 @@ async function help(c) {
   const build = () => {
     const e = new EmbedBuilder().setColor(COLORS.ok).setFooter({ text: `${FOOT} • Page ${page + 1}/${total}` });
     if (page === 0) {
-      e.setTitle('☢️ Uranium — 200 moderation commands').setDescription('Use the buttons to browse. Commands look like `/member ban`, `/channel lock` ...\nUse `/info setup-check` first to see if I have all permissions.')
+      e.setTitle('☢️ Uranium — Command Center').setDescription('Browse moderation, utility, community, fun, server tools, music and AI commands. Prefix commands work too.\nUse `/info setup-check` first to see if I have all permissions.')
         .addFields(cats.map((x) => ({ name: `/${x.name}`, value: `${x.description}\n**${x.commands.length}** commands`, inline: true })));
     } else {
       const x = cats[page - 1];
@@ -46,8 +46,8 @@ module.exports = {
     C('help', 'Browse all Uranium commands', [], null, help, { custom: true }),
     C('ping', 'Check the bot speed', [], null, async (c) => res('Pong!', null, { icon: '🏓', fields: [['Websocket', `${Math.round(c.i.client.ws.ping)} ms`, true], ['Response', `${Date.now() - c.i.createdTimestamp} ms`, true]] })),
     C('uptime', 'How long the bot has been running', [], null, async () => res('Uptime', `Online since ${ts(started)}`, { icon: '⏱️', fields: [['Running for', `${Math.floor(process.uptime() / 3600)}h ${Math.floor(process.uptime() / 60) % 60}m`]] })),
-    C('about', 'About Uranium', [], null, async (c) => res('About Uranium', 'A modern moderation bot with 200 commands, buttons and a web dashboard.', { icon: '☢️', links: [['Invite Uranium', inviteUrl(c.i.client.application.id)], ...(process.env.PUBLIC_BASE_URL ? [['Website', process.env.PUBLIC_BASE_URL]] : [])] })),
-    C('botinfo', 'Technical bot info', [], null, async (c) => res('Bot info', null, { icon: '🤖', color: 0x5b8cff, fields: [['Servers', String(c.i.client.guilds.cache.size), true], ['Node.js', process.version, true], ['Memory', `${Math.round(process.memoryUsage().rss / 1048576)} MB`, true], ['Commands', '200', true]] })),
+    C('about', 'About Uranium', [], null, async (c) => res('About Uranium', 'A modern Discord bot with moderation, utility, community, fun, music, AI and a web dashboard.', { icon: '☢️', links: [['Invite Uranium', inviteUrl(c.i.client.application.id)], ...(process.env.PUBLIC_BASE_URL ? [['Website', process.env.PUBLIC_BASE_URL]] : [])] })),
+    C('botinfo', 'Technical bot info', [], null, async (c) => res('Bot info', null, { icon: '🤖', color: 0x5b8cff, fields: [['Servers', String(c.i.client.guilds.cache.size), true], ['Node.js', process.version, true], ['Memory', `${Math.round(process.memoryUsage().rss / 1048576)} MB`, true], ['Commands', String(c.cats.reduce((n, x) => n + x.commands.length, 0)), true]] })),
     C('userinfo', 'Info about a member', [U(false)], null, async (c) => {
       const u = tu(c); const m = await memberOf(c, u); const roles = m ? [...m.roles.cache.values()].filter((r) => r.id !== c.g.id).sort((a, b) => b.position - a.position).slice(0, 15).map((r) => `<@&${r.id}>`).join(' ') : '';
       return res(u.username, null, { icon: '👤', color: m?.displayColor || 0x5b8cff, user: u, fields: [['ID', `\`${u.id}\``, true], ['Created', ts(u.createdTimestamp), true], ['Joined', m ? ts(m.joinedTimestamp) : 'Not in server', true], ['Bot', u.bot ? 'Yes' : 'No', true], ['Timed out', m?.isCommunicationDisabled() ? 'Yes' : 'No', true], ['Roles', roles || 'None']] });

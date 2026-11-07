@@ -69,7 +69,8 @@ if (PORT) http.createServer(async (req, res) => {
   } catch (error) { console.error('[dashboard control]', error.message); return sendJson(res, 502, { error: 'Could not reach that server through Uranium.' }); }
 }).listen(PORT, () => console.log('Bot API listening on ' + PORT));
 
-const cats = ['member', 'message', 'channel', 'role', 'voice', 'server', 'automod', 'info', 'music', 'ai', 'premium', 'license'].map((n) => require('./commands/' + n));
+const cats = ['member', 'message', 'channel', 'role', 'voice', 'server', 'automod', 'info', 'music', 'ai', 'premium', 'license', 'utility', 'community', 'fun', 'servertools'].map((n) => require('./commands/' + n));
+prefix.CAT_SHORT.utility = 'ut'; prefix.CAT_SHORT.community = 'cm'; prefix.CAT_SHORT.fun = 'fn'; prefix.CAT_SHORT.servertools = 'st';
 for (const cat of cats) cat.map = new Map(cat.commands.map((c) => [c.name, c]));
 const byName = new Map(cats.map((c) => [c.name, c]));
 require('./lib/patch')(byName);
@@ -306,6 +307,7 @@ const onReady = async () => {
   console.log(`✅ Uranium online as ${client.user.tag}`);
   const st = G().config.status; const T = { playing: ActivityType.Playing, watching: ActivityType.Watching, listening: ActivityType.Listening, competing: ActivityType.Competing };
   client.user.setActivity(st ? st.text : '/help • !help', { type: st ? T[st.type] : ActivityType.Watching });
+  if (process.env.ENABLE_GUILD_MEMBERS_INTENT !== 'true') console.warn('⚠️ Welcome/goodbye automation needs the Server Members Intent enabled in Discord Developer Portal and ENABLE_GUILD_MEMBERS_INTENT=true.');
   if (!contentIntent) console.warn('⚠️ Message Content Intent is OFF: prefix commands only work after @mentioning the bot. Turn it on in the Developer Portal → Bot.');
   loadOwners(); emojis.ensure(client); music.startWatch(client);
   try {
@@ -318,14 +320,54 @@ const onReady = async () => {
 };
 function makeClient(withContent) {
   contentIntent = withContent;
-  const intents = [GatewayIntentBits.Guilds, GatewayIntentBits.GuildVoiceStates, GatewayIntentBits.GuildMessages, GatewayIntentBits.DirectMessages];
+  const intents = [GatewayIntentBits.Guilds, GatewayIntentBits.GuildVoiceStates, GatewayIntentBits.GuildMessages, GatewayIntentBits.GuildMessageReactions, GatewayIntentBits.DirectMessages];
   if (withContent) intents.push(GatewayIntentBits.MessageContent);
-  client = new Client({ intents, partials: [Partials.Channel] });
+  if (process.env.ENABLE_GUILD_MEMBERS_INTENT === 'true') intents.push(GatewayIntentBits.GuildMembers);
+  client = new Client({ intents, partials: [Partials.Channel, Partials.Message, Partials.Reaction, Partials.User] });
   client.on('interactionCreate', (i) => {
     const run = i.isAutocomplete() ? autocomplete(i) : i.isChatInputCommand() ? slash(i) : (i.isButton() || i.isStringSelectMenu()) ? button(i) : null;
     run?.catch((e) => console.error('Interaction error:', e));
   });
   client.on('messageCreate', onMessage);
+  client.on('guildMemberAdd', async (member) => {
+    try {
+      const cfg = db.g(member.guild.id).config, id = cfg.welcomeChannel;
+      if (!id) return;
+      const ch = await member.guild.channels.fetch(id).catch(() => null);
+      if (!ch?.isTextBased()) return;
+      const content = String(cfg.welcomeMessage || 'Welcome {user} to **{server}**!').replaceAll('{user}', '<@' + member.id + '>').replaceAll('{username}', member.user.username).replaceAll('{server}', member.guild.name).replaceAll('{memberCount}', String(member.guild.memberCount));
+      await ch.send({ content, allowedMentions: { users: [member.id] } });
+    } catch (e) { console.error('[welcome]', e.message); }
+  });
+  client.on('guildMemberRemove', async (member) => {
+    try {
+      const cfg = db.g(member.guild.id).config, id = cfg.goodbyeChannel;
+      if (!id) return;
+      const ch = await member.guild.channels.fetch(id).catch(() => null);
+      if (!ch?.isTextBased()) return;
+      const content = String(cfg.goodbyeMessage || '**{username}** has left **{server}**.').replaceAll('{user}', member.user.username).replaceAll('{username}', member.user.username).replaceAll('{server}', member.guild.name).replaceAll('{memberCount}', String(member.guild.memberCount));
+      await ch.send({ content, allowedMentions: { parse: [] } });
+    } catch (e) { console.error('[goodbye]', e.message); }
+  });
+  client.on('messageReactionAdd', async (reaction, user) => {
+    try {
+      if (user.bot) return;
+      if (reaction.partial) await reaction.fetch();
+      const msg = reaction.message, guild = msg.guild;
+      if (!guild || !['⭐', '🌟'].includes(reaction.emoji.name) || reaction.count < 3) return;
+      const cfg = db.g(guild.id).config, channelId = cfg.starboardChannel;
+      if (!channelId || msg.channelId === channelId) return;
+      const data = db.g(guild.id); data.starboard ||= {};
+      if (data.starboard[msg.id]) return;
+      const dest = await guild.channels.fetch(channelId).catch(() => null);
+      if (!dest?.isTextBased()) return;
+      const embed = new EmbedBuilder().setColor(0xffd166).setAuthor({ name: msg.author?.tag || 'Unknown member', iconURL: msg.author?.displayAvatarURL?.() }).setDescription((msg.content || '[No text content]').slice(0, 3500)).addFields({ name: 'Source', value: '<#' + msg.channelId + '>', inline: true }, { name: 'Jump', value: '[Open message](' + msg.url + ')', inline: true }).setFooter({ text: '⭐ ' + reaction.count + ' stars' }).setTimestamp(msg.createdAt);
+      const attachment = msg.attachments?.find(a => a.contentType?.startsWith('image/'));
+      if (attachment) embed.setImage(attachment.url);
+      const posted = await dest.send({ embeds: [embed], allowedMentions: { parse: [] } });
+      data.starboard[msg.id] = posted.id; db.save();
+    } catch (e) { console.error('[starboard]', e.message); }
+  });
   client.on('messageDelete', (m) => { if (m.guild && m.content && !m.author?.bot) premium.snipes.set(m.channelId, { content: m.content, author: m.author?.username || 'unknown', authorId: m.author?.id, at: Date.now() }); });
   client.once('clientReady', onReady);
   client.on('error', (e) => console.error('Client error:', e));

@@ -75,3 +75,16 @@ Changing Uranium's prefix is not a Premium feature. A server member with Manage 
 ## Important: database persistence on Render Free
 
 The current bot database is stored in `data/db.json`. Render Free web services use an ephemeral filesystem: local files are lost when the service redeploys, restarts, or spins down. That means server settings, moderation records, and Premium grants stored in this file are not safe for long-term production use. Move this data to a persistent datastore before relying on paid Premium licenses.
+
+## 100 additional prefix commands
+
+The bot adds four slash-command groups, each with 25 working commands:
+
+- `utility`: calculator, text tools, timestamps, Discord ID dates, server/member information, color details and more.
+- `community`: welcome/goodbye setup, rules, introductions, suggestions, FAQs, birthdays and reputation.
+- `fun`: games, trivia, prompts, randomizers and chat challenges.
+- `servertools`: thread controls, scheduled events, channel topics, slowmode, announcements and polls.
+
+Use either the category form (for example, `!utility calculate "(12 + 8) * 3"`, `!community rules`, `!fun rps rock`, `!servertools thread-list`) or the direct command name when it is unique (for example, `!joke`, `!coinflip`, `!server-age`). Category shortcuts are `!ut`, `!cm`, `!fn`, and `!st`. The slash equivalents are grouped under `/utility`, `/community`, `/fun`, and `/servertools`.
+
+Welcome and goodbye messages use `{user}`, `{username}`, `{server}`, and `{memberCount}`. To enable automatic join/leave events, turn on **Server Members Intent** in the Discord Developer Portal and set `ENABLE_GUILD_MEMBERS_INTENT=true` on the bot's Render service. This is optional; the commands work without it.
