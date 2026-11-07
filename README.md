@@ -54,3 +54,15 @@ Set the OAuth redirect URI in the Discord Developer Portal to:
 - The website currently uses Express MemoryStore for sessions. Sessions are temporary and will be lost on restart; use a persistent session store before relying on long-lived production sessions.
 - Dashboard controls are served through a session-protected web proxy and a bot API protected by `DASHBOARD_API_SECRET`. Set that same secret privately on both Render services before enabling controls.
 - Render Free services can sleep when idle.
+
+## Server Premium access
+
+Only the bot owner listed in `OWNER_IDS` can grant or revoke Premium access. Grants are scoped to the current Discord server and saved in that server's database record.
+
+- `/license grant @member` or `!lic grant @member` — grant access.
+- `/license revoke @member` or `!lic revoke @member` — revoke access.
+- `/license access [@member]` — check access.
+- `/license profile` or `!brand` — set Uranium's actual per-server nickname, avatar, banner, and bio, plus the branded embed color.
+- Shortcuts: `!pgrant`, `!prevoke`, `!paccess`, and `!brand`. The `!lic` category shortcut also works, e.g. `!lic profile`.
+
+Discord supports a bot's own guild-member profile fields separately per server. The command uses Discord's current-member endpoint, so the avatar, banner, bio, and nickname apply only to the server where the command is run. Image links must be direct HTTPS links from Discord's CDN, and images must be 8 MB or smaller. The existing owner-only bot avatar command remains a separate global account setting.
