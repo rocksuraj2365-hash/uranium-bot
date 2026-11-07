@@ -1,4 +1,4 @@
-const { EmbedBuilder } = require('discord.js');
+const { EmbedBuilder, Routes } = require('discord.js');
 const { C, U, S } = require('../lib/cmd');
 const db = require('../lib/db');
 const { UserError, hexColor } = require('../lib/util');
@@ -9,6 +9,27 @@ const P = { premium: true };
 const card = (title, desc, user, icon = '💎') => ({
   title, desc, icon, color: GOLD, user,
 });
+
+
+async function imageData(url, field) {
+  if (!url) return null;
+  let parsed;
+  try { parsed = new URL(url); } catch { throw new UserError(`The ${field} URL is invalid.`); }
+  if (parsed.protocol !== 'https:' || !['cdn.discordapp.com', 'media.discordapp.net'].includes(parsed.hostname) || parsed.port || parsed.username || parsed.password) {
+    throw new UserError(`Use a direct HTTPS image URL from Discord's CDN for the ${field}.`, 'Upload the image to Discord first, then copy its media link.');
+  }
+  let response;
+  try { response = await fetch(parsed, { redirect: 'error', signal: AbortSignal.timeout(12000) }); }
+  catch { throw new UserError(`Could not download the ${field} image. Check the Discord CDN link and try again.`); }
+  if (!response.ok) throw new UserError(`Discord could not load the ${field} image (HTTP ${response.status}).`);
+  const type = String(response.headers.get('content-type') || '').split(';')[0].toLowerCase();
+  if (!['image/png', 'image/jpeg', 'image/gif', 'image/webp'].includes(type)) throw new UserError(`The ${field} link must point to a PNG, JPG, GIF, or WebP image.`);
+  const declared = Number(response.headers.get('content-length') || 0);
+  if (declared > 8 * 1024 * 1024) throw new UserError(`The ${field} image must be 8 MB or smaller.`);
+  const bytes = Buffer.from(await response.arrayBuffer());
+  if (!bytes.length || bytes.length > 8 * 1024 * 1024) throw new UserError(`The ${field} image must be between 1 byte and 8 MB.`);
+  return `data:${type};base64,${bytes.toString('base64')}`;
+}
 
 module.exports = {
   name: 'license',
@@ -32,22 +53,29 @@ module.exports = {
       return card('Premium access', `**${user.username}**: ${active ? '✅ Premium active' : '❌ No Premium'} in **${c.g.name}**.`, user, active ? '💎' : '🔒');
     }),
     C('profile', 'Customize Uranium branding for this server', [
-      S('name', 'Bot nickname / brand name', false, { max: 80 }),
-      S('bio', 'Server-specific profile bio', false, { max: 300 }),
+      S('name', 'Bot nickname / display name', false, { max: 32 }),
+      S('bio', 'Server-specific profile bio (max 190 characters)', false, { max: 190 }),
       S('color', 'Embed color, hex e.g. #8b5cf6', false, { max: 7 }),
       S('avatar', 'Profile-card avatar image URL', false, { max: 500 }),
       S('banner', 'Profile-card banner image URL', false, { max: 500 }),
     ], null, async (c) => {
       const d = db.g(c.g.id); const brand = d.config.branding ||= {};
+      const body = {};
       for (const key of ['name', 'bio', 'color', 'avatar', 'banner']) {
         const value = c.s(key); if (value == null || value === '') continue;
-        if (['avatar', 'banner'].includes(key) && !/^https:\/\//i.test(value)) throw new UserError(`The ${key} must be an HTTPS image URL.`);
         if (key === 'color') { try { brand.color = hexColor(value); } catch { throw new UserError('Color must be a 6-digit hex value, such as #8b5cf6.'); } }
         else brand[key] = value;
       }
-      if (brand.name) {
-        try { await c.me.setNickname(brand.name.slice(0, 32), 'Premium server branding'); }
-        catch { /* nickname permission is optional; profile card still uses the brand name */ }
+      if (c.s('name') != null) body.nick = c.s('name');
+      if (c.s('bio') != null) body.bio = c.s('bio');
+      if (c.s('avatar') != null) body.avatar = await imageData(c.s('avatar'), 'avatar');
+      if (c.s('banner') != null) body.banner = await imageData(c.s('banner'), 'banner');
+      if (Object.keys(body).length) {
+        try { await c.i.client.rest.patch(Routes.guildMember(c.g.id, '@me'), { body }); }
+        catch (error) {
+          const message = String(error?.rawError?.message || error?.message || '');
+          throw new UserError('Discord could not update this server profile.', message.slice(0, 180) || 'Check the image, bio length, and bot permissions.');
+        }
       }
       db.save();
       const e = new EmbedBuilder().setColor(brand.color || GOLD).setTitle(brand.name || c.g.name)
