@@ -40,10 +40,48 @@ async function help(c) {
 }
 async function memberOf(c, u) { return c.g.members.fetch(u.id).catch(() => null); }
 
+const reportCooldown = new Map();
+async function submitReport(c) {
+  const userId = c.i.user.id;
+  const now = Date.now();
+  const until = reportCooldown.get(userId) || 0;
+  if (until > now) throw new UserError('Please wait before sending another report.', `Try again in ${Math.ceil((until - now) / 60000)} minute(s).`);
+  const details = String(c.s('details') || '').trim();
+  if (details.length < 8) throw new UserError('Please add a little more detail.', 'A useful report needs at least 8 characters.');
+  const embed = new EmbedBuilder().setColor(0x8b5cf6).setTitle('Uranium user report')
+    .setDescription(trunc(details, 1000))
+    .addFields(
+      { name: 'Reporter', value: `${c.i.user.username} (\`${userId}\`)`, inline: true },
+      { name: 'Server', value: trunc(c.g.name, 100), inline: true },
+      { name: 'Channel', value: `#${trunc(c.ch?.name || 'unknown', 90)} (\`${c.ch?.id || 'unknown'}\`)`, inline: true }
+    ).setTimestamp();
+  const payload = { embeds: [embed], allowedMentions: { parse: [] } };
+  let delivered = false;
+  const reportChannelId = String(process.env.BOT_REPORT_CHANNEL_ID || '').trim();
+  if (reportChannelId) {
+    const channel = await c.i.client.channels.fetch(reportChannelId).catch(() => null);
+    if (channel?.isTextBased?.() && typeof channel.send === 'function') {
+      await channel.send(payload).then(() => { delivered = true; }).catch(() => {});
+    }
+  }
+  if (!delivered) {
+    const owners = [...new Set(String(process.env.OWNER_IDS || '').split(/[\\s,]+/).filter(id => /^\\d{17,20}$/.test(id)))];
+    for (const ownerId of owners) {
+      const owner = await c.i.client.users.fetch(ownerId).catch(() => null);
+      if (!owner) continue;
+      try { await owner.send(payload); delivered = true; } catch {}
+    }
+  }
+  if (!delivered) throw new UserError('Reporting is temporarily unavailable.', 'Please contact a server administrator or the bot operator directly.');
+  reportCooldown.set(userId, now + 5 * 60 * 1000);
+  return res('Report sent', 'Thanks for reporting this. The Uranium operator has been notified. Your report is sent to the configured support destination and is not posted publicly.', { icon: '📨', color: 0x8b5cf6 });
+}
+
 module.exports = {
   name: 'info', description: 'Info, help and bot status',
   commands: [
     C('help', 'Browse all Uranium commands', [], null, help, { custom: true }),
+    C('report', 'Privately report a Uranium issue or policy concern', [S('details', 'Describe the issue (8-1000 characters)', true, { max: 1000 })], null, submitReport),
     C('ping', 'Check the bot speed', [], null, async (c) => res('Pong!', null, { icon: '🏓', fields: [['Websocket', `${Math.round(c.i.client.ws.ping)} ms`, true], ['Response', `${Date.now() - c.i.createdTimestamp} ms`, true]] })),
     C('uptime', 'How long the bot has been running', [], null, async () => res('Uptime', `Online since ${ts(started)}`, { icon: '⏱️', fields: [['Running for', `${Math.floor(process.uptime() / 3600)}h ${Math.floor(process.uptime() / 60) % 60}m`]] })),
     C('about', 'About Uranium', [], null, async (c) => res('About Uranium', 'A modern Discord bot with moderation, utility, community, fun, music, AI and a web dashboard.', { icon: '☢️', links: [['Invite Uranium', inviteUrl(c.i.client.application.id)], ...(process.env.PUBLIC_BASE_URL ? [['Website', process.env.PUBLIC_BASE_URL]] : [])] })),
