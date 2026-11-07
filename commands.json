@@ -1,7 +1,7 @@
 {
   "version": 1,
   "generatedFrom": "commands/*.js",
-  "total": 347,
+  "total": 345,
   "categories": [
     {
       "name": "member",
@@ -159,13 +159,6 @@
           "description": "See how long a member's timeout has left",
           "slash": "/member timeout-check",
           "prefix": "!member timeout-check",
-          "access": "Available subject to command permissions"
-        },
-        {
-          "name": "dm-user",
-          "description": "Send an official mod message to a member's DMs",
-          "slash": "/member dm-user",
-          "prefix": "!member dm-user",
           "access": "Available subject to command permissions"
         },
         {
@@ -1612,13 +1605,6 @@
           "description": "Premium: make the bot leave a server",
           "slash": "/premium leave",
           "prefix": "!premium leave",
-          "access": "Bot owner only"
-        },
-        {
-          "name": "broadcast",
-          "description": "Premium: send an announcement to every server",
-          "slash": "/premium broadcast",
-          "prefix": "!premium broadcast",
           "access": "Bot owner only"
         },
         {
