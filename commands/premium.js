@@ -13,7 +13,7 @@ const bar = (p, n = 10) => '▰'.repeat(Math.round(p * n)) + '▱'.repeat(n - Ma
 const polls = new Map();
 const snipes = new Map();
 const O = { owner: true };
-const P = { premium: true };
+const PREMIUM_ACCESS = { premium: true };
 const btn = (id, label, emoji, style = ButtonStyle.Secondary, off = false) => new ButtonBuilder().setCustomId(id).setLabel(label).setEmoji(emoji).setStyle(style).setDisabled(off);
 const goldEmbed = (t, d) => new EmbedBuilder().setColor(GOLD).setTitle(t).setDescription(d || null).setFooter({ text: `Uranium Premium` }).setTimestamp();
 
@@ -209,8 +209,8 @@ module.exports = {
       if (!/^https?:\/\//i.test(url)) throw new UserError('Give an image link or a custom emoji', 'Example: https://.../image.png');
       const e = await c.g.emojis.create({ attachment: url, name: c.s('name').replace(/\W/g, '_'), reason: c.audit() });
       return own('Emoji added', `${e} \`:${e.name}:\``, { icon: '😀', undo: { label: 'Emoji deleted', fn: () => e.delete() } });
-    }, P),
-    C('embed-builder', 'Premium: build and send a custom embed with buttons', [CH('channel', 'Where to send (default: here)')], null, builder, { ...P, custom: true }),
+    }, PREMIUM_ACCESS),
+    C('embed-builder', 'Premium: build and send a custom embed with buttons', [CH('channel', 'Where to send (default: here)')], null, builder, { ...PREMIUM_ACCESS, custom: true }),
     C('poll', 'Premium: live poll with buttons', [S('question', 'Poll question', true, { max: 200 }), S('options', 'Options separated by | or commas (2-5)', true, { max: 400 })], null, async (c) => {
       const opts = c.s('options').split(/[|,]/).map((x) => x.trim()).filter(Boolean).slice(0, 5); if (opts.length < 2) throw new UserError('Give at least 2 options', 'Example: yes | no | maybe');
       const id = Date.now().toString(36); polls.set(id, { q: c.s('question'), opts, votes: new Map(), by: c.i.user.id });
