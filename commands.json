@@ -1577,175 +1577,175 @@
     },
     {
       "name": "premium",
-      "description": "Owner-managed premium bot controls and community features.",
+      "description": "Premium and owner-managed server features.",
       "commands": [
         {
           "name": "noprefix",
           "description": "Premium: use commands without any prefix",
           "slash": "/premium noprefix",
           "prefix": "!premium noprefix",
-          "access": "Bot owner only"
+          "access": "Restricted: Premium or bot-owner access"
         },
         {
           "name": "servers",
           "description": "Premium: list all servers the bot is in",
           "slash": "/premium servers",
           "prefix": "!premium servers",
-          "access": "Bot owner only"
+          "access": "Restricted: Premium or bot-owner access"
         },
         {
           "name": "server-info",
           "description": "Premium: details of a server by ID",
           "slash": "/premium server-info",
           "prefix": "!premium server-info",
-          "access": "Bot owner only"
+          "access": "Restricted: Premium or bot-owner access"
         },
         {
           "name": "leave",
           "description": "Premium: make the bot leave a server",
           "slash": "/premium leave",
           "prefix": "!premium leave",
-          "access": "Bot owner only"
+          "access": "Restricted: Premium or bot-owner access"
         },
         {
           "name": "gban",
           "description": "Premium: ban a user in every server",
           "slash": "/premium gban",
           "prefix": "!premium gban",
-          "access": "Bot owner only"
+          "access": "Restricted: Premium or bot-owner access"
         },
         {
           "name": "ungban",
           "description": "Premium: unban a user in every server",
           "slash": "/premium ungban",
           "prefix": "!premium ungban",
-          "access": "Bot owner only"
+          "access": "Restricted: Premium or bot-owner access"
         },
         {
           "name": "blacklist",
           "description": "Premium: block a user from using the bot",
           "slash": "/premium blacklist",
           "prefix": "!premium blacklist",
-          "access": "Bot owner only"
+          "access": "Restricted: Premium or bot-owner access"
         },
         {
           "name": "unblacklist",
           "description": "Premium: allow a blocked user again",
           "slash": "/premium unblacklist",
           "prefix": "!premium unblacklist",
-          "access": "Bot owner only"
+          "access": "Restricted: Premium or bot-owner access"
         },
         {
           "name": "status",
           "description": "Premium: change what the bot is doing",
           "slash": "/premium status",
           "prefix": "!premium status",
-          "access": "Bot owner only"
+          "access": "Restricted: Premium or bot-owner access"
         },
         {
           "name": "bot-avatar",
           "description": "Premium: change the bot profile picture",
           "slash": "/premium bot-avatar",
           "prefix": "!premium bot-avatar",
-          "access": "Bot owner only"
+          "access": "Restricted: Premium or bot-owner access"
         },
         {
           "name": "restart",
           "description": "Premium: restart the bot",
           "slash": "/premium restart",
           "prefix": "!premium restart",
-          "access": "Bot owner only"
+          "access": "Restricted: Premium or bot-owner access"
         },
         {
           "name": "live-stats",
           "description": "Premium: live animated bot statistics",
           "slash": "/premium live-stats",
           "prefix": "!premium live-stats",
-          "access": "Bot owner only"
+          "access": "Restricted: Premium or bot-owner access"
         },
         {
           "name": "emoji-add",
           "description": "Premium: add an emoji to this server",
           "slash": "/premium emoji-add",
           "prefix": "!premium emoji-add",
-          "access": "Bot owner only"
+          "access": "Restricted: Premium or bot-owner access"
         },
         {
           "name": "embed-builder",
           "description": "Premium: build and send a custom embed with buttons",
           "slash": "/premium embed-builder",
           "prefix": "!premium embed-builder",
-          "access": "Bot owner only"
+          "access": "Restricted: Premium or bot-owner access"
         },
         {
           "name": "poll",
           "description": "Premium: live poll with buttons",
           "slash": "/premium poll",
           "prefix": "!premium poll",
-          "access": "Bot owner only"
+          "access": "Restricted: Premium or bot-owner access"
         },
         {
           "name": "giveaway",
           "description": "Premium: giveaway with an enter button",
           "slash": "/premium giveaway",
           "prefix": "!premium giveaway",
-          "access": "Bot owner only"
+          "access": "Restricted: Premium or bot-owner access"
         },
         {
           "name": "role-panel",
           "description": "Premium: button panel to pick roles",
           "slash": "/premium role-panel",
           "prefix": "!premium role-panel",
-          "access": "Bot owner only"
+          "access": "Restricted: Premium or bot-owner access"
         },
         {
           "name": "ticket-panel",
           "description": "Premium: support ticket panel with a button",
           "slash": "/premium ticket-panel",
           "prefix": "!premium ticket-panel",
-          "access": "Bot owner only"
+          "access": "Restricted: Premium or bot-owner access"
         },
         {
           "name": "backup",
           "description": "Premium: download this server layout as a file",
           "slash": "/premium backup",
           "prefix": "!premium backup",
-          "access": "Bot owner only"
+          "access": "Restricted: Premium or bot-owner access"
         },
         {
           "name": "export-cases",
           "description": "Premium: download cases, warnings and notes as a file",
           "slash": "/premium export-cases",
           "prefix": "!premium export-cases",
-          "access": "Bot owner only"
+          "access": "Restricted: Premium or bot-owner access"
         },
         {
           "name": "lockdown-timer",
           "description": "Premium: lock a channel and unlock it automatically",
           "slash": "/premium lockdown-timer",
           "prefix": "!premium lockdown-timer",
-          "access": "Bot owner only"
+          "access": "Restricted: Premium or bot-owner access"
         },
         {
           "name": "history",
           "description": "Premium: full moderation history of a user",
           "slash": "/premium history",
           "prefix": "!premium history",
-          "access": "Bot owner only"
+          "access": "Restricted: Premium or bot-owner access"
         },
         {
           "name": "leaderboard",
           "description": "Premium: top moderators by actions",
           "slash": "/premium leaderboard",
           "prefix": "!premium leaderboard",
-          "access": "Bot owner only"
+          "access": "Restricted: Premium or bot-owner access"
         },
         {
           "name": "snipe",
           "description": "Premium: see the last deleted message here",
           "slash": "/premium snipe",
           "prefix": "!premium snipe",
-          "access": "Bot owner only"
+          "access": "Restricted: Premium or bot-owner access"
         }
       ]
     },
