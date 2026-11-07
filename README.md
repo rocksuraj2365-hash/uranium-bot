@@ -22,9 +22,6 @@ Both services are configured as Render Web Services. Keep their environment vari
 - `GITHUB_TOKEN` (fine-grained PAT; grant only Contents read/write and Metadata read on the two allowlisted Uranium repositories)
 - `RENDER_API_KEY`
 
-### uranium-bot
-- `DASHBOARD_API_SECRET` (same random secret as the web service)
-
 ### uranium-web
 - `DISCORD_CLIENT_ID`
 - `DISCORD_CLIENT_SECRET`
