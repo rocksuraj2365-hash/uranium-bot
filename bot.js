@@ -180,7 +180,7 @@ async function execute(i, cat, def) {
   await i.deferReply();
   try {
     if (def.owner && !isOwner(i.user.id)) throw new UserError('💎 This is a **Premium** command and it is only for the bot owner.', 'Normal moderation commands are in the other groups. Use the help menu.');
-    if (def.premium && !premium.hasAccess(i.guildId, i.user.id)) throw new UserError('💎 This server feature requires Premium access.', 'Only the bot owner can grant it with `/premium grant` in this server.');
+    if (def.premium && !premium.hasAccess(i.guildId, i.user.id)) throw new UserError('💎 This server feature requires Premium access.', 'Only the bot owner can grant it with `/license grant` or `!premium add @member`.');
     const me = await i.guild.members.fetchMe();
     if (def.perm) {
       if (!i.memberPermissions.has(def.perm)) throw new UserError(`You need the **${permName(def.perm)}** permission to use \`${label}\`.`, 'Ask a server admin to give you that permission or a role that has it.');
@@ -233,7 +233,7 @@ async function onMessage(msg) {
     if (!hit) { if (mention) return aiGo(msg, body, owner, true); if (npAi) return aiGo(msg, body, owner); return; }
     if (blacklisted(msg.author.id) && !owner) return;
     if (hit.def.owner && !owner) return;
-    if (hit.def.premium && !premium.hasAccess(msg.guild.id, msg.author.id)) return msg.reply({ embeds: [ui.errorEmbed('💎 This server feature requires Premium access.', 'Only the bot owner can grant it with `!vip grant @member` in this server.')], allowedMentions: { repliedUser: false } });
+    if (hit.def.premium && !premium.hasAccess(msg.guild.id, msg.author.id)) return msg.reply({ embeds: [ui.errorEmbed('💎 This server feature requires Premium access.', 'Only the bot owner can grant it with `!premium add @member`.')], allowedMentions: { repliedUser: false } });
     const member = msg.member || await msg.guild.members.fetch(msg.author.id).catch(() => null); if (!member) return;
     const vals = {}; const fi = prefix.fakeInteraction(msg, member, hit.def, vals, client); fi.srcId = msg.id;
     const alias = prefix.shortOf(hit.cat.name, hit.def.name);

@@ -13,7 +13,7 @@ const bar = (p, n = 10) => '▰'.repeat(Math.round(p * n)) + '▱'.repeat(n - Ma
 const polls = new Map();
 const snipes = new Map();
 const O = { owner: true };
-const P = { premium: true };
+const PREMIUM_ACCESS = { premium: true };
 const btn = (id, label, emoji, style = ButtonStyle.Secondary, off = false) => new ButtonBuilder().setCustomId(id).setLabel(label).setEmoji(emoji).setStyle(style).setDisabled(off);
 const goldEmbed = (t, d) => new EmbedBuilder().setColor(GOLD).setTitle(t).setDescription(d || null).setFooter({ text: `Uranium Premium` }).setTimestamp();
 
@@ -209,57 +209,57 @@ module.exports = {
       if (!/^https?:\/\//i.test(url)) throw new UserError('Give an image link or a custom emoji', 'Example: https://.../image.png');
       const e = await c.g.emojis.create({ attachment: url, name: c.s('name').replace(/\W/g, '_'), reason: c.audit() });
       return own('Emoji added', `${e} \`:${e.name}:\``, { icon: '😀', undo: { label: 'Emoji deleted', fn: () => e.delete() } });
-    }, P),
-    C('embed-builder', 'Premium: build and send a custom embed with buttons', [CH('channel', 'Where to send (default: here)')], null, builder, { ...P, custom: true }),
+    }, PREMIUM_ACCESS),
+    C('embed-builder', 'Premium: build and send a custom embed with buttons', [CH('channel', 'Where to send (default: here)')], null, builder, { ...PREMIUM_ACCESS, custom: true }),
     C('poll', 'Premium: live poll with buttons', [S('question', 'Poll question', true, { max: 200 }), S('options', 'Options separated by | or commas (2-5)', true, { max: 400 })], null, async (c) => {
       const opts = c.s('options').split(/[|,]/).map((x) => x.trim()).filter(Boolean).slice(0, 5); if (opts.length < 2) throw new UserError('Give at least 2 options', 'Example: yes | no | maybe');
       const id = Date.now().toString(36); polls.set(id, { q: c.s('question'), opts, votes: new Map(), by: c.i.user.id });
       const m = await c.ch.send(pollView(id)); return own('Poll posted', 'Members can vote with the buttons.', { icon: '📊', links: [['Open poll', m.url]] });
-    }, P),
+    }, PREMIUM_ACCESS),
     C('giveaway', 'Premium: giveaway with an enter button', [S('duration', 'e.g. 1h, 1d', true, { max: 20 }), I('winners', 'Winners (1-10)', false, 1, 10), S('prize', 'Prize', true, { max: 200 })], null, async (c) => {
       const ms = parseDuration(c.s('duration')); const end = Date.now() + ms; const g = { prize: c.s('prize'), winners: c.n('winners') || 1, end, entrants: [], channelId: c.ch.id, ended: false, hostName: c.i.user.username };
       const m = await c.ch.send(gwView(g)); const d = db.g(c.g.id); (d.giveaways ||= {})[m.id] = g; db.save();
       db.schedule({ type: 'giveaway', at: end, guildId: c.g.id, channelId: c.ch.id, messageId: m.id });
       return own('Giveaway started', `Ends ${ts(end)}.`, { icon: '🎉', links: [['Open giveaway', m.url]] });
-    }, P),
+    }, PREMIUM_ACCESS),
     C('role-panel', 'Premium: button panel to pick roles', [S('title', 'Panel title', true, { max: 100 }), R('role1', 'Role 1'), R('role2', 'Role 2', false), R('role3', 'Role 3', false), R('role4', 'Role 4', false), R('role5', 'Role 5', false)], null, async (c) => {
       const roles = ['role1', 'role2', 'role3', 'role4', 'role5'].map((n) => c.r(n)).filter(Boolean);
       const e = goldEmbed(`🏷️ ${c.s('title')}`, roles.map((r) => `• <@&${r.id}>`).join('\n') + '\n\nPress a button to get or remove a role.');
       const m = await c.ch.send({ embeds: [e], components: [new ActionRowBuilder().addComponents(roles.map((r) => btn(`rp:${r.id}`, trunc(r.name, 70), '🏷️')))] });
       return own('Role panel posted', 'Members can pick roles with the buttons.', { icon: '🏷️', links: [['Open panel', m.url]] });
-    }, P),
+    }, PREMIUM_ACCESS),
     C('ticket-panel', 'Premium: support ticket panel with a button', [CH('channel', 'Where to post (default: here)', false, [CT.GuildText]), CH('category', 'Category for tickets', false, [CT.GuildCategory]), R('support', 'Support role to add', false)], null, async (c) => {
       const ch = c.c('channel') || c.ch; const m = await ch.send({ embeds: [goldEmbed('🎫 Support tickets', 'Need help? Press the button to open a private ticket.')], components: [new ActionRowBuilder().addComponents(btn(`tk:open:${c.r('support')?.id || 0}:${c.c('category')?.id || 0}`, 'Open ticket', '🎫', ButtonStyle.Success))] });
       return own('Ticket panel posted', `Posted in <#${ch.id}>.`, { icon: '🎫', links: [['Open panel', m.url]] });
-    }, P),
+    }, PREMIUM_ACCESS),
     C('backup', 'Premium: download this server layout as a file', [], null, async (c) => {
       await c.g.channels.fetch();
       const data = { name: c.g.name, at: new Date().toISOString(), roles: [...c.g.roles.cache.values()].sort((a, b) => b.position - a.position).map((r) => ({ name: r.name, color: r.hexColor, perms: r.permissions.toArray(), hoist: r.hoist, mentionable: r.mentionable, position: r.position })), channels: [...c.g.channels.cache.values()].map((x) => ({ name: x.name, type: CT[x.type], parent: x.parent?.name || null, topic: x.topic || null, nsfw: !!x.nsfw, position: x.position })) };
       return own('Backup ready', `Saved **${data.roles.length}** roles and **${data.channels.length}** channels.`, { icon: '🗄️', files: [{ name: 'uranium-backup.json', data: Buffer.from(JSON.stringify(data, null, 2)) }] });
-    }, P),
+    }, PREMIUM_ACCESS),
     C('export-cases', 'Premium: download cases, warnings and notes as a file', [], null, async (c) => {
       const d = db.g(c.g.id); const data = { cases: d.cases, warns: d.warns, notes: d.notes, watch: d.watch };
       return own('Export ready', `**${d.cases.length}** cases, **${d.warns.length}** warnings, **${d.notes.length}** notes.`, { icon: '📤', files: [{ name: 'uranium-cases.json', data: Buffer.from(JSON.stringify(data, null, 2)) }] });
-    }, P),
+    }, PREMIUM_ACCESS),
     C('lockdown-timer', 'Premium: lock a channel and unlock it automatically', [S('duration', 'e.g. 10m, 1h', true, { max: 20 }), CH('channel', 'Channel (default: this one)', false, [CT.GuildText])], null, async (c) => {
       const ms = parseDuration(c.s('duration')); const ch = c.c('channel') || c.ch; if (!ch.permissionOverwrites) throw new UserError('That channel cannot be locked');
       await ch.permissionOverwrites.edit(c.g.roles.everyone, { SendMessages: false }, { reason: c.audit() });
       db.schedule({ type: 'unlock', at: Date.now() + ms, guildId: c.g.id, channelId: ch.id });
       return own('Timed lockdown', `<#${ch.id}> is locked and opens ${ts(Date.now() + ms)}.`, { icon: '⏳', undo: { label: 'Channel unlocked', fn: () => ch.permissionOverwrites.edit(c.g.roles.everyone, { SendMessages: null }) } });
-    }, P),
+    }, PREMIUM_ACCESS),
     C('history', 'Premium: full moderation history of a user', [U()], null, async (c) => {
       const u = c.u('user'); const d = db.g(c.g.id);
       const rows = [...d.cases.filter((x) => x.userId === u.id).map((x) => ({ at: x.at, t: `🔨 ${x.type}`, r: x.reason })), ...d.warns.filter((x) => x.userId === u.id).map((x) => ({ at: x.at, t: '⚠️ warning', r: x.reason })), ...d.notes.filter((x) => x.userId === u.id).map((x) => ({ at: x.at, t: '📝 note', r: x.text }))].sort((a, b) => b.at - a.at);
       return own(`History of ${u.username}`, rows.length ? rows.slice(0, 15).map((x) => `${ts(x.at)} • **${x.t}** • ${trunc(x.r || '—', 80)}`).join('\n') : '_Clean record._', { icon: '📜', user: u, fields: [['Total entries', String(rows.length), true]] });
-    }, P),
+    }, PREMIUM_ACCESS),
     C('leaderboard', 'Premium: top moderators by actions', [], null, async (c) => {
       const by = {}; for (const x of db.g(c.g.id).cases) by[x.modId] = (by[x.modId] || 0) + 1;
       const top = Object.entries(by).sort((a, b) => b[1] - a[1]).slice(0, 10); const mx = top[0]?.[1] || 1;
       return own('Moderator leaderboard', top.length ? top.map(([id, n], k) => `${['🥇', '🥈', '🥉'][k] || `**${k + 1}.**`} <@${id}> • **${n}**\n\`${bar(n / mx)}\``).join('\n') : '_No actions yet._', { icon: '🏆' });
-    }, P),
+    }, PREMIUM_ACCESS),
     C('snipe', 'Premium: see the last deleted message here', [], null, async (c) => {
       const s = snipes.get(c.ch.id); if (!s) throw new UserError('Nothing to snipe here', 'No deleted message was seen in this channel since the bot started.');
       return own('Sniped message', trunc(s.content || '(no text)', 1500), { icon: '🎯', fields: [['Author', `<@${s.authorId}> (${s.author})`, true], ['Deleted', ts(s.at), true]] });
-    }, P),
+    }, PREMIUM_ACCESS),
   ],
 };

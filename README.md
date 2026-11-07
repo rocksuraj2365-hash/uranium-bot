@@ -59,13 +59,18 @@ Set the OAuth redirect URI in the Discord Developer Portal to:
 
 Only the bot owner listed in `OWNER_IDS` can grant or revoke Premium access. Grants are scoped to the current Discord server and saved in that server's database record.
 
-- `/license grant @member` or `!lic grant @member` — grant access.
-- `/license revoke @member` or `!lic revoke @member` — revoke access.
-- `/license access [@member]` — check access.
+- `!premium add @member` — grant Premium access in this server (bot owner only).
+- `!premium remove @member` — revoke Premium access (bot owner only).
+- `!premium check [@member]` — check a member's Premium status.
+- Slash equivalents remain `/license grant`, `/license revoke`, and `/license access`.
 - `/license profile` or `!brand` — set Uranium's actual per-server nickname, avatar, banner, and bio, plus the branded embed color.
-- Shortcuts: `!pgrant`, `!prevoke`, `!paccess`, and `!brand`. The `!lic` category shortcut also works, e.g. `!lic profile`.
+- Profile shortcut: `!premium profile` or `!brand`. The `!lic profile` alias remains available.
 
 Discord supports a bot's own guild-member profile fields separately per server. The command uses Discord's current-member endpoint, so the avatar, banner, bio, and nickname apply only to the server where the command is run. Image links must be direct HTTPS links from Discord's CDN, and images must be 8 MB or smaller. The existing owner-only bot avatar command remains a separate global account setting.
+
+## Prefix customization (free for every server)
+
+Changing Uranium's prefix is not a Premium feature. A server member with Manage Server permission can use `!prefix ?` (or another 1-3 character prefix) or change it in the dashboard. No Premium grant is required.
 
 ## Important: database persistence on Render Free
 
