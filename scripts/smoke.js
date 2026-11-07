@@ -3,6 +3,7 @@ const prefix = require('../lib/prefix');
 const license = { name: 'license', commands: ['grant', 'revoke', 'access', 'profile'].map((name) => ({ name })) };
 license.map = new Map(license.commands.map((command) => [command.name, command]));
 const newCats = ['utility', 'community', 'fun', 'servertools'].map((name) => require('../commands/' + name));
+for (const cat of newCats) cat.map = new Map(cat.commands.map((command) => [command.name, command]));
 for (const cat of newCats) {
   assert.equal(cat.commands.length, 25, cat.name + ' must contain exactly 25 new commands');
   assert.equal(new Set(cat.commands.map((x) => x.name)).size, 25, cat.name + ' command names must be unique');
