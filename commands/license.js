@@ -48,7 +48,7 @@ module.exports = {
       const user = c.u('user'); const d = db.g(c.g.id); d.premiumUsers ||= [];
       if (d.premiumUsers.includes(user.id)) throw new UserError(`**${user.username}** already has Premium in this server.`);
       d.premiumUsers.push(user.id); db.save();
-      return { ...card('Premium granted', `**${user.username}** can now use server Premium features in **${c.g.name}**. Use `/license revoke` to remove access.`, user, '✅'), fields: [['Server', c.g.name], ['Premium members', String(d.premiumUsers.length), true]] };
+      return { ...card('Premium granted', `**${user.username}** can now use server Premium features in **${c.g.name}**. Use the /license revoke command to remove access.`, user, '✅'), fields: [['Server', c.g.name], ['Premium members', String(d.premiumUsers.length), true]] };
     }, O),
     C('revoke', 'Owner: revoke Premium access from a member in this server', [U(true, 'user', 'Member to revoke Premium from')], null, async (c) => {
       const user = c.u('user'); const d = db.g(c.g.id); d.premiumUsers ||= [];
