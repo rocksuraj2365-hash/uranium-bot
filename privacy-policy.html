@@ -35,7 +35,7 @@
 <li>Uranium receives message content to run prefix and mention commands, and &mdash; in a channel an administrator has set as the AI chat channel &mdash; to answer messages with AI.</li>
 <li>If a message is deleted, the bot keeps the last deleted message for that channel in memory only (its text, author username and ID, and the time) so the owner-only snipe command can show it. This is held in a running-process map, not written to the data file.</li>
 <li>Poll votes are also held in memory only (which option each user ID chose). Giveaway entrants, by contrast, are saved in the data file as described above.</li>
-<li>When someone uses <code>/info report</code>, the report text, reporter's Discord ID and username, server name and channel details are sent to the configured support channel (<code>BOT_REPORT_CHANNEL_ID</code>) or, if no channel is configured, to the bot owner through Discord DMs. Uranium does not write report content to its JSON database.</li>
+<li>When someone uses <code>/support report</code>, the report text, reporter's Discord ID and username, server name and channel details are sent to the configured support channel (<code>BOT_REPORT_CHANNEL_ID</code>) or, if no channel is configured, to the bot owner through Discord DMs. Uranium does not write report content to its JSON database.</li>
 <li>Message content is not written to the moderation data file merely because a message was sent. It can be saved if a moderator puts it in a reason or note, or if it becomes part of another record described here.</li>
 </ul></section>
 
