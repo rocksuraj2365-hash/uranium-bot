@@ -27,6 +27,8 @@ Both services are configured as Render Web Services. Keep their environment vari
 - `DISCORD_CLIENT_SECRET`
 - `SESSION_SECRET`
 - `PUBLIC_BASE_URL`
+- `BOT_CONTROL_URL` (set to `https://uranium-bot.onrender.com`)
+- `DASHBOARD_API_SECRET` (same random secret as the bot service)
 
 Never commit secrets or paste them into Discord or chat. Add them privately in the matching Render service.
 
@@ -50,4 +52,5 @@ Set the OAuth redirect URI in the Discord Developer Portal to:
 ## Notes
 
 - The website currently uses Express MemoryStore for sessions. Sessions are temporary and will be lost on restart; use a persistent session store before relying on long-lived production sessions.
+- Dashboard controls are served through a session-protected web proxy and a bot API protected by `DASHBOARD_API_SECRET`. Set that same secret privately on both Render services before enabling controls.
 - Render Free services can sleep when idle.

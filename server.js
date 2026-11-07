@@ -10,6 +10,7 @@ const DISCORD_API = 'https://discord.com/api/v10';
 
 const app = express();
 app.set('trust proxy', 1);
+app.use(express.json({ limit: '12kb' }));
 
 // NOTE: MemoryStore is only OK for a starter. Add a persistent store before production.
 app.use(
@@ -120,6 +121,33 @@ function requireAuth(req, res, next) {
 
 app.get('/api/me', requireAuth, (req, res) => res.json(req.session.user));
 app.get('/api/guilds', requireAuth, (req, res) => res.json(req.session.guilds || []));
+
+function manageableGuild(req, res, next) {
+  const guild = (req.session.guilds || []).find(g => g.id === String(req.params.guildId) && g.manageable);
+  if (!guild) return res.status(403).json({ error: 'You do not have Manage Server access to this guild.' });
+  next();
+}
+async function forwardBotControl(req, res) {
+  const base = String(process.env.BOT_CONTROL_URL || '').replace(/\/$/, '');
+  const secret = process.env.DASHBOARD_API_SECRET;
+  if (!base || !secret) return res.status(503).json({ error: 'Dashboard-to-bot connection is not configured yet.' });
+  const controller = new AbortController(); const timeout = setTimeout(() => controller.abort(), 90000);
+  try {
+    const response = await fetch(base + '/control/guild/' + encodeURIComponent(req.params.guildId), {
+      method: req.method, headers: { 'x-dashboard-secret': secret, 'x-discord-user-id': req.session.user.id, ...(req.method === 'POST' ? { 'content-type': 'application/json' } : {}) },
+      ...(req.method === 'POST' ? { body: JSON.stringify(req.body || {}) } : {}), signal: controller.signal
+    });
+    const data = await response.json().catch(() => ({ error: 'The bot returned an unreadable response.' }));
+    return res.status(response.status).json(data);
+  } catch (error) {
+    return res.status(502).json({ error: error.name === 'AbortError' ? 'The bot took too long to wake up. Please retry.' : 'Could not connect to the bot service.' });
+  } finally { clearTimeout(timeout); }
+}
+app.get('/api/guilds/:guildId/control', requireAuth, manageableGuild, forwardBotControl);
+app.post('/api/guilds/:guildId/control', requireAuth, manageableGuild, (req, res, next) => {
+  if (req.get('origin') !== BASE) return res.status(403).json({ error: 'Request origin check failed.' });
+  next();
+}, forwardBotControl);
 
 app.get('/logout', (req, res) => req.session.destroy(() => res.redirect('/')));
 

@@ -1,7 +1,7 @@
 (() => {
   const $ = (s, root=document) => root.querySelector(s);
   const $$ = (s, root=document) => [...root.querySelectorAll(s)];
-  const state = { user:null, guilds:[], filter:'manageable', query:'' };
+  const state = { user:null, guilds:[], filter:'manageable', query:'', selectedGuild:null, channels:[] };
   const commandGroups = [
     ['member','👥','Member tools','Manage member moderation, warnings, notes and actions.'],
     ['message','💬','Message tools','Message cleanup and channel conversation utilities.'],
@@ -30,7 +30,7 @@
     card.innerHTML='<div class="server-card-top">'+avatarNode+'<span class="permission '+(canManage?'permission-good':'permission-muted')+'">'+(canManage?'✓ Manageable':'View only')+'</span></div>'+
       '<h3>'+escapeHTML(g.name)+'</h3><p class="server-id">ID · '+escapeHTML(g.id)+'</p>'+
       '<div class="server-card-actions">'+
-      (canManage?'<a class="button button-primary button-small" href="https://discord.com/channels/'+encodeURIComponent(g.id)+'" target="_blank" rel="noopener">Open server ↗</a>':'<span class="button button-disabled button-small">No manage access</span>')+
+      (canManage?'<button class="button button-primary button-small" type="button" data-configure="'+escapeHTML(g.id)+'">⚙ Configure</button><a class="button button-secondary button-small" href="https://discord.com/channels/'+encodeURIComponent(g.id)+'" target="_blank" rel="noopener">Open ↗</a>':'<span class="button button-disabled button-small">No manage access</span>')+
       '<button class="copy-btn" type="button" data-copy="'+escapeHTML(g.id)+'" aria-label="Copy server ID" title="Copy server ID">▣</button></div>';
     return card;
   }
@@ -85,7 +85,32 @@
     } catch(e) { toast(e.message||'Something went wrong.'); }
     finally { $('#refreshBtn').classList.remove('spinning'); }
   }
+  async function configureGuild(id) {
+    const guild=state.guilds.find(g=>g.id===id); if(!guild || !guild.manageable) return;
+    state.selectedGuild=guild; $('#guildSettings').hidden=false; $('#settingsTitle').textContent=guild.name+' settings';
+    $('#settingsStatus').textContent='Connecting to Uranium bot… this may take a little while if the service is waking up.';
+    $('#settingsFeedback').textContent=''; $('#saveSettings').disabled=true; go('servers');
+    try {
+      const response=await fetch('/api/guilds/'+encodeURIComponent(id)+'/control',{credentials:'same-origin'}); const data=await response.json();
+      if(!response.ok) throw new Error(data.error||'Could not load server settings.');
+      state.channels=data.channels||[];
+      const fill=(selector,label,selected)=>{const el=$(selector);el.replaceChildren(new Option(label,''));state.channels.forEach(ch=>el.add(new Option('# '+ch.name,ch.id)));el.value=selected||'';};
+      $('#settingPrefix').value=data.settings.prefix||'!'; $('#settingAI').checked=data.settings.ai!==false;
+      fill('#settingAIChannel','No automatic AI channel',data.settings.aiChannel); fill('#settingModlog','Disabled',data.settings.modlog);
+      $('#settingsStatus').textContent='Connected. Changes apply to this server’s bot configuration.'; $('#saveSettings').disabled=false;
+    } catch(error) { $('#settingsStatus').textContent=error.message||'Could not load settings.'; }
+  }
+  async function saveSettings() {
+    if(!state.selectedGuild) return; const button=$('#saveSettings'); button.disabled=true; button.textContent='Saving…'; $('#settingsFeedback').textContent='';
+    try {
+      const response=await fetch('/api/guilds/'+encodeURIComponent(state.selectedGuild.id)+'/control',{method:'POST',credentials:'same-origin',headers:{'content-type':'application/json'},body:JSON.stringify({prefix:$('#settingPrefix').value,ai:$('#settingAI').checked,aiChannel:$('#settingAIChannel').value,modlog:$('#settingModlog').value})});
+      const data=await response.json(); if(!response.ok) throw new Error(data.error||'Could not save settings.');
+      $('#settingsFeedback').textContent='Saved ✓'; $('#settingsStatus').textContent='Settings saved successfully.'; toast('Server settings saved');
+    } catch(error) { $('#settingsFeedback').textContent=error.message||'Save failed.'; }
+    finally { button.disabled=false; button.textContent='Save server settings'; }
+  }
   document.addEventListener('click',e=>{
+    const config=e.target.closest('[data-configure]');if(config){configureGuild(config.dataset.configure);return;}
     const nav=e.target.closest('[data-view]');if(nav){go(nav.dataset.view);return;}
     const jump=e.target.closest('[data-go]');if(jump){go(jump.dataset.go);return;}
     const filter=e.target.closest('[data-filter]');if(filter){state.filter=filter.dataset.filter;$$('[data-filter]').forEach(x=>x.classList.toggle('active',x===filter));renderServers();return;}
@@ -94,6 +119,8 @@
   $('#serverSearch').addEventListener('input',e=>{state.query=e.target.value;renderServers();});
   $('#commandSearch').addEventListener('input',e=>renderCommands(e.target.value));
   $('#refreshBtn').addEventListener('click',load);
+  $('#saveSettings').addEventListener('click',saveSettings);
+  $('#closeSettings').addEventListener('click',()=>{$('#guildSettings').hidden=true;state.selectedGuild=null;});
   $('#menuBtn').addEventListener('click',()=>$('#sidebar').classList.toggle('open'));
   renderCommands();load();
 })();
