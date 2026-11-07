@@ -62,7 +62,7 @@ Only the bot owner listed in `OWNER_IDS` can grant or revoke Premium access. Gra
 - `/license grant @member` or `!lic grant @member` — grant access.
 - `/license revoke @member` or `!lic revoke @member` — revoke access.
 - `/license access [@member]` — check access.
-- `/premium profile` or `!brand` — set the server's Uranium nickname, profile-card bio, embed color, avatar image, and banner image.
-- Shortcuts: `!pgrant`, `!prevoke`, `!paccess`, and `!brand`. The `!vip` category shortcut also works, e.g. `!lic profile`.
+- `/license profile` or `!brand` — set Uranium's actual per-server nickname, avatar, banner, and bio, plus the branded embed color.
+- Shortcuts: `!pgrant`, `!prevoke`, `!paccess`, and `!brand`. The `!lic` category shortcut also works, e.g. `!lic profile`.
 
-Discord bot account avatars, banners, and bios are account-wide, not independently configurable per server through the bot API. The Premium profile therefore displays server-specific avatar/banner/bio in a branded embed card; the bot nickname can be changed per server when its role permissions allow it. The existing owner-only bot avatar command remains global.
+Discord supports a bot's own guild-member profile fields separately per server. The command uses Discord's current-member endpoint, so the avatar, banner, bio, and nickname apply only to the server where the command is run. Image links must be direct HTTPS links from Discord's CDN, and images must be 8 MB or smaller. The existing owner-only bot avatar command remains a separate global account setting.
