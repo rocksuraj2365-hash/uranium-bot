@@ -1,4 +1,5 @@
 const http = require('http');
+const crypto = require('crypto');
 const { Client, GatewayIntentBits, Partials, REST, Routes, SlashCommandBuilder, EmbedBuilder, ActivityType } = require('discord.js');
 const db = require('./lib/db');
 const ui = require('./lib/ui');
@@ -18,7 +19,56 @@ const { DISCORD_BOT_TOKEN, DISCORD_CLIENT_ID, DEV_GUILD_ID, PORT } = process.env
 if (!DISCORD_BOT_TOKEN || !DISCORD_CLIENT_ID) { console.error('Missing DISCORD_BOT_TOKEN or DISCORD_CLIENT_ID'); process.exit(1); }
 
 let client = null, started = false, contentIntent = false;
-if (PORT) http.createServer((q, r) => { r.writeHead(200); r.end('Uranium is running. Ready: ' + started); }).listen(PORT, () => console.log('Health server on ' + PORT));
+const crypto = require('crypto');
+
+function safeEqual(a, b) {
+  const x = Buffer.from(String(a || '')), y = Buffer.from(String(b || ''));
+  return x.length === y.length && x.length > 0 && crypto.timingSafeEqual(x, y);
+}
+function sendJson(res, status, body) {
+  res.writeHead(status, { 'content-type': 'application/json; charset=utf-8', 'cache-control': 'no-store' });
+  res.end(JSON.stringify(body));
+}
+if (PORT) http.createServer(async (req, res) => {
+  const url = new URL(req.url, 'http://localhost');
+  if (req.method === 'GET' && url.pathname === '/health') return sendJson(res, 200, { status: 'ok', ready: started });
+  const match = /^\/control\/guild\/(\d{17,20})$/.exec(url.pathname);
+  if (!match || !['GET', 'POST'].includes(req.method)) return sendJson(res, 404, { error: 'Not found' });
+  const secret = process.env.DASHBOARD_API_SECRET;
+  if (!secret || !safeEqual(req.headers['x-dashboard-secret'], secret)) return sendJson(res, 401, { error: 'Unauthorized dashboard request' });
+  const userId = String(req.headers['x-discord-user-id'] || '');
+  if (!/^\d{17,20}$/.test(userId)) return sendJson(res, 401, { error: 'Invalid Discord user' });
+  if (!client || !started) return sendJson(res, 503, { error: 'Bot is still starting. Retry shortly.' });
+  try {
+    const guild = await client.guilds.fetch(match[1]);
+    const member = await guild.members.fetch(userId).catch(() => null);
+    if (!member || (!member.permissions.has('ManageGuild') && !member.permissions.has('Administrator'))) return sendJson(res, 403, { error: 'Manage Server permission is required.' });
+    const config = db.g(guild.id).config;
+    if (req.method === 'GET') {
+      await guild.channels.fetch().catch(() => {});
+      const channels = [...guild.channels.cache.values()].filter(ch => [0, 5].includes(ch.type)).sort((a,b) => a.rawPosition-b.rawPosition).map(ch => ({ id: ch.id, name: ch.name, type: ch.type }));
+      return sendJson(res, 200, { settings: { ai: config.ai !== false, prefix: config.prefix || '!', aiChannel: config.aiChannel || '', modlog: config.modlog || '' }, channels });
+    }
+    let raw = '';
+    for await (const chunk of req) { raw += chunk; if (raw.length > 12000) return sendJson(res, 413, { error: 'Request too large' }); }
+    const input = JSON.parse(raw || '{}');
+    const nextPrefix = String(input.prefix ?? config.prefix ?? '!');
+    if (!nextPrefix || nextPrefix.length > 3 || /[`\s]/.test(nextPrefix)) return sendJson(res, 400, { error: 'Prefix must be 1 to 3 characters with no spaces.' });
+    const selected = {};
+    for (const key of ['aiChannel', 'modlog']) {
+      const id = String(input[key] || '');
+      if (!id) { selected[key] = ''; continue; }
+      const channel = await guild.channels.fetch(id).catch(() => null);
+      if (!channel || ![0, 5].includes(channel.type)) return sendJson(res, 400, { error: 'Choose a valid text channel from this server.' });
+      selected[key] = channel.id;
+    }
+    config.ai = input.ai !== false; config.prefix = nextPrefix;
+    if (selected.aiChannel) config.aiChannel = selected.aiChannel; else delete config.aiChannel;
+    if (selected.modlog) config.modlog = selected.modlog; else delete config.modlog;
+    db.save();
+    return sendJson(res, 200, { ok: true, settings: { ai: config.ai !== false, prefix: config.prefix, aiChannel: config.aiChannel || '', modlog: config.modlog || '' } });
+  } catch (error) { console.error('[dashboard control]', error.message); return sendJson(res, 502, { error: 'Could not reach that server through Uranium.' }); }
+}).listen(PORT, () => console.log('Bot API listening on ' + PORT));
 
 const cats = ['member', 'message', 'channel', 'role', 'voice', 'server', 'automod', 'info', 'music', 'ai', 'premium'].map((n) => require('./commands/' + n));
 for (const cat of cats) cat.map = new Map(cat.commands.map((c) => [c.name, c]));
