@@ -1,0 +1,38 @@
+const { C, U, S, I } = require('../lib/cmd');
+const { UserError, res, ts, snowflake } = require('../lib/util');
+function calc(input) {
+  const s=String(input||'').replace(/\s+/g,''); if(!s||s.length>80||!/^[\d.+\-*/()%]+$/.test(s)) throw new UserError('Invalid calculation','Use numbers and + - * / % ( ).');
+  const a=s.match(/\d+(?:\.\d+)?|[()+\-*/%]/g)||[];let i=0;
+  function atom(){const t=a[i++];if(t==='('){const v=expr();if(a[i++]!==')')throw Error();return v;}if(t==='-')return -atom();if(t==='+')return atom();if(!t||!/^\d/.test(t))throw Error();return Number(t);}
+  function term(){let v=atom();while(['*','/','%'].includes(a[i])){const op=a[i++],n=atom();if((op==='/'||op==='%')&&n===0)throw new UserError('Cannot divide by zero');v=op==='*'?v*n:op==='/'?v/n:v%n;}return v;}
+  function expr(){let v=term();while(['+','-'].includes(a[i])){const op=a[i++],n=term();v=op==='+'?v+n:v-n;}return v;}
+  try{const v=expr();if(i!==a.length||!Number.isFinite(v))throw Error();return v;}catch(e){if(e instanceof UserError)throw e;throw new UserError('Invalid calculation','Check brackets and operators.');}
+}
+function dateFromId(id){return Number((BigInt(snowflake(id))>>22n)+1420070400000n);}
+module.exports={name:'utility',description:'25 practical utility and text tools',commands:[
+C('calculate','Evaluate a basic arithmetic expression',[S('expression','Example: (12 + 8) * 3',true,{max:80})],null,async c=>res('Calculator',c.s('expression')+' = **'+calc(c.s('expression'))+'**',{icon:'🧮'})),
+C('random-number','Generate a random integer',[I('min','Minimum',true,-1000000000,1000000000),I('max','Maximum',true,-1000000000,1000000000)],null,async c=>{const a=c.n('min'),b=c.n('max');if(a>b)throw new UserError('Minimum cannot be greater than maximum');return res('Random number',String(Math.floor(Math.random()*(b-a+1))+a),{icon:'🎲'});}),
+C('choose','Choose one item from a list',[S('options','Separate choices with commas',true,{max:1000})],null,async c=>{const a=c.s('options').split(',').map(x=>x.trim()).filter(Boolean);if(a.length<2)throw new UserError('Add at least two comma-separated choices');return res('My choice','I choose **'+a[Math.floor(Math.random()*a.length)]+'**',{icon:'🎯'});}),
+C('coinflip','Flip a coin',[],null,async()=>res('Coin flip',Math.random()<.5?'🪙 **Heads**':'🪙 **Tails**',{icon:'🪙'})),
+C('dice-roll','Roll dice',[I('sides','Number of sides',true,2,1000),I('count','Number of dice',false,1,20)],null,async c=>{const n=c.n('count')||1,s=c.n('sides'),a=Array.from({length:n},()=>1+Math.floor(Math.random()*s));return res('Dice roll',a.join(' + ')+' = **'+a.reduce((x,y)=>x+y,0)+'**',{icon:'🎲'});}),
+C('reverse-text','Reverse text',[S('text','Text to reverse',true,{max:1500})],null,async c=>res('Reversed',Array.from(c.s('text')).reverse().join(''),{icon:'🔁'})),
+C('uppercase','Convert text to uppercase',[S('text','Text',true,{max:1500})],null,async c=>res('Uppercase',c.s('text').toUpperCase(),{icon:'🔠'})),
+C('lowercase','Convert text to lowercase',[S('text','Text',true,{max:1500})],null,async c=>res('Lowercase',c.s('text').toLowerCase(),{icon:'🔡'})),
+C('title-case','Convert text to title case',[S('text','Text',true,{max:1500})],null,async c=>res('Title case',c.s('text').toLowerCase().replace(/\b\w/g,x=>x.toUpperCase()),{icon:'🔤'})),
+C('word-count','Count words and characters',[S('text','Text to count',true,{max:3000})],null,async c=>{const s=c.s('text');return res('Text statistics',null,{icon:'📏',fields:[['Words',String(s.trim()?s.trim().split(/\s+/).length:0),true],['Characters',String(s.length),true],['Without spaces',String(s.replace(/\s/g,'').length),true],['Lines',String(s.split(/\r?\n/).length),true]]});}),
+C('timestamp','Format a Unix timestamp',[I('seconds','Unix timestamp in seconds',true,1,9999999999)],null,async c=>{const d=new Date(c.n('seconds')*1000);if(!Number.isFinite(d.getTime()))throw new UserError('Timestamp is outside the supported range');return res('Timestamp',ts(d.getTime(),'F')+'\n'+d.toISOString(),{icon:'🕒'});}),
+C('snowflake-time','Find creation time of a Discord ID',[S('id','Discord snowflake ID',true,{max:20})],null,async c=>{const t=dateFromId(c.s('id'));return res('Discord ID date',ts(t,'F')+'\n'+new Date(t).toISOString(),{icon:'🧊'});}),
+C('server-age','Show how old this server is',[],null,async c=>res('Server age','Created '+ts(c.g.createdTimestamp,'F')+' ('+ts(c.g.createdTimestamp)+').',{icon:'🏰'})),
+C('member-joined','Show when a member joined',[U(false)],null,async c=>{const u=c.u('user')||c.i.user,m=await c.g.members.fetch(u.id).catch(()=>null);if(!m)throw new UserError('That user is not in this server');return res('Member join date',u.username+' joined '+ts(m.joinedTimestamp,'F')+' ('+ts(m.joinedTimestamp)+').',{icon:'📅',user:u});}),
+C('member-created','Show when a Discord account was created',[U(false)],null,async c=>{const u=c.u('user')||c.i.user;return res('Account creation',u.username+' created this account '+ts(u.createdTimestamp,'F')+' ('+ts(u.createdTimestamp)+').',{icon:'🗓️',user:u});}),
+C('channel-count','Count channels by type',[],null,async c=>{await c.g.channels.fetch().catch(()=>{});const a=[...c.g.channels.cache.values()];return res('Channel count',null,{icon:'📚',fields:[['Text',String(a.filter(x=>x.type===0).length),true],['Voice',String(a.filter(x=>x.type===2).length),true],['Categories',String(a.filter(x=>x.type===4).length),true],['Forums',String(a.filter(x=>x.type===15).length),true]]});}),
+C('role-count','Count server roles',[],null,async c=>res('Role count','This server has **'+(c.g.roles.cache.size-1)+'** custom roles.',{icon:'🏷️'})),
+C('emoji-count','Count custom server emojis',[],null,async c=>{const e=await c.g.emojis.fetch();return res('Emoji count','**'+e.size+'** custom emoji(s).',{icon:'😀'});}),
+C('boost-info','Show server boost details',[],null,async c=>res('Boost information',null,{icon:'🚀',fields:[['Level',String(c.g.premiumTier),true],['Boosts',String(c.g.premiumSubscriptionCount||0),true]]})),
+C('channel-topic','Show this channel topic',[],null,async c=>res('#'+c.ch.name+' topic',c.ch.topic||'No topic is set.',{icon:'📝'})),
+C('color-info','Show details for a hex color',[S('hex','Color like #8B5CF6',true,{max:7})],null,async c=>{const m=/^#?([0-9a-f]{6})$/i.exec(c.s('hex'));if(!m)throw new UserError('Use a six-digit hex color, such as #8B5CF6');const h=m[1].toUpperCase(),n=parseInt(h,16),r=n>>16,g=(n>>8)&255,b=n&255;return res('#'+h,'RGB: '+r+', '+g+', '+b+'\nDecimal: '+n,{icon:'🎨',color:n});}),
+C('avatar-link','Get a member avatar link',[U(false)],null,async c=>{const u=c.u('user')||c.i.user,url=u.displayAvatarURL({size:1024});return res(u.username+' avatar',url,{icon:'🖼️',user:u,links:[['Open avatar',url]]});}),
+C('server-icon-link','Get this server icon link',[],null,async c=>{const url=c.g.iconURL({size:1024});if(!url)throw new UserError('This server has no icon');return res('Server icon',url,{icon:'🏰',links:[['Open icon',url]]});}),
+C('server-banner-link','Get this server banner link',[],null,async c=>{const g=await c.g.fetch(),url=g.bannerURL({size:1024});if(!url)throw new UserError('This server has no banner');return res('Server banner',url,{icon:'🌄',links:[['Open banner',url]]});}),
+C('member-status','Show a member status summary',[U(false)],null,async c=>{const u=c.u('user')||c.i.user,m=await c.g.members.fetch(u.id).catch(()=>null);if(!m)throw new UserError('That user is not in this server');return res(u.username+' status',null,{icon:'👤',user:u,fields:[['Nickname',m.nickname||'None',true],['Bot',u.bot?'Yes':'No',true],['Boosting',m.premiumSince?'Yes':'No',true],['Timed out',m.isCommunicationDisabled()?'Yes':'No',true],['Roles',String(m.roles.cache.size-1),true]]});})
+]};
