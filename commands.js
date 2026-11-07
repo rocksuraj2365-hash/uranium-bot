@@ -2,7 +2,7 @@
   const $ = (id) => document.getElementById(id);
   const PAGE_SIZE = 30;
   const state = { categories: [], page: 0, category: 'all', query: '' };
-  const icons = { member:'👤', message:'💬', channel:'📺', role:'🏷️', voice:'🔊', server:'🏰', automod:'🛡️', info:'ℹ️', music:'🎵', ai:'🤖', premium:'💎', license:'🔑', utility:'🧮', community:'🌐', fun:'🎮', servertools:'🧰' };
+  const icons = { member:'👤', message:'💬', channel:'📺', role:'🏷️', voice:'🔊', server:'🏰', automod:'🛡️', info:'ℹ️', music:'🎵', ai:'🤖', premium:'💎', license:'🔑', utility:'🧮', community:'🌐', fun:'🎮', servertools:'🧰', support:'📨' };
   const escapeHTML = (value) => String(value ?? '').replace(/[&<>"']/g, ch => ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[ch]));
   function allCommands() {
     return state.categories.flatMap(category => category.commands.map(command => ({ ...command, category: category.name, categoryDescription: category.description })));
