@@ -10,6 +10,7 @@ const DISCORD_API = 'https://discord.com/api/v10';
 
 const app = express();
 app.set('trust proxy', 1);
+app.use(express.json({ limit: '12kb' }));
 
 // NOTE: MemoryStore is only OK for a starter. Add a persistent store before production.
 app.use(
