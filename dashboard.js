@@ -1,20 +1,7 @@
 (() => {
   const $ = (s, root=document) => root.querySelector(s);
   const $$ = (s, root=document) => [...root.querySelectorAll(s)];
-  const state = { user:null, guilds:[], filter:'manageable', query:'', selectedGuild:null, channels:[] };
-  const commandGroups = [
-    ['member','👥','Member tools','Manage member moderation, warnings, notes and actions.'],
-    ['message','💬','Message tools','Message cleanup and channel conversation utilities.'],
-    ['channel','#️⃣','Channel tools','Channel configuration, locking and management.'],
-    ['role','🎭','Role tools','Role assignment and role administration.'],
-    ['voice','🔊','Voice tools','Voice channel utilities and member controls.'],
-    ['server','🏠','Server tools','Server information and configuration utilities.'],
-    ['automod','🛡️','Auto moderation','Automated moderation rules and protection.'],
-    ['info','ℹ️','Information','Useful information about members, servers and Uranium.'],
-    ['music','🎵','Music','Music playback and voice-session controls.'],
-    ['ai','🤖','Uranium AI','AI chat, AI channel and AI settings.'],
-    ['premium','💎','Premium','Additional community and owner tools.']
-  ];
+  const state = { user:null, guilds:[], filter:'manageable', query:'', selectedGuild:null, channels:[], commandCatalog:[], commandPage:0, commandCategory:'all', commandQuery:'' };
   const escapeHTML = (s) => String(s).replace(/[&<>"']/g, c => ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
   const avatar = (g) => g.icon ? 'https://cdn.discordapp.com/icons/'+g.id+'/'+g.icon+'.png?size=96' : '';
   const initials = (s) => String(s||'?').trim().slice(0,2).toUpperCase();
@@ -51,15 +38,38 @@
     fillGrid('#allServers',list,state.filter==='manageable'?'No manageable servers match your search.':'No servers match your search.');
     $('#serverCount').textContent='Showing '+list.length+' of '+(state.filter==='all'?state.guilds.length:manageable.length)+' servers';
   }
-  function renderCommands(query='') {
-    const grid=$('#commandGrid'); grid.replaceChildren();
-    const items=commandGroups.filter(x=>(x[0]+' '+x[2]+' '+x[3]).toLowerCase().includes(query.toLowerCase()));
-    if(!items.length){const e=document.createElement('div');e.className='empty-state';e.textContent='No command groups match that search.';grid.append(e);return;}
-    items.forEach(([key,emoji,title,desc])=>{
+  function renderCommands(query=state.commandQuery) {
+    state.commandQuery=query;
+    const grid=$('#commandGrid'); if(!grid) return;
+    const all=state.commandCatalog.flatMap(category=>category.commands.map(command=>({...command,category:category.name})));
+    const q=String(query||'').trim().toLowerCase();
+    const items=all.filter(command=>(state.commandCategory==='all'||command.category===state.commandCategory)&&
+      (!q||[command.name,command.description,command.category,command.slash,command.prefix,command.access].join(' ').toLowerCase().includes(q)));
+    const pageSize=30, pages=Math.max(1,Math.ceil(items.length/pageSize));
+    state.commandPage=Math.max(0,Math.min(state.commandPage,pages-1));
+    const start=state.commandPage*pageSize, visible=items.slice(start,start+pageSize);
+    grid.replaceChildren();
+    if(!visible.length){const e=document.createElement('div');e.className='empty-state';e.textContent='No commands match your search. Try another word or category.';grid.append(e);}
+    visible.forEach(item=>{
       const card=document.createElement('article');card.className='command-card';
-      card.innerHTML='<span class="command-icon">'+emoji+'</span><div><span class="command-key">/'+key+'</span><h3>'+title+'</h3><p>'+desc+'</p></div><span class="command-arrow">↗</span>';
+      const restricted=item.access&&item.access!=='Available subject to command permissions';
+      card.innerHTML='<span class="command-icon">'+escapeHTML(({member:'👤',message:'💬',channel:'📺',role:'🏷️',voice:'🔊',server:'🏰',automod:'🛡️',info:'ℹ️',music:'🎵',ai:'🤖',premium:'💎',license:'🔑',utility:'🧮',community:'🌐',fun:'🎮',servertools:'🧰'})[item.category]||'📚')+'</span><div><span class="command-key">'+escapeHTML(item.slash)+'</span><h3>'+escapeHTML(item.name)+'</h3><p>'+escapeHTML(item.description)+'</p><div class="command-meta"><code class="command-syntax">'+escapeHTML(item.prefix)+'</code>'+(restricted?'<span class="command-access">'+escapeHTML(item.access)+'</span>':'')+'</div></div>';
       grid.append(card);
     });
+    const count=$('#commandCount'); if(count) count.textContent=items.length?'Showing '+(start+1)+'–'+Math.min(start+pageSize,items.length)+' of '+items.length+' commands':'0 commands';
+    const label=$('#commandPageLabel'); if(label) label.textContent='Page '+(state.commandPage+1)+' of '+pages;
+    const prev=$('#commandPrev'), next=$('#commandNext'); if(prev) prev.disabled=state.commandPage===0; if(next) next.disabled=state.commandPage>=pages-1;
+  }
+  async function loadCommandCatalog() {
+    try {
+      const response=await fetch('/commands.json',{cache:'no-store'}); if(!response.ok) throw new Error('Command catalog could not be loaded.');
+      const data=await response.json(); state.commandCatalog=Array.isArray(data.categories)?data.categories:[];
+      const select=$('#commandCategory'); if(select){select.replaceChildren(new Option('All categories ('+(data.total||0)+')','all'));state.commandCatalog.forEach(category=>select.add(new Option(category.name+' ('+category.commands.length+')',category.name)));}
+      renderCommands();
+    } catch(error) {
+      const count=$('#commandCount'); if(count) count.textContent=error.message||'Catalog unavailable';
+      const grid=$('#commandGrid'); if(grid){grid.replaceChildren();const e=document.createElement('div');e.className='empty-state';e.textContent='Could not load the command catalog. Refresh the page to retry.';grid.append(e);}
+    }
   }
   function go(view) {
     $$('.view').forEach(x=>x.classList.toggle('active',x.id==='view-'+view));
@@ -110,6 +120,7 @@
     finally { button.disabled=false; button.textContent='Save server settings'; }
   }
   document.addEventListener('click',e=>{
+    const page=e.target.closest('[data-cmd-page]');if(page){state.commandPage+=Number(page.dataset.cmdPage);renderCommands();return;}
     const config=e.target.closest('[data-configure]');if(config){configureGuild(config.dataset.configure);return;}
     const nav=e.target.closest('[data-view]');if(nav){go(nav.dataset.view);return;}
     const jump=e.target.closest('[data-go]');if(jump){go(jump.dataset.go);return;}
@@ -117,10 +128,11 @@
     const copy=e.target.closest('[data-copy]');if(copy){if(!navigator.clipboard?.writeText){toast('Clipboard is unavailable in this browser.');return;}navigator.clipboard.writeText(copy.dataset.copy).then(()=>toast('Server ID copied')).catch(()=>toast('Could not copy.'));return;}
   });
   $('#serverSearch').addEventListener('input',e=>{state.query=e.target.value;renderServers();});
-  $('#commandSearch').addEventListener('input',e=>renderCommands(e.target.value));
+  $('#commandSearch').addEventListener('input',e=>{state.commandPage=0;renderCommands(e.target.value);});
+  $('#commandCategory').addEventListener('change',e=>{state.commandCategory=e.target.value;state.commandPage=0;renderCommands();});
   $('#refreshBtn').addEventListener('click',load);
   $('#saveSettings').addEventListener('click',saveSettings);
   $('#closeSettings').addEventListener('click',()=>{$('#guildSettings').hidden=true;state.selectedGuild=null;});
   $('#menuBtn').addEventListener('click',()=>$('#sidebar').classList.toggle('open'));
-  renderCommands();load();
+  loadCommandCatalog();load();
 })();
