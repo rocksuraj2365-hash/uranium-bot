@@ -59,10 +59,10 @@ Set the OAuth redirect URI in the Discord Developer Portal to:
 
 Only the bot owner listed in `OWNER_IDS` can grant or revoke Premium access. Grants are scoped to the current Discord server and saved in that server's database record.
 
-- `/premium grant @member` or `!vip grant @member` — grant access.
-- `/premium revoke @member` or `!vip revoke @member` — revoke access.
-- `/premium access [@member]` — check access.
+- `/license grant @member` or `!lic grant @member` — grant access.
+- `/license revoke @member` or `!lic revoke @member` — revoke access.
+- `/license access [@member]` — check access.
 - `/premium profile` or `!brand` — set the server's Uranium nickname, profile-card bio, embed color, avatar image, and banner image.
-- Shortcuts: `!pgrant`, `!prevoke`, `!paccess`, and `!brand`. The `!vip` category shortcut also works, e.g. `!vip profile`.
+- Shortcuts: `!pgrant`, `!prevoke`, `!paccess`, and `!brand`. The `!vip` category shortcut also works, e.g. `!lic profile`.
 
 Discord bot account avatars, banners, and bios are account-wide, not independently configurable per server through the bot API. The Premium profile therefore displays server-specific avatar/banner/bio in a branded embed card; the bot nickname can be changed per server when its role permissions allow it. The existing owner-only bot avatar command remains global.
