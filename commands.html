@@ -1,0 +1,48 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <meta name="theme-color" content="#090711">
+  <meta name="description" content="Search all 347 implemented Uranium Discord bot commands by category, name or description.">
+  <title>Uranium • Command Library</title>
+  <link rel="stylesheet" href="/style.css">
+</head>
+<body class="public-command-page">
+  <nav>
+    <a class="brand" href="/"><span class="brand-mark">☢</span><span>URANIUM<small>COMMAND LIBRARY</small></span></a>
+    <span class="nav-links"><a class="btn" href="/">Home</a><a class="btn" href="/dashboard">Dashboard</a><a class="btn primary" href="/invite">Invite Bot</a></span>
+  </nav>
+  <main class="public-command-main">
+    <header class="public-command-hero">
+      <div>
+        <p class="eyebrow">THE COMPLETE COMMAND INDEX</p>
+        <h1>Command Library<span class="purple-dot">.</span></h1>
+        <p>Browse every command currently defined in Uranium's source code. Search by name or description, filter by category, and copy the slash or prefix syntax into Discord.</p>
+        <p class="updated" id="publicCommandSummary">Loading command catalog…</p>
+      </div>
+      <div class="hero-art">
+        <img src="https://media4.giphy.com/media/yQltwC4N8nzOE1WdDW/downsized.gif" alt="Animated neon atom illustration" loading="lazy" decoding="async">
+        <span>Animation via <a href="https://giphy.com/gifs/yQltwC4N8nzOE1WdDW" target="_blank" rel="noopener">GIPHY</a></span>
+      </div>
+    </header>
+    <div class="command-tools">
+      <label class="search-box command-search"><span>⌕</span><input id="publicCommandSearch" type="search" placeholder="Search 347 commands…" autocomplete="off"></label>
+      <select id="publicCommandCategory" class="command-category" aria-label="Filter by category"><option value="all">All categories</option></select>
+      <span class="result-line" id="publicCommandCount">Loading…</span>
+    </div>
+    <div class="command-grid" id="publicCommandGrid"><div class="empty-state">Loading commands…</div></div>
+    <div class="command-pager">
+      <button class="button button-secondary button-small" id="publicCommandPrev" type="button">← Previous</button>
+      <span id="publicCommandPage">Page 1</span>
+      <button class="button button-secondary button-small" id="publicCommandNext" type="button">Next →</button>
+    </div>
+    <div class="notice"><span>ⓘ</span><p><b>Usage:</b> Slash commands use the syntax shown in purple. Prefix examples use <code>!</code>; replace it with your server's configured prefix. Some commands require specific Discord permissions, Premium access, or bot-owner access. AI commands remain listed for transparency but the AI feature is disabled pending provider compliance review.</p></div>
+  </main>
+  <footer>
+    <div>☢ Uranium &copy; 2026</div>
+    <div class="footer-links"><a href="/">Home</a><a href="/dashboard">Dashboard</a><a href="/terms-of-service">Terms</a><a href="/privacy-policy">Privacy</a><a href="/interactions">Interactions</a></div>
+  </footer>
+  <script src="/commands.js" defer></script>
+</body>
+</html>
