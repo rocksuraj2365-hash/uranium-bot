@@ -53,7 +53,7 @@
     visible.forEach(item=>{
       const card=document.createElement('article');card.className='command-card';
       const restricted=item.access&&item.access!=='Available subject to command permissions';
-      card.innerHTML='<span class="command-icon">'+escapeHTML(({member:'👤',message:'💬',channel:'📺',role:'🏷️',voice:'🔊',server:'🏰',automod:'🛡️',info:'ℹ️',music:'🎵',ai:'🤖',premium:'💎',license:'🔑',utility:'🧮',community:'🌐',fun:'🎮',servertools:'🧰'})[item.category]||'📚')+'</span><div><span class="command-key">'+escapeHTML(item.slash)+'</span><h3>'+escapeHTML(item.name)+'</h3><p>'+escapeHTML(item.description)+'</p><div class="command-meta"><code class="command-syntax">'+escapeHTML(item.prefix)+'</code>'+(restricted?'<span class="command-access">'+escapeHTML(item.access)+'</span>':'')+'</div></div>';
+      card.innerHTML='<span class="command-icon">'+escapeHTML(({member:'👤',message:'💬',channel:'📺',role:'🏷️',voice:'🔊',server:'🏰',automod:'🛡️',info:'ℹ️',music:'🎵',ai:'🤖',premium:'💎',license:'🔑',utility:'🧮',community:'🌐',fun:'🎮',servertools:'🧰',support:'📨'})[item.category]||'📚')+'</span><div><span class="command-key">'+escapeHTML(item.slash)+'</span><h3>'+escapeHTML(item.name)+'</h3><p>'+escapeHTML(item.description)+'</p><div class="command-meta"><code class="command-syntax">'+escapeHTML(item.prefix)+'</code>'+(restricted?'<span class="command-access">'+escapeHTML(item.access)+'</span>':'')+'</div></div>';
       grid.append(card);
     });
     const count=$('#commandCount'); if(count) count.textContent=items.length?'Showing '+(start+1)+'–'+Math.min(start+pageSize,items.length)+' of '+items.length+' commands':'0 commands';
