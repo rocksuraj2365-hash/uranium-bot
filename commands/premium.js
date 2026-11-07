@@ -307,6 +307,6 @@ module.exports = {
     C('snipe', 'Premium: see the last deleted message here', [], null, async (c) => {
       const s = snipes.get(c.ch.id); if (!s) throw new UserError('Nothing to snipe here', 'No deleted message was seen in this channel since the bot started.');
       return own('Sniped message', trunc(s.content || '(no text)', 1500), { icon: '🎯', fields: [['Author', `<@${s.authorId}> (${s.author})`, true], ['Deleted', ts(s.at), true]] });
-    }, O),
+    }, P),
   ],
 };
