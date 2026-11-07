@@ -105,7 +105,7 @@
       if(!response.ok) throw new Error(data.error||'Could not load server settings.');
       state.channels=data.channels||[];
       const fill=(selector,label,selected)=>{const el=$(selector);el.replaceChildren(new Option(label,''));state.channels.forEach(ch=>el.add(new Option('# '+ch.name,ch.id)));el.value=selected||'';};
-      $('#settingPrefix').value=data.settings.prefix||'!'; $('#settingAI').checked=data.settings.ai!==false;
+      $('#settingPrefix').value=data.settings.prefix||'!'; $('#settingAI').checked=data.settings.ai===true; $('#settingAI').disabled=!!data.settings.aiLocked; $('#settingAILockNote').hidden=!data.settings.aiLocked;
       fill('#settingAIChannel','No automatic AI channel',data.settings.aiChannel); fill('#settingModlog','Disabled',data.settings.modlog);
       $('#settingsStatus').textContent='Connected. Changes apply to this server’s bot configuration.'; $('#saveSettings').disabled=false;
     } catch(error) { $('#settingsStatus').textContent=error.message||'Could not load settings.'; }
