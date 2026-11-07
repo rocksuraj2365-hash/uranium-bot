@@ -66,3 +66,7 @@ Only the bot owner listed in `OWNER_IDS` can grant or revoke Premium access. Gra
 - Shortcuts: `!pgrant`, `!prevoke`, `!paccess`, and `!brand`. The `!lic` category shortcut also works, e.g. `!lic profile`.
 
 Discord supports a bot's own guild-member profile fields separately per server. The command uses Discord's current-member endpoint, so the avatar, banner, bio, and nickname apply only to the server where the command is run. Image links must be direct HTTPS links from Discord's CDN, and images must be 8 MB or smaller. The existing owner-only bot avatar command remains a separate global account setting.
+
+## Important: database persistence on Render Free
+
+The current bot database is stored in `data/db.json`. Render Free web services use an ephemeral filesystem: local files are lost when the service redeploys, restarts, or spins down. That means server settings, moderation records, and Premium grants stored in this file are not safe for long-term production use. Move this data to a persistent datastore before relying on paid Premium licenses.
