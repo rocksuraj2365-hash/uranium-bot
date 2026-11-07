@@ -69,7 +69,8 @@ if (PORT) http.createServer(async (req, res) => {
   } catch (error) { console.error('[dashboard control]', error.message); return sendJson(res, 502, { error: 'Could not reach that server through Uranium.' }); }
 }).listen(PORT, () => console.log('Bot API listening on ' + PORT));
 
-const cats = ['member', 'message', 'channel', 'role', 'voice', 'server', 'automod', 'info', 'music', 'ai', 'premium', 'license'].map((n) => require('./commands/' + n));
+const cats = ['member', 'message', 'channel', 'role', 'voice', 'server', 'automod', 'info', 'music', 'ai', 'premium', 'license', 'utility', 'community', 'fun', 'servertools'].map((n) => require('./commands/' + n));
+prefix.CAT_SHORT.utility = 'ut'; prefix.CAT_SHORT.community = 'cm'; prefix.CAT_SHORT.fun = 'fn'; prefix.CAT_SHORT.servertools = 'st';
 for (const cat of cats) cat.map = new Map(cat.commands.map((c) => [c.name, c]));
 const byName = new Map(cats.map((c) => [c.name, c]));
 require('./lib/patch')(byName);
@@ -326,6 +327,26 @@ function makeClient(withContent) {
     run?.catch((e) => console.error('Interaction error:', e));
   });
   client.on('messageCreate', onMessage);
+  client.on('guildMemberAdd', async (member) => {
+    try {
+      const cfg = db.g(member.guild.id).config, id = cfg.welcomeChannel;
+      if (!id) return;
+      const ch = await member.guild.channels.fetch(id).catch(() => null);
+      if (!ch?.isTextBased()) return;
+      const content = String(cfg.welcomeMessage || 'Welcome {user} to **{server}**!').replaceAll('{user}', '<@' + member.id + '>').replaceAll('{username}', member.user.username).replaceAll('{server}', member.guild.name).replaceAll('{memberCount}', String(member.guild.memberCount));
+      await ch.send({ content, allowedMentions: { users: [member.id] } });
+    } catch (e) { console.error('[welcome]', e.message); }
+  });
+  client.on('guildMemberRemove', async (member) => {
+    try {
+      const cfg = db.g(member.guild.id).config, id = cfg.goodbyeChannel;
+      if (!id) return;
+      const ch = await member.guild.channels.fetch(id).catch(() => null);
+      if (!ch?.isTextBased()) return;
+      const content = String(cfg.goodbyeMessage || '**{username}** has left **{server}**.').replaceAll('{user}', member.user.username).replaceAll('{username}', member.user.username).replaceAll('{server}', member.guild.name).replaceAll('{memberCount}', String(member.guild.memberCount));
+      await ch.send({ content, allowedMentions: { parse: [] } });
+    } catch (e) { console.error('[goodbye]', e.message); }
+  });
   client.on('messageDelete', (m) => { if (m.guild && m.content && !m.author?.bot) premium.snipes.set(m.channelId, { content: m.content, author: m.author?.username || 'unknown', authorId: m.author?.id, at: Date.now() }); });
   client.once('clientReady', onReady);
   client.on('error', (e) => console.error('Client error:', e));
