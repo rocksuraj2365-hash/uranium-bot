@@ -46,7 +46,8 @@ for (const entry of catalog.categories) {
 }
 assert.equal(require('../commands/info').commands.length, 25, 'Info group must stay within Discord subcommand limit');
 assert.equal(require('../commands/support').commands.length, 1, 'Support report command must be registered');
-assert.equal(template.commands.length, 1, 'Support template command must be registered');
+assert.equal(template.commands.length, 2, 'Support template and refresh commands must be registered');
+assert.ok(template.commands.some((x) => x.name === 'refresh'), 'Support template refresh command must be registered');
 assert.equal(security.commands.length, 6, 'Premium security suite must register six commands');
 for (const def of security.commands) {
   const hit = prefix.resolve(prefix.tokenize('security ' + def.name));
