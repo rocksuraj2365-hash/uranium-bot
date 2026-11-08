@@ -335,9 +335,20 @@ const onReady = async () => {
   if (!contentIntent) console.warn('⚠️ Message Content Intent is OFF: prefix commands only work after @mentioning the bot. Turn it on in the Developer Portal → Bot.');
   loadOwners(); emojis.ensure(client); music.startWatch(client);
   try {
-    const rest = new REST({ version: '10' }).setToken(DISCORD_BOT_TOKEN); const body = cats.map(build);
-    await rest.put(DEV_GUILD_ID ? Routes.applicationGuildCommands(DISCORD_CLIENT_ID, DEV_GUILD_ID) : Routes.applicationCommands(DISCORD_CLIENT_ID), { body });
-    console.log(`✅ Registered ${body.length} command groups`);
+    const rest = new REST({ version: '10' }).setToken(DISCORD_BOT_TOKEN);
+    const route = DEV_GUILD_ID ? Routes.applicationGuildCommands(DISCORD_CLIENT_ID, DEV_GUILD_ID) : Routes.applicationCommands(DISCORD_CLIENT_ID);
+    const body = cats.map(build);
+    // Discord's bulk overwrite also replaces PRIMARY_ENTRY_POINT commands.
+    // Preserve the app's Activity entry point instead of accidentally deleting it.
+    if (!DEV_GUILD_ID) {
+      const existing = await rest.get(Routes.applicationCommands(DISCORD_CLIENT_ID));
+      const entryPoints = (Array.isArray(existing) ? existing : [])
+        .filter((command) => command.type === 4)
+        .map(({ name, description, type, handler }) => ({ name, description, type, handler }));
+      body.push(...entryPoints);
+    }
+    await rest.put(route, { body });
+    console.log(`✅ Registered ${cats.length} command groups and preserved the app Entry Point command`);
   } catch (e) { console.error('❌ Command registration failed:', e.rawError ? JSON.stringify(e.rawError).slice(0, 800) : e); }
   setInterval(tick, 30000).unref(); tick();
   art.build().then((ok) => ok && console.log('✅ Banner animation ready'));
