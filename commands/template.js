@@ -6,6 +6,14 @@ module.exports = {
   description: 'Create interactive server layouts',
   commands: [
     C(
+      'refresh',
+      'Post or update the FAQ, rules, guides and starter messages in every support template text channel',
+      [],
+      null,
+      supportTemplate.refreshSupportTemplate,
+      { custom: true, ephemeral: true },
+    ),
+    C(
       'support',
       'Build a complete Uranium support server with channels, roles and interactive panels',
       [],
