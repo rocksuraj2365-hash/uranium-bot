@@ -43,6 +43,8 @@ const pages = {
   '/commands.js': 'commands.js',
   '/commands.json': 'commands.json',
   '/dashboard': 'dashboard.html',
+  '/admin': 'admin.html',
+  '/admin.js': 'admin.js',
   '/style.css': 'style.css',
   '/dashboard.js': 'dashboard.js',
   '/terms-of-service': 'terms-of-service.html',
@@ -51,7 +53,14 @@ const pages = {
   '/interactions': 'interactions.html',
 };
 for (const [route, file] of Object.entries(pages)) {
-  app.get(route, (req, res) => res.sendFile(path.join(__dirname, file)));
+  app.get(route, (req, res) => {
+    if (route === '/admin') {
+      if (!req.session.user) return res.redirect('/login');
+      const admins = new Set((process.env.ADMIN_DISCORD_IDS || process.env.OWNER_IDS || '').split(/[\\s,]+/).filter(Boolean));
+      if (!admins.has(String(req.session.user.id))) return res.status(403).send('Owner access only.');
+    }
+    res.sendFile(path.join(__dirname, file));
+  });
 }
 
 app.get('/health', (req, res) => res.json({ status: 'ok' }));
@@ -132,6 +141,22 @@ function requireAuth(req, res, next) {
 }
 
 app.get('/api/me', requireAuth, (req, res) => res.json(req.session.user));
+function requireAdmin(req, res, next) {
+  if (!req.session.user) return res.status(401).json({ error: 'Not logged in' });
+  const admins = new Set((process.env.ADMIN_DISCORD_IDS || process.env.OWNER_IDS || '').split(/[\\s,]+/).filter(Boolean));
+  if (!admins.has(String(req.session.user.id))) return res.status(403).json({ error: 'Owner access only.' });
+  next();
+}
+app.get('/api/admin/stats', requireAdmin, async (req, res) => {
+  const base = String(process.env.BOT_CONTROL_URL || '').replace(/\\/$/, '');
+  const secret = process.env.DASHBOARD_API_SECRET;
+  if (!base || !secret) return res.status(503).json({ error: 'Bot connection is not configured.' });
+  try {
+    const response = await fetch(base + '/owner/stats', { headers: { 'x-dashboard-secret': secret, 'x-owner-user-id': req.session.user.id }, signal: AbortSignal.timeout(15000) });
+    const data = await response.json().catch(() => ({}));
+    return res.status(response.status).json(data);
+  } catch { return res.status(502).json({ error: 'Could not reach the bot service. It may be starting or sleeping.' }); }
+});
 app.get('/api/guilds', requireAuth, (req, res) => res.json(req.session.guilds || []));
 
 function manageableGuild(req, res, next) {
