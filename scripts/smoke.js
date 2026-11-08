@@ -4,6 +4,8 @@ const license = { name: 'license', commands: ['grant', 'revoke', 'access', 'prof
 license.map = new Map(license.commands.map((command) => [command.name, command]));
 const newCats = ['utility', 'community', 'fun', 'servertools'].map((name) => require('../commands/' + name));
 const template = require('../commands/template');
+const security = require('../commands/security');
+security.map = new Map(security.commands.map((command) => [command.name, command]));
 template.map = new Map(template.commands.map((command) => [command.name, command]));
 for (const cat of newCats) cat.map = new Map(cat.commands.map((command) => [command.name, command]));
 for (const cat of newCats) {
@@ -11,7 +13,7 @@ for (const cat of newCats) {
   assert.equal(new Set(cat.commands.map((x) => x.name)).size, 25, cat.name + ' command names must be unique');
 }
 assert.equal(newCats.reduce((n, cat) => n + cat.commands.length, 0), 100);
-prefix.init([...newCats, template, license]);
+prefix.init([...newCats, template, license, security]);
 for (const cat of newCats) {
   for (const def of cat.commands) {
     const hit = prefix.resolve(prefix.tokenize(cat.name + ' ' + def.name));
@@ -28,8 +30,8 @@ for (const [shortcut, expected] of [['add','grant'],['remove','revoke'],['check'
   assert.equal(hit.used, 2);
 }
 const catalog = require('../commands.json');
-assert.equal(catalog.total, 346, 'Published catalog total must match the implemented command set');
-assert.equal(catalog.categories.length, 18, 'Every command category must be published');
+assert.equal(catalog.total, 352, 'Published catalog total must match the implemented command set');
+assert.equal(catalog.categories.length, 19, 'Every command category must be published');
 for (const entry of catalog.categories) {
   const source = require('../commands/' + entry.name);
   assert.ok(source.commands.length <= 25, entry.name + ' exceeds Discord subcommand limit');
@@ -45,6 +47,14 @@ for (const entry of catalog.categories) {
 assert.equal(require('../commands/info').commands.length, 25, 'Info group must stay within Discord subcommand limit');
 assert.equal(require('../commands/support').commands.length, 1, 'Support report command must be registered');
 assert.equal(template.commands.length, 1, 'Support template command must be registered');
+assert.equal(security.commands.length, 6, 'Premium security suite must register six commands');
+for (const def of security.commands) {
+  const hit = prefix.resolve(prefix.tokenize('security ' + def.name));
+  assert.ok(hit, 'Security prefix route missing: ' + def.name);
+  assert.equal(hit.cat, security);
+  assert.equal(hit.def, def);
+  assert.equal(def.premium, true, 'Security command must require Premium access');
+}
 const templateHit = prefix.resolve(prefix.tokenize('template support'));
 assert.ok(templateHit, 'Support template prefix command must resolve');
 assert.equal(templateHit.def.name, 'support');
