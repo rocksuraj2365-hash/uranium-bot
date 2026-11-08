@@ -30,7 +30,7 @@ for (const [shortcut, expected] of [['add','grant'],['remove','revoke'],['check'
   assert.equal(hit.used, 2);
 }
 const catalog = require('../commands.json');
-assert.equal(catalog.total, 352, 'Published catalog total must match the implemented command set');
+assert.equal(catalog.total, 353, 'Published catalog total must match the implemented command set');
 assert.equal(catalog.categories.length, 19, 'Every command category must be published');
 for (const entry of catalog.categories) {
   const source = require('../commands/' + entry.name);
@@ -46,7 +46,8 @@ for (const entry of catalog.categories) {
 }
 assert.equal(require('../commands/info').commands.length, 25, 'Info group must stay within Discord subcommand limit');
 assert.equal(require('../commands/support').commands.length, 1, 'Support report command must be registered');
-assert.equal(template.commands.length, 1, 'Support template command must be registered');
+assert.equal(template.commands.length, 2, 'Support template and refresh commands must be registered');
+assert.ok(template.commands.some((x) => x.name === 'refresh'), 'Support template refresh command must be registered');
 assert.equal(security.commands.length, 6, 'Premium security suite must register six commands');
 for (const def of security.commands) {
   const hit = prefix.resolve(prefix.tokenize('security ' + def.name));
