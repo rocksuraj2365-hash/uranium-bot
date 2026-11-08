@@ -12,6 +12,7 @@ const devTools = require('./lib/dev-tools');
 const dmAi = require('./lib/dm-ai');
 const np = require('./lib/np');
 const music = require('./lib/music');
+const supportTemplate = require('./lib/support-template');
 const emojis = require('./lib/emojis');
 const { UserError, permName } = require('./lib/util');
 
@@ -72,8 +73,8 @@ if (PORT) http.createServer(async (req, res) => {
   } catch (error) { console.error('[dashboard control]', error.message); return sendJson(res, 502, { error: 'Could not reach that server through Uranium.' }); }
 }).listen(PORT, () => console.log('Bot API listening on ' + PORT));
 
-const cats = ['member', 'message', 'channel', 'role', 'voice', 'server', 'automod', 'info', 'music', 'ai', 'premium', 'license', 'utility', 'community', 'fun', 'servertools', 'support'].map((n) => require('./commands/' + n));
-prefix.CAT_SHORT.utility = 'ut'; prefix.CAT_SHORT.community = 'cm'; prefix.CAT_SHORT.fun = 'fn'; prefix.CAT_SHORT.servertools = 'st'; prefix.CAT_SHORT.support = 'sp';
+const cats = ['member', 'message', 'channel', 'role', 'voice', 'server', 'automod', 'info', 'music', 'ai', 'premium', 'license', 'utility', 'community', 'fun', 'servertools', 'support', 'template'].map((n) => require('./commands/' + n));
+prefix.CAT_SHORT.utility = 'ut'; prefix.CAT_SHORT.community = 'cm'; prefix.CAT_SHORT.fun = 'fn'; prefix.CAT_SHORT.servertools = 'st'; prefix.CAT_SHORT.support = 'sp'; prefix.CAT_SHORT.template = 'tpl';
 for (const cat of cats) cat.map = new Map(cat.commands.map((c) => [c.name, c]));
 const byName = new Map(cats.map((c) => [c.name, c]));
 require('./lib/patch')(byName);
@@ -181,7 +182,7 @@ function ctx(i, me) {
 }
 async function execute(i, cat, def) {
   const label = `/${cat.name} ${def.name}`;
-  await i.deferReply();
+  await i.deferReply(def.ephemeral ? { flags: ui.EPH } : undefined);
   try {
     if (def.owner && !isOwner(i.user.id)) throw new UserError('💎 This is a **Premium** command and it is only for the bot owner.', 'Normal moderation commands are in the other groups. Use the help menu.');
     if (def.premium && !premium.hasAccess(i.guildId, i.user.id)) throw new UserError('💎 This server feature requires Premium access.', 'Only the bot owner can grant it with `/license grant` or `!premium add @member`.');
@@ -269,6 +270,7 @@ async function autocomplete(i) {
 }
 async function button(i) {
   const [kind, a] = i.customId.split(':');
+  if (kind === 'template') return supportTemplate.onButton(i);
   if (['cf', 'help', 'eb', 'lst', 'sv'].includes(kind)) return; // handled by collectors
   if (kind === 'mu') return music.onComponent(i);
   if (kind === 'ai') { ai.resetHistory(i.channelId, i.user.id); return i.reply({ content: '🧠 I forgot our earlier messages here.', flags: ui.EPH }); }
