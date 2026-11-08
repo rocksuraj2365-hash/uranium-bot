@@ -1,7 +1,7 @@
 {
   "version": 1,
   "generatedFrom": "commands/*.js",
-  "total": 346,
+  "total": 352,
   "categories": [
     {
       "name": "member",
@@ -2530,6 +2530,54 @@
           "slash": "/template support",
           "prefix": "!template support",
           "access": "Requires Manage Server; bot needs Manage Channels and Manage Roles"
+        }
+      ]
+    },
+    {
+      "name": "security",
+      "description": "Premium security intelligence: permission scans, audit review and configuration drift.",
+      "commands": [
+        {
+          "name": "scan",
+          "description": "Premium: scan roles and channel overrides for sensitive permissions",
+          "slash": "/security scan",
+          "prefix": "!security scan",
+          "access": "Premium access required"
+        },
+        {
+          "name": "audit",
+          "description": "Premium: review recent server audit-log activity",
+          "slash": "/security audit",
+          "prefix": "!security audit",
+          "access": "Premium access required"
+        },
+        {
+          "name": "invites",
+          "description": "Premium: inspect active server invites and usage limits",
+          "slash": "/security invites",
+          "prefix": "!security invites",
+          "access": "Premium access required"
+        },
+        {
+          "name": "webhooks",
+          "description": "Premium: inventory server webhooks without exposing tokens",
+          "slash": "/security webhooks",
+          "prefix": "!security webhooks",
+          "access": "Premium access required"
+        },
+        {
+          "name": "baseline",
+          "description": "Premium: save a role and channel configuration baseline",
+          "slash": "/security baseline",
+          "prefix": "!security baseline",
+          "access": "Premium access required"
+        },
+        {
+          "name": "drift",
+          "description": "Premium: compare current roles and channels against the saved baseline",
+          "slash": "/security drift",
+          "prefix": "!security drift",
+          "access": "Premium access required"
         }
       ]
     }
