@@ -30,7 +30,7 @@ for (const [shortcut, expected] of [['add','grant'],['remove','revoke'],['check'
   assert.equal(hit.used, 2);
 }
 const catalog = require('../commands.json');
-assert.equal(catalog.total, 352, 'Published catalog total must match the implemented command set');
+assert.equal(catalog.total, 353, 'Published catalog total must match the implemented command set');
 assert.equal(catalog.categories.length, 19, 'Every command category must be published');
 for (const entry of catalog.categories) {
   const source = require('../commands/' + entry.name);
