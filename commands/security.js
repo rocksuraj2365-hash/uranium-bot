@@ -4,6 +4,7 @@ const { UserError, res, ts, trunc } = require('../lib/util');
 const db = require('../lib/db');
 const PREMIUM = { premium: true };
 const title = (name) => '☢ Uranium Security • ' + name;
+function requireManager(ctx) { if (!ctx.i.memberPermissions.has(P.ManageGuild)) throw new UserError('You need Manage Server permission to use this security tool.'); }
 const flags = [
   ['Administrator', P.Administrator], ['Manage Server', P.ManageGuild],
   ['Manage Roles', P.ManageRoles], ['Manage Channels', P.ManageChannels],
@@ -21,6 +22,7 @@ const channelSignature = (ch) => JSON.stringify({ name:ch.name, type:ch.type, pa
 const roleSignature = (r) => JSON.stringify({ name:r.name, perms:r.perms, position:r.position, managed:r.managed });
 
 async function scan(c) {
+  requireManager(c);
   await c.g.roles.fetch().catch(() => {});
   await c.g.channels.fetch().catch(() => {});
   const riskyRoles = [];
@@ -79,6 +81,7 @@ async function webhooks(c) {
   return res(title('Webhook inventory'), lines.join('\n'), { icon:'🪝', fields:[['Total webhooks',String(hooks.size),true]], footer:'Webhook tokens are never displayed.' });
 }
 async function saveBaseline(c) {
+  requireManager(c);
   await c.g.roles.fetch().catch(() => {});
   await c.g.channels.fetch().catch(() => {});
   const roles = [...c.g.roles.cache.values()].map(roleSnapshot);
@@ -89,6 +92,7 @@ async function saveBaseline(c) {
   return res(title('Security baseline saved'), 'Saved a configuration baseline containing **' + roles.length + ' roles** and **' + channels.length + ' channels**. Use !security drift later to compare the current setup.', { icon:'🧬' });
 }
 async function drift(c) {
+  requireManager(c);
   await c.g.roles.fetch().catch(() => {});
   await c.g.channels.fetch().catch(() => {});
   const base = db.g(c.g.id).securityBaseline;
@@ -111,11 +115,11 @@ module.exports = {
   name:'security',
   description:'Premium security intelligence: permission scans, audit review and configuration drift.',
   commands:[
-    C('scan','Premium: scan roles and channel overrides for sensitive permissions',[],P.ManageGuild,scan,PREMIUM),
+    C('scan','Premium: scan roles and channel overrides for sensitive permissions',[],null,scan,PREMIUM),
     C('audit','Premium: review recent server audit-log activity',[],P.ViewAuditLog,audit,PREMIUM),
     C('invites','Premium: inspect active server invites and usage limits',[],P.ManageGuild,invites,PREMIUM),
     C('webhooks','Premium: inventory server webhooks without exposing tokens',[],P.ManageWebhooks,webhooks,PREMIUM),
-    C('baseline','Premium: save a role and channel configuration baseline',[],P.ManageGuild,saveBaseline,PREMIUM),
-    C('drift','Premium: compare current roles and channels against the saved baseline',[],P.ManageGuild,drift,PREMIUM),
+    C('baseline','Premium: save a role and channel configuration baseline',[],null,saveBaseline,PREMIUM),
+    C('drift','Premium: compare current roles and channels against the saved baseline',[],null,drift,PREMIUM),
   ],
 };
