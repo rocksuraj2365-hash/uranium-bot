@@ -1,7 +1,7 @@
 {
   "version": 1,
   "generatedFrom": "commands/*.js",
-  "total": 352,
+  "total": 353,
   "categories": [
     {
       "name": "member",
@@ -2530,6 +2530,13 @@
           "slash": "/template support",
           "prefix": "!template support",
           "access": "Requires Manage Server; bot needs Manage Channels and Manage Roles"
+        },
+        {
+          "name": "refresh",
+          "description": "Post or update the FAQ, rules, guides and starter messages in every support template text channel",
+          "slash": "/template refresh",
+          "prefix": "!template refresh",
+          "access": "Requires Manage Server; updates existing support template channels without duplicating them"
         }
       ]
     },
