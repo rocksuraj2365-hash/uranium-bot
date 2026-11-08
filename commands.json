@@ -1,7 +1,7 @@
 {
   "version": 1,
   "generatedFrom": "commands/*.js",
-  "total": 345,
+  "total": 346,
   "categories": [
     {
       "name": "member",
@@ -2517,6 +2517,19 @@
           "slash": "/support report",
           "prefix": "!support report",
           "access": "Available subject to command permissions"
+        }
+      ]
+    },
+    {
+      "name": "template",
+      "description": "Create polished Discord server layouts with roles, channels and interactive panels.",
+      "commands": [
+        {
+          "name": "support",
+          "description": "Build a complete Uranium support server with channels, roles and interactive panels",
+          "slash": "/template support",
+          "prefix": "!template support",
+          "access": "Requires Manage Server; bot needs Manage Channels and Manage Roles"
         }
       ]
     }
