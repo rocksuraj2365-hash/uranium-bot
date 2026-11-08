@@ -1,14 +1,28 @@
 <!DOCTYPE html>
 <html lang="en"><head>
 <meta charset="UTF-8"><meta name="viewport" content="width=device-width, initial-scale=1">
-<title>Uranium Dashboard</title><link rel="stylesheet" href="/style.css">
-</head><body>
-<nav><a class="logo" href="/" style="text-decoration:none">Uranium</a><a class="btn" href="/logout">Logout</a></nav>
-<main>
-<h2 id="hello">Loading...</h2>
-<p style="color:var(--mute)">Servers where you can manage things:</p>
-<div class="list" id="guilds"></div>
+<title>Dashboard | Uranium</title>
+<meta name="description" content="Manage Uranium in your Discord servers: settings, cases, music and quick actions.">
+<meta name="robots" content="noindex"><meta name="theme-color" content="#8b5cf6">
+<link rel="stylesheet" href="/style.css"><link rel="stylesheet" href="/dashboard.css">
+</head><body class="dash">
+<nav><a class="logo" href="/">Uranium</a><span class="nav-links"><span id="user" class="user-chip"></span><a class="btn" href="/logout">Logout</a></span></nav>
+<main class="dash-wrap">
+<section class="hero-strip"><div><h1 id="hello">Loading&hellip;</h1><p class="sub">Pick a server to manage Uranium there.</p></div><button class="btn" id="refresh" type="button">&#x21bb; Refresh</button></section>
+<section class="stats" id="stats">
+<div class="stat"><b data-stat="servers">&ndash;</b><span>Servers with Uranium</span></div>
+<div class="stat"><b data-stat="mine">&ndash;</b><span>Servers you manage</span></div>
+<div class="stat"><b data-stat="ping">&ndash;</b><span>Bot ping (ms)</span></div>
+<div class="stat"><b data-stat="uptime">&ndash;</b><span>Uptime</span></div>
+</section>
+<section class="toolbar"><input id="search" type="search" placeholder="Search your servers&hellip;" aria-label="Search servers">
+<div class="chips" id="filters"><button class="chip active" data-f="all" type="button">All</button><button class="chip" data-f="manage" type="button">I can manage</button><button class="chip" data-f="bot" type="button">Uranium added</button></div></section>
+<div id="servers" class="grid" aria-live="polite"></div>
 </main>
-<script src="/dashboard.js"></script>
+<div id="scrim" class="scrim"></div>
+<aside id="panel" class="panel" aria-hidden="true"><div class="panel-head"><div class="panel-title"><span id="pIcon" class="icon"></span><h2 id="pName">Server</h2></div><button class="btn" id="pClose" type="button" aria-label="Close">&#x2715;</button></div>
+<div class="tabs" id="tabs"></div><div id="pBody" class="panel-body"></div></aside>
+<div id="toasts" class="toasts"></div>
 <footer><div>Uranium &copy; 2026</div><div class="footer-links"><a href="/">Home</a><a href="/terms-of-service">Terms of Service</a><a href="/privacy-policy">Privacy Policy</a><a href="/verify-user">Verify User</a><a href="/interactions">Interactions</a></div></footer>
+<script src="/dashboard.js"></script>
 </body></html>
