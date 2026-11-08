@@ -56,7 +56,7 @@ for (const [route, file] of Object.entries(pages)) {
   app.get(route, (req, res) => {
     if (route === '/admin') {
       if (!req.session.user) return res.redirect('/login');
-      const admins = new Set((process.env.ADMIN_DISCORD_IDS || process.env.OWNER_IDS || '').split(/[\\s,]+/).filter(Boolean));
+      const admins = new Set((process.env.ADMIN_DISCORD_IDS || process.env.OWNER_IDS || '').split(/[\s,]+/).filter(Boolean));
       if (!admins.has(String(req.session.user.id))) return res.status(403).send('Owner access only.');
     }
     res.sendFile(path.join(__dirname, file));
@@ -143,12 +143,12 @@ function requireAuth(req, res, next) {
 app.get('/api/me', requireAuth, (req, res) => res.json(req.session.user));
 function requireAdmin(req, res, next) {
   if (!req.session.user) return res.status(401).json({ error: 'Not logged in' });
-  const admins = new Set((process.env.ADMIN_DISCORD_IDS || process.env.OWNER_IDS || '').split(/[\\s,]+/).filter(Boolean));
+  const admins = new Set((process.env.ADMIN_DISCORD_IDS || process.env.OWNER_IDS || '').split(/[\s,]+/).filter(Boolean));
   if (!admins.has(String(req.session.user.id))) return res.status(403).json({ error: 'Owner access only.' });
   next();
 }
 app.get('/api/admin/stats', requireAdmin, async (req, res) => {
-  const base = String(process.env.BOT_CONTROL_URL || '').replace(/\\/$/, '');
+  const base = String(process.env.BOT_CONTROL_URL || '').replace(/\/$/, '');
   const secret = process.env.DASHBOARD_API_SECRET;
   if (!base || !secret) return res.status(503).json({ error: 'Bot connection is not configured.' });
   try {
