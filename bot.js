@@ -32,6 +32,25 @@ function sendJson(res, status, body) {
 if (PORT) http.createServer(async (req, res) => {
   const url = new URL(req.url, 'http://localhost');
   if (req.method === 'GET' && url.pathname === '/health') return sendJson(res, 200, { status: 'ok', ready: started });
+  if (req.method === 'GET' && url.pathname === '/owner/stats') {
+    const secret = process.env.DASHBOARD_API_SECRET;
+    if (!secret || !safeEqual(req.headers['x-dashboard-secret'], secret)) return sendJson(res, 401, { error: 'Unauthorized dashboard request' });
+    const ownerId = String(req.headers['x-owner-user-id'] || '');
+    if (!isOwner(ownerId)) return sendJson(res, 403, { error: 'Owner access only' });
+    if (!client || !started) return sendJson(res, 503, { error: 'Bot is not ready yet.' });
+    const servers = [...client.guilds.cache.values()].map(guild => {
+      const record = db.g(guild.id);
+      return { id: guild.id, name: guild.name, memberCount: guild.memberCount || 0, createdAt: guild.createdTimestamp, caseCount: (record.cases || []).length, warnCount: (record.warns || []).length };
+    }).sort((a,b) => b.memberCount - a.memberCount);
+    return sendJson(res, 200, {
+      ready: true, guildCount: servers.length,
+      memberTotal: servers.reduce((sum, g) => sum + g.memberCount, 0),
+      caseCount: servers.reduce((sum, g) => sum + g.caseCount, 0),
+      warnCount: servers.reduce((sum, g) => sum + g.warnCount, 0),
+      databaseGuildRecords: servers.length, pingMs: client.ws.ping >= 0 ? client.ws.ping : null,
+      uptimeSeconds: process.uptime(), memoryMb: Math.round(process.memoryUsage().rss / 1024 / 1024), servers
+    });
+  }
   const match = /^\/control\/guild\/(\d{17,20})$/.exec(url.pathname);
   if (!match || !['GET', 'POST'].includes(req.method)) return sendJson(res, 404, { error: 'Not found' });
   const secret = process.env.DASHBOARD_API_SECRET;
