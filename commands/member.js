@@ -54,7 +54,7 @@ module.exports = {
       await m.timeout(null, c.audit());
       return res('Timeout removed', `**${m.user.username}** can talk again.`, { user: m.user, case: c.case('untimeout', m.id) });
     }),
-    C('warn', 'Warn a member (saved in their record)', [U(), S('reason', 'Why are you warning them?', true, { max: 300 })], P.ModerateMembers, async (c) => {
+    C('warn', 'Warn a member (saved in their record)', [U(), RS()], P.ModerateMembers, async (c) => {
       const m = await c.m('user'); checkTarget(c, m, 'warn');
       const w = db.addWarn(c.g.id, { userId: m.id, modId: c.i.user.id, reason: c.reason() });
       const total = db.g(c.g.id).warns.filter((x) => x.userId === m.id).length;
