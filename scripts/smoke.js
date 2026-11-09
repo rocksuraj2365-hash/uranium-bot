@@ -4,16 +4,18 @@ const license = { name: 'license', commands: ['grant', 'revoke', 'access', 'prof
 license.map = new Map(license.commands.map((command) => [command.name, command]));
 const newCats = ['utility', 'community', 'fun', 'servertools'].map((name) => require('../commands/' + name));
 const template = require('../commands/template');
+const support = require('../commands/support');
 const security = require('../commands/security');
 security.map = new Map(security.commands.map((command) => [command.name, command]));
 template.map = new Map(template.commands.map((command) => [command.name, command]));
+support.map = new Map(support.commands.map((command) => [command.name, command]));
 for (const cat of newCats) cat.map = new Map(cat.commands.map((command) => [command.name, command]));
 for (const cat of newCats) {
   assert.equal(cat.commands.length, 25, cat.name + ' must contain exactly 25 new commands');
   assert.equal(new Set(cat.commands.map((x) => x.name)).size, 25, cat.name + ' command names must be unique');
 }
 assert.equal(newCats.reduce((n, cat) => n + cat.commands.length, 0), 100);
-prefix.init([...newCats, template, license, security]);
+prefix.init([...newCats, template, license, security, support]);
 for (const cat of newCats) {
   for (const def of cat.commands) {
     const hit = prefix.resolve(prefix.tokenize(cat.name + ' ' + def.name));
