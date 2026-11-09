@@ -51,7 +51,8 @@ Set the OAuth redirect URI in the Discord Developer Portal to:
 
 ## Notes
 
-- The website currently uses Express MemoryStore for sessions. Sessions are temporary and will be lost on restart; use a persistent session store before relying on long-lived production sessions.
+- The website currently uses Express MemoryStore for sessions. Sessions are temporary and will be lost on restart; a persistent PostgreSQL/Redis session store still needs to be provisioned and configured before relying on long-lived production sessions.
+- Bot JSON writes now use atomic replacement and flush on SIGTERM/SIGINT. This reduces partial writes and shutdown loss, but it does not change Render Free's ephemeral-filesystem limitation.
 - Dashboard controls are served through a session-protected web proxy and a bot API protected by `DASHBOARD_API_SECRET`. Set that same secret privately on both Render services before enabling controls.
 - Render Free services can sleep when idle.
 

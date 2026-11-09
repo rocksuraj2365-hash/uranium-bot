@@ -2,6 +2,7 @@ const { PermissionFlagsBits: P, ChannelType: CT } = require('discord.js');
 const { C, U, S, B, R, RS, DUR, I } = require('../lib/cmd');
 const db = require('../lib/db');
 const { UserError, res, checkTarget, checkRole, hexColor, parseDuration, fmt, ts, nice, trunc } = require('../lib/util');
+const { blockedSelfAssignablePermissions } = require('../lib/role-safety');
 
 const MR = P.ManageRoles;
 const PERMS = ['ViewChannel', 'SendMessages', 'ReadMessageHistory', 'AddReactions', 'AttachFiles', 'EmbedLinks', 'UseExternalEmojis', 'MentionEveryone', 'ManageMessages',
@@ -68,7 +69,10 @@ module.exports = {
       return res('Role moved', `${ping(r)} is now at position **${c.n('position')}**.`, { icon: '↕️', undo: { label: 'Position restored', fn: () => r.setPosition(old) } });
     }),
     C('clone', 'Copy a role with the same permissions', [roleOpt('role')], MR, async (c) => {
-      const r = c.r('role'); const n = await c.g.roles.create({ name: `${r.name} copy`.slice(0, 100), color: r.color, permissions: r.permissions, hoist: r.hoist, mentionable: r.mentionable, reason: c.audit() });
+      const r = c.r('role'); checkRole(c, r);
+      const blocked = blockedSelfAssignablePermissions(r);
+      if (blocked.length) throw new UserError(`Cannot clone **${r.name}** because it has powerful permissions.`, `Remove these permissions before cloning: ${blocked.join(', ')}`);
+      const n = await c.g.roles.create({ name: `${r.name} copy`.slice(0, 100), color: r.color, permissions: r.permissions, hoist: r.hoist, mentionable: r.mentionable, reason: c.audit() });
       return res('Role cloned', `Created ${ping(n)}.`, { icon: '🧬', undo: { label: 'Clone deleted', fn: () => n.delete() } });
     }),
     C('perms-view', 'See which permissions a role has', [roleOpt('role')], MR, async (c) => {

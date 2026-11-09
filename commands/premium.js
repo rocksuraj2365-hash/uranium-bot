@@ -2,7 +2,8 @@ const { PermissionFlagsBits: P, ChannelType: CT, EmbedBuilder, ActionRowBuilder,
 const os = require('os');
 const { C, U, S, I, CH, R } = require('../lib/cmd');
 const db = require('../lib/db');
-const { UserError, res, ts, trunc, snowflake, parseDuration, fmt, hexColor } = require('../lib/util');
+const { UserError, res, ts, trunc, snowflake, parseDuration, fmt, hexColor, checkRole } = require('../lib/util');
+const { isSafeSelfAssignableRole, blockedSelfAssignablePermissions } = require('../lib/role-safety');
 const { FOOT } = require('../lib/ui');
 
 const GOLD = 0xffd166;
@@ -32,14 +33,24 @@ function gwView(g, ended = false, winners = []) {
   return { embeds: [e], components: [new ActionRowBuilder().addComponents(btn('gw:enter', ended ? 'Ended' : 'Enter giveaway', '🎉', ButtonStyle.Success, ended))] };
 }
 async function endGiveaway(client, s) {
-  const d = db.g(s.guildId); const g = d.giveaways?.[s.messageId]; if (!g || g.ended) return;
-  g.ended = true; const pool = [...g.entrants]; const win = [];
-  while (pool.length && win.length < g.winners) win.push(pool.splice(Math.floor(Math.random() * pool.length), 1)[0]);
-  db.save();
-  const ch = await client.channels.fetch(s.channelId).catch(() => null); if (!ch) return;
-  const msg = await ch.messages.fetch(s.messageId).catch(() => null);
-  if (msg) await msg.edit(gwView(g, true, win)).catch(() => {});
-  await ch.send({ content: win.length ? `🎉 Congratulations ${win.map((w) => `<@${w}>`).join(', ')}! You won **${g.prize}**!` : `No one entered the giveaway for **${g.prize}**.` }).catch(() => {});
+  const d = db.g(s.guildId); const g = d.giveaways?.[s.messageId];
+  if (!g || g.ended) return true;
+  if (!g.ending) {
+    const pool = [...g.entrants]; const winners = [];
+    while (pool.length && winners.length < g.winners) winners.push(pool.splice(Math.floor(Math.random() * pool.length), 1)[0]);
+    g.winnersSelected = winners;
+    g.ending = true;
+    db.save();
+  }
+  const ch = await client.channels.fetch(s.channelId).catch((error) => { if (error.code === 10003 || error.status === 404) return null; throw error; });
+  if (!ch) { g.ended = true; db.save(); return true; }
+  const msg = await ch.messages.fetch(s.messageId).catch((error) => { if (error.code === 10008 || error.status === 404) return null; throw error; });
+  if (!msg) { g.ended = true; db.save(); return true; }
+  const winners = g.winnersSelected || [];
+  await msg.edit(gwView(g, true, winners));
+  await ch.send({ content: winners.length ? `🎉 Congratulations ${winners.map((w) => `<@${w}>`).join(', ')}! You won **${g.prize}**!` : `No one entered the giveaway for **${g.prize}**.`, allowedMentions: { users: winners } });
+  g.ended = true; g.ending = false; db.save();
+  return true;
 }
 async function onButton(i) {
   const [kind, a, b] = i.customId.split(':');
@@ -56,7 +67,8 @@ async function onButton(i) {
   if (kind === 'rp') {
     const role = i.guild.roles.cache.get(a); const me = i.guild.members.me;
     if (!role) return i.reply({ content: 'That role no longer exists.', flags: EPH });
-    if (role.managed || role.position >= me.roles.highest.position) return i.reply({ content: `I cannot give **${role.name}** (my role must be above it).`, flags: EPH });
+    if (!isSafeSelfAssignableRole(role) || role.id === i.guild.id) return i.reply({ content: `**${role.name}** is not eligible for self-assignment because it is managed or has powerful permissions.`, flags: EPH });
+    if (role.position >= me.roles.highest.position) return i.reply({ content: `I cannot give **${role.name}** (my role must be above it).`, flags: EPH });
     const has = i.member.roles.cache.has(role.id);
     await (has ? i.member.roles.remove(role) : i.member.roles.add(role));
     return i.reply({ content: has ? `➖ Removed **${role.name}**` : `✅ You now have **${role.name}**`, flags: EPH });
@@ -191,7 +203,7 @@ module.exports = {
       await c.i.client.user.setAvatar(c.s('url')); return own('Avatar changed', 'The bot has a new profile picture.', { icon: '🖼️' });
     }, O),
     C('restart', 'Premium: restart the bot', [], null, async () => {
-      setTimeout(() => process.exit(0), 2500); return own('Restarting', 'Uranium will be back in about a minute.', { icon: '♻️' });
+      setTimeout(() => { db.flush(); process.exit(0); }, 2500); return own('Restarting', 'Uranium will be back in about a minute.', { icon: '♻️' });
     }, { ...O, danger: 'The bot will **restart** and be offline for a minute.' }),
     C('live-stats', 'Premium: live animated bot statistics', [], null, liveStats, { ...O, custom: true }),
     C('emoji-add', 'Premium: add an emoji to this server', [S('name', 'Emoji name', true, { max: 32 }), S('source', 'Image URL or a custom emoji', true, { max: 300 })], P.ManageGuildExpressions, async (c) => {
@@ -212,8 +224,12 @@ module.exports = {
       db.schedule({ type: 'giveaway', at: end, guildId: c.g.id, channelId: c.ch.id, messageId: m.id });
       return own('Giveaway started', `Ends ${ts(end)}.`, { icon: '🎉', links: [['Open giveaway', m.url]] });
     }, PREMIUM_ACCESS),
-    C('role-panel', 'Premium: button panel to pick roles', [S('title', 'Panel title', true, { max: 100 }), R('role1', 'Role 1'), R('role2', 'Role 2', false), R('role3', 'Role 3', false), R('role4', 'Role 4', false), R('role5', 'Role 5', false)], null, async (c) => {
+    C('role-panel', 'Premium: button panel to pick roles', [S('title', 'Panel title', true, { max: 100 }), R('role1', 'Role 1'), R('role2', 'Role 2', false), R('role3', 'Role 3', false), R('role4', 'Role 4', false), R('role5', 'Role 5', false)], P.ManageRoles, async (c) => {
       const roles = ['role1', 'role2', 'role3', 'role4', 'role5'].map((n) => c.r(n)).filter(Boolean);
+      for (const role of roles) {
+        checkRole(c, role);
+        if (!isSafeSelfAssignableRole(role)) throw new UserError(`**${role.name}** cannot be placed in a self-assignment panel because it has powerful permissions.`, `Remove these permissions first: ${blockedSelfAssignablePermissions(role).join(', ')}`);
+      }
       const e = goldEmbed(`🏷️ ${c.s('title')}`, roles.map((r) => `• <@&${r.id}>`).join('\n') + '\n\nPress a button to get or remove a role.');
       const m = await c.ch.send({ embeds: [e], components: [new ActionRowBuilder().addComponents(roles.map((r) => btn(`rp:${r.id}`, trunc(r.name, 70), '🏷️')))] });
       return own('Role panel posted', 'Members can pick roles with the buttons.', { icon: '🏷️', links: [['Open panel', m.url]] });
