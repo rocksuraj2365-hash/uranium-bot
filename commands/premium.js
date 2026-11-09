@@ -33,14 +33,24 @@ function gwView(g, ended = false, winners = []) {
   return { embeds: [e], components: [new ActionRowBuilder().addComponents(btn('gw:enter', ended ? 'Ended' : 'Enter giveaway', '🎉', ButtonStyle.Success, ended))] };
 }
 async function endGiveaway(client, s) {
-  const d = db.g(s.guildId); const g = d.giveaways?.[s.messageId]; if (!g || g.ended) return;
-  g.ended = true; const pool = [...g.entrants]; const win = [];
-  while (pool.length && win.length < g.winners) win.push(pool.splice(Math.floor(Math.random() * pool.length), 1)[0]);
-  db.save();
-  const ch = await client.channels.fetch(s.channelId).catch(() => null); if (!ch) return;
-  const msg = await ch.messages.fetch(s.messageId).catch(() => null);
-  if (msg) await msg.edit(gwView(g, true, win)).catch(() => {});
-  await ch.send({ content: win.length ? `🎉 Congratulations ${win.map((w) => `<@${w}>`).join(', ')}! You won **${g.prize}**!` : `No one entered the giveaway for **${g.prize}**.` }).catch(() => {});
+  const d = db.g(s.guildId); const g = d.giveaways?.[s.messageId];
+  if (!g || g.ended) return true;
+  if (!g.ending) {
+    const pool = [...g.entrants]; const winners = [];
+    while (pool.length && winners.length < g.winners) winners.push(pool.splice(Math.floor(Math.random() * pool.length), 1)[0]);
+    g.winnersSelected = winners;
+    g.ending = true;
+    db.save();
+  }
+  const ch = await client.channels.fetch(s.channelId).catch((error) => { if (error.code === 10003 || error.status === 404) return null; throw error; });
+  if (!ch) { g.ended = true; db.save(); return true; }
+  const msg = await ch.messages.fetch(s.messageId).catch((error) => { if (error.code === 10008 || error.status === 404) return null; throw error; });
+  if (!msg) { g.ended = true; db.save(); return true; }
+  const winners = g.winnersSelected || [];
+  await msg.edit(gwView(g, true, winners));
+  await ch.send({ content: winners.length ? `🎉 Congratulations ${winners.map((w) => `<@${w}>`).join(', ')}! You won **${g.prize}**!` : `No one entered the giveaway for **${g.prize}**.`, allowedMentions: { users: winners } });
+  g.ended = true; g.ending = false; db.save();
+  return true;
 }
 async function onButton(i) {
   const [kind, a, b] = i.customId.split(':');
