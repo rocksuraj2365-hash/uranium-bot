@@ -203,7 +203,7 @@ module.exports = {
       await c.i.client.user.setAvatar(c.s('url')); return own('Avatar changed', 'The bot has a new profile picture.', { icon: '🖼️' });
     }, O),
     C('restart', 'Premium: restart the bot', [], null, async () => {
-      setTimeout(() => process.exit(0), 2500); return own('Restarting', 'Uranium will be back in about a minute.', { icon: '♻️' });
+      setTimeout(() => { db.flush(); process.exit(0); }, 2500); return own('Restarting', 'Uranium will be back in about a minute.', { icon: '♻️' });
     }, { ...O, danger: 'The bot will **restart** and be offline for a minute.' }),
     C('live-stats', 'Premium: live animated bot statistics', [], null, liveStats, { ...O, custom: true }),
     C('emoji-add', 'Premium: add an emoji to this server', [S('name', 'Emoji name', true, { max: 32 }), S('source', 'Image URL or a custom emoji', true, { max: 300 })], P.ManageGuildExpressions, async (c) => {
