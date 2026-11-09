@@ -2,7 +2,8 @@ const { PermissionFlagsBits: P, ChannelType: CT, EmbedBuilder, ActionRowBuilder,
 const os = require('os');
 const { C, U, S, I, CH, R } = require('../lib/cmd');
 const db = require('../lib/db');
-const { UserError, res, ts, trunc, snowflake, parseDuration, fmt, hexColor } = require('../lib/util');
+const { UserError, res, ts, trunc, snowflake, parseDuration, fmt, hexColor, checkRole } = require('../lib/util');
+const { isSafeSelfAssignableRole, blockedSelfAssignablePermissions } = require('../lib/role-safety');
 const { FOOT } = require('../lib/ui');
 
 const GOLD = 0xffd166;
@@ -56,7 +57,8 @@ async function onButton(i) {
   if (kind === 'rp') {
     const role = i.guild.roles.cache.get(a); const me = i.guild.members.me;
     if (!role) return i.reply({ content: 'That role no longer exists.', flags: EPH });
-    if (role.managed || role.position >= me.roles.highest.position) return i.reply({ content: `I cannot give **${role.name}** (my role must be above it).`, flags: EPH });
+    if (!isSafeSelfAssignableRole(role) || role.id === i.guild.id) return i.reply({ content: `**${role.name}** is not eligible for self-assignment because it is managed or has powerful permissions.`, flags: EPH });
+    if (role.position >= me.roles.highest.position) return i.reply({ content: `I cannot give **${role.name}** (my role must be above it).`, flags: EPH });
     const has = i.member.roles.cache.has(role.id);
     await (has ? i.member.roles.remove(role) : i.member.roles.add(role));
     return i.reply({ content: has ? `➖ Removed **${role.name}**` : `✅ You now have **${role.name}**`, flags: EPH });
@@ -212,8 +214,12 @@ module.exports = {
       db.schedule({ type: 'giveaway', at: end, guildId: c.g.id, channelId: c.ch.id, messageId: m.id });
       return own('Giveaway started', `Ends ${ts(end)}.`, { icon: '🎉', links: [['Open giveaway', m.url]] });
     }, PREMIUM_ACCESS),
-    C('role-panel', 'Premium: button panel to pick roles', [S('title', 'Panel title', true, { max: 100 }), R('role1', 'Role 1'), R('role2', 'Role 2', false), R('role3', 'Role 3', false), R('role4', 'Role 4', false), R('role5', 'Role 5', false)], null, async (c) => {
+    C('role-panel', 'Premium: button panel to pick roles', [S('title', 'Panel title', true, { max: 100 }), R('role1', 'Role 1'), R('role2', 'Role 2', false), R('role3', 'Role 3', false), R('role4', 'Role 4', false), R('role5', 'Role 5', false)], P.ManageRoles, async (c) => {
       const roles = ['role1', 'role2', 'role3', 'role4', 'role5'].map((n) => c.r(n)).filter(Boolean);
+      for (const role of roles) {
+        checkRole(c, role);
+        if (!isSafeSelfAssignableRole(role)) throw new UserError(`**${role.name}** cannot be placed in a self-assignment panel because it has powerful permissions.`, `Remove these permissions first: ${blockedSelfAssignablePermissions(role).join(', ')}`);
+      }
       const e = goldEmbed(`🏷️ ${c.s('title')}`, roles.map((r) => `• <@&${r.id}>`).join('\n') + '\n\nPress a button to get or remove a role.');
       const m = await c.ch.send({ embeds: [e], components: [new ActionRowBuilder().addComponents(roles.map((r) => btn(`rp:${r.id}`, trunc(r.name, 70), '🏷️')))] });
       return own('Role panel posted', 'Members can pick roles with the buttons.', { icon: '🏷️', links: [['Open panel', m.url]] });
