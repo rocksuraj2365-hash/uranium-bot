@@ -1,7 +1,7 @@
 {
   "version": 1,
   "generatedFrom": "commands/*.js",
-  "total": 353,
+  "total": 354,
   "categories": [
     {
       "name": "member",
@@ -2509,7 +2509,7 @@
     },
     {
       "name": "support",
-      "description": "Report Uranium issues and policy concerns.",
+      "description": "Collect user ratings and feedback, and report Uranium issues.",
       "commands": [
         {
           "name": "report",
@@ -2517,6 +2517,13 @@
           "slash": "/support report",
           "prefix": "!support report",
           "access": "Available subject to command permissions"
+        },
+        {
+          "name": "feedback",
+          "description": "Rate Uranium from 1 to 5 stars and leave optional feedback",
+          "slash": "/support feedback",
+          "prefix": "!feedback",
+          "access": "Available to all users; feedback is delivered privately to the bot team"
         }
       ]
     },
