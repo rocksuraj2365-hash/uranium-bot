@@ -312,16 +312,45 @@ async function button(i) {
 }
 
 /* ---------- scheduler ---------- */
+async function fetchScheduleResource(promise, missingCodes = []) {
+  try { return await promise; }
+  catch (error) { if (error.status === 404 || missingCodes.includes(error.code)) return null; throw error; }
+}
 async function tick() {
   for (const s of db.dueSchedules()) {
     try {
-      if (s.type === 'giveaway') { await premium.endGiveaway(client, s); db.dropSchedule(s.id); continue; }
-      const g = await client.guilds.fetch(s.guildId);
-      if (s.type === 'unban') { await g.members.unban(s.userId, 'Temp ban expired').catch(() => {}); db.addCase(s.guildId, { type: 'unban', userId: s.userId, modId: client.user.id, reason: 'Temp ban expired' }); }
-      if (s.type === 'unrole') { const m = await g.members.fetch(s.userId).catch(() => null); if (m) await m.roles.remove(s.roleId, 'Temp role expired').catch(() => {}); }
-      if (s.type === 'unlock') { const ch = await g.channels.fetch(s.channelId).catch(() => null); if (ch?.permissionOverwrites) { await ch.permissionOverwrites.edit(g.roles.everyone, { SendMessages: null }, { reason: 'Timed lockdown ended' }).catch(() => {}); ch.send?.({ embeds: [ui.okEmbed('Channel unlocked', 'The timed lockdown has ended.')] }).catch(() => {}); } }
-    } catch (e) { console.error('Schedule error:', e.message); }
-    db.dropSchedule(s.id);
+      let complete = false;
+      if (s.type === 'giveaway') complete = await premium.endGiveaway(client, s);
+      else {
+        const g = await fetchScheduleResource(client.guilds.fetch(s.guildId), [10004]);
+        if (!g) complete = true;
+        else if (s.type === 'unban') {
+          const ban = await fetchScheduleResource(g.bans.fetch(s.userId), [10026]);
+          if (ban) { await g.members.unban(s.userId, 'Temp ban expired'); db.addCase(s.guildId, { type: 'unban', userId: s.userId, modId: client.user.id, reason: 'Temp ban expired' }); }
+          complete = true;
+        } else if (s.type === 'unrole') {
+          const member = await fetchScheduleResource(g.members.fetch(s.userId), [10007]);
+          if (!member || !member.roles.cache.has(s.roleId)) complete = true;
+          else { await member.roles.remove(s.roleId, 'Temp role expired'); complete = true; }
+        } else if (s.type === 'unlock') {
+          const channel = await fetchScheduleResource(g.channels.fetch(s.channelId), [10003]);
+          if (!channel?.permissionOverwrites) complete = true;
+          else {
+            await channel.permissionOverwrites.edit(g.roles.everyone, { SendMessages: null }, { reason: 'Timed lockdown ended' });
+            channel.send?.({ embeds: [ui.okEmbed('Channel unlocked', 'The timed lockdown has ended.')] }).catch(() => {});
+            complete = true;
+          }
+        } else {
+          console.warn('Unknown scheduled action; removing it:', s.type);
+          complete = true;
+        }
+      }
+      if (complete) db.dropSchedule(s.id);
+      else db.retrySchedule(s.id, new Error('Scheduled action did not confirm completion'));
+    } catch (e) {
+      console.error('Schedule action failed; it will be retried:', e.message);
+      db.retrySchedule(s.id, e);
+    }
   }
 }
 
@@ -410,6 +439,14 @@ function makeClient(withContent) {
   return client;
 }
 process.on('unhandledRejection', (e) => console.error('Unhandled:', e));
+function shutdown(signal) {
+  console.log(`Received ${signal}; flushing Uranium data before shutdown.`);
+  db.flush();
+  if (client) client.destroy();
+  process.exit(0);
+}
+process.once('SIGTERM', () => shutdown('SIGTERM'));
+process.once('SIGINT', () => shutdown('SIGINT'));
 (async () => {
   for (const withContent of [true, false]) {
     const cl = makeClient(withContent);
