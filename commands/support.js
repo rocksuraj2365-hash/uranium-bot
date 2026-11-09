@@ -71,7 +71,7 @@ async function submitFeedback(c) {
     }
   }
   if (!delivered) {
-    const owners = [...new Set(String(process.env.OWNER_IDS || '').split(/[\\s,]+/).filter(id => /^\\d{17,20}$/.test(id)))];
+    const owners = [...new Set(String(process.env.OWNER_IDS || '').split(/[\s,]+/).filter(id => /^\d{17,20}$/.test(id)))];
     for (const ownerId of owners) {
       const owner = await c.i.client.users.fetch(ownerId).catch(() => null);
       if (!owner) continue;
