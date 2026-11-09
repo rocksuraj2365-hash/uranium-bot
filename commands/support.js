@@ -57,7 +57,7 @@ async function submitFeedback(c) {
     .setTitle('☢️ Uranium user feedback')
     .addFields(
       { name: 'Rating', value: `${stars} **${rating}/5**`, inline: true },
-      { name: 'User', value: `${c.i.user.username} (\\`${userId}\\`)`, inline: true },
+      { name: 'User', value: `${c.i.user.username} (\`${userId}\`)`, inline: true },
       { name: 'Server', value: trunc(c.g.name, 100), inline: true },
       { name: 'Feedback', value: trunc(comment || 'No written comment provided.', 1000) }
     ).setTimestamp();
