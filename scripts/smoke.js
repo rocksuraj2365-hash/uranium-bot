@@ -77,7 +77,7 @@ assert.ok(blockedSelfAssignablePermissions(adminRole).includes('Administrator'))
 const managedRole = { ...safeRole, managed: true };
 assert.equal(isSafeSelfAssignableRole(managedRole), false, 'Managed roles must never be self-assignable');
 
-// Components V2 payload contract: V2 flag, component-only body, and valid container tree.
+// Components V2 payload contract (also exercised by the Node checks workflow): V2 flag, component-only body, and valid container tree.
 const v2 = cv2.message([cv2.text('# Uranium'), cv2.separator(), cv2.row([cv2.button('test:action', 'Test', 1)])], 0x5b8cff);
 assert.equal(v2.flags, 1 << 15, 'CV2 messages must set IS_COMPONENTS_V2');
 assert.equal(v2.content, null, 'CV2 messages must not use legacy content');
