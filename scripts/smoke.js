@@ -1,5 +1,6 @@
 const assert = require('node:assert/strict');
 const prefix = require('../lib/prefix');
+const cv2 = require('../lib/cv2');
 const { isSafeSelfAssignableRole, blockedSelfAssignablePermissions } = require('../lib/role-safety');
 const { PermissionFlagsBits } = require('discord.js');
 const license = { name: 'license', commands: ['grant', 'revoke', 'access', 'profile'].map((name) => ({ name })) };
@@ -75,5 +76,17 @@ assert.equal(isSafeSelfAssignableRole(adminRole), false, 'Administrator roles mu
 assert.ok(blockedSelfAssignablePermissions(adminRole).includes('Administrator'));
 const managedRole = { ...safeRole, managed: true };
 assert.equal(isSafeSelfAssignableRole(managedRole), false, 'Managed roles must never be self-assignable');
+
+// Components V2 payload contract (also exercised by the Node checks workflow): V2 flag, component-only body, and valid container tree.
+const v2 = cv2.message([cv2.text('# Uranium'), cv2.separator(), cv2.row([cv2.button('test:action', 'Test', 1)])], 0x5b8cff);
+assert.equal(v2.flags, 1 << 15, 'CV2 messages must set IS_COMPONENTS_V2');
+assert.equal(v2.content, null, 'CV2 messages must not use legacy content');
+assert.deepEqual(v2.embeds, [], 'CV2 messages must not include legacy embeds');
+assert.equal(v2.components.length, 1);
+assert.equal(v2.components[0].type, 17, 'CV2 message should use a container');
+assert.equal(v2.components[0].components[0].type, 10, 'CV2 text should use Text Display');
+assert.equal(cv2.ephemeralMessage([cv2.text('Private')]).flags, (1 << 15) | (1 << 6), 'Private CV2 replies must preserve the ephemeral flag');
+
+console.log('Components V2 payload checks passed.');
 console.log('Command catalog and Discord subcommand-limit checks passed.');
 console.log('100 new prefix command and Premium shortcut smoke tests passed.');
