@@ -85,6 +85,9 @@ assert.deepEqual(v2.embeds, [], 'CV2 messages must not include legacy embeds');
 assert.equal(v2.components.length, 1);
 assert.equal(v2.components[0].type, 17, 'CV2 message should use a container');
 assert.equal(v2.components[0].components[0].type, 10, 'CV2 text should use Text Display');
+const selectRow = cv2.row([cv2.select('test:select', 'Choose', [{ label: 'One', value: 'one' }])]);
+assert.equal(selectRow.type, 1, 'String select menus must be wrapped in an Action Row');
+assert.equal(selectRow.components[0].type, 3, 'Action Row should contain the String Select Menu');
 assert.equal(cv2.ephemeralMessage([cv2.text('Private')]).flags, (1 << 15) | (1 << 6), 'Private CV2 replies must preserve the ephemeral flag');
 
 console.log('Components V2 payload checks passed.');
