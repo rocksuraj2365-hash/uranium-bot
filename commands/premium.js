@@ -63,7 +63,7 @@ async function endGiveaway(client, s) {
   if (!msg) { g.ended = true; db.save(); return true; }
   const winners = g.winnersSelected || [];
   await msg.edit(gwView(g, true, winners));
-  await ch.send({ content: winners.length ? `🎉 Congratulations ${winners.map((w) => `<@${w}>`).join(', ')}! You won **${g.prize}**!` : `No one entered the giveaway for **${g.prize}**.`, allowedMentions: { users: winners } });
+  await ch.send({ ...cv2.message([cv2.text(winners.length ? `# ${icons.E('crown')} Giveaway winners\\nCongratulations ${winners.map((w) => `<@${w}>`).join(', ')}! You won **${g.prize}**!` : `# Giveaway ended\\nNo one entered for **${g.prize}**.`)], GOLD), allowedMentions: { users: winners } });
   g.ended = true; g.ending = false; db.save();
   return true;
 }
@@ -161,7 +161,7 @@ async function builder(c) {
     st.title = m.fields.getTextInputValue('t'); st.description = m.fields.getTextInputValue('d'); st.footer = m.fields.getTextInputValue('f');
     const img = m.fields.getTextInputValue('i'); st.image = /^https?:\/\//i.test(img) ? img : '';
     try { st.color = hexColor(m.fields.getTextInputValue('c')); } catch { /* keep old color */ }
-    await c.i.editReply({ embeds: [mk()], components: [row(false)] });
+    await c.i.editReply(v2View(mk(), [row(false)]));
   });
   col.on('end', (_, why) => { if (why === 'time') c.i.editReply({ components: [] }).catch(() => {}); });
   return { handled: true };
@@ -246,11 +246,11 @@ module.exports = {
         if (!isSafeSelfAssignableRole(role)) throw new UserError(`**${role.name}** cannot be placed in a self-assignment panel because it has powerful permissions.`, `Remove these permissions first: ${blockedSelfAssignablePermissions(role).join(', ')}`);
       }
       const e = goldEmbed(`🏷️ ${c.s('title')}`, roles.map((r) => `• <@&${r.id}>`).join('\n') + '\n\nPress a button to get or remove a role.');
-      const m = await c.ch.send({ embeds: [e], components: [new ActionRowBuilder().addComponents(roles.map((r) => btn(`rp:${r.id}`, trunc(r.name, 70), '🏷️')))] });
+      const m = await c.ch.send(v2View(e, [new ActionRowBuilder().addComponents(roles.map((r) => btn(`rp:${r.id}`, trunc(r.name, 70), icons.E('role'))))]));
       return own('Role panel posted', 'Members can pick roles with the buttons.', { icon: '🏷️', links: [['Open panel', m.url]] });
     }, PREMIUM_ACCESS),
     C('ticket-panel', 'Premium: support ticket panel with a button', [CH('channel', 'Where to post (default: here)', false, [CT.GuildText]), CH('category', 'Category for tickets', false, [CT.GuildCategory]), R('support', 'Support role to add', false)], null, async (c) => {
-      const ch = c.c('channel') || c.ch; const m = await ch.send({ embeds: [goldEmbed('🎫 Support tickets', 'Need help? Press the button to open a private ticket.')], components: [new ActionRowBuilder().addComponents(btn(`tk:open:${c.r('support')?.id || 0}:${c.c('category')?.id || 0}`, 'Open ticket', '🎫', ButtonStyle.Success))] });
+      const ch = c.c('channel') || c.ch; const m = await ch.send(v2View(goldEmbed('Support tickets', 'Need help? Press the button to open a private ticket.'), [new ActionRowBuilder().addComponents(btn(`tk:open:${c.r('support')?.id || 0}:${c.c('category')?.id || 0}`, 'Open ticket', icons.E('support'), ButtonStyle.Success))]));
       return own('Ticket panel posted', `Posted in <#${ch.id}>.`, { icon: '🎫', links: [['Open panel', m.url]] });
     }, PREMIUM_ACCESS),
     C('backup', 'Premium: download this server layout as a file', [], null, async (c) => {
