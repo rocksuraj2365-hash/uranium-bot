@@ -24,9 +24,9 @@ function v2View(embed, rows = []) {
   const parts = [];
   if (data.title) parts.push(`# ${icons.E('premium')} ${data.title}`);
   if (data.description) parts.push(data.description);
-  for (const field of data.fields || []) parts.push(`**${field.name}**\\n${field.value}`);
+  for (const field of data.fields || []) parts.push(`**${field.name}**\n${field.value}`);
   if (data.footer?.text) parts.push(`-# ${data.footer.text}`);
-  const children = [cv2.text(parts.join('\\n\\n').slice(0, 4000))];
+  const children = [cv2.text(parts.join('\n\n').slice(0, 4000))];
   if (data.image?.url) children.push({ type: 12, items: [{ media: { url: data.image.url } }] });
   if (data.thumbnail?.url) children.push({ type: 12, items: [{ media: { url: data.thumbnail.url } }] });
   for (const row of rows) children.push(cv2.separator(), cv2.row(row.toJSON().components));
@@ -63,7 +63,7 @@ async function endGiveaway(client, s) {
   if (!msg) { g.ended = true; db.save(); return true; }
   const winners = g.winnersSelected || [];
   await msg.edit(gwView(g, true, winners));
-  await ch.send({ ...cv2.message([cv2.text(winners.length ? `# ${icons.E('crown')} Giveaway winners\\nCongratulations ${winners.map((w) => `<@${w}>`).join(', ')}! You won **${g.prize}**!` : `# Giveaway ended\\nNo one entered for **${g.prize}**.`)], GOLD), allowedMentions: { users: winners } });
+  await ch.send({ ...cv2.message([cv2.text(winners.length ? `# ${icons.E('crown')} Giveaway winners\nCongratulations ${winners.map((w) => `<@${w}>`).join(', ')}! You won **${g.prize}**!` : `# Giveaway ended\nNo one entered for **${g.prize}**.`)], GOLD), allowedMentions: { users: winners } });
   g.ended = true; g.ending = false; db.save();
   return true;
 }
