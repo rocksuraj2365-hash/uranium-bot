@@ -214,7 +214,7 @@ async function execute(i, cat, def) {
     if (def.danger && !(await ui.confirm(i, def.danger))) return { ok: false, error: 'The user cancelled or did not confirm.' };
     const r = def.custom ? await def.run(c) : await ui.animate(i, label, () => def.run(c));
     if (r?.handled) return { ok: true, note: 'Done (the result was shown in the channel).' };
-    await ui.sendResult(i, r);
+    await ui.sendResult(i, { ...r, category: cat.name, command: def.name });
     modlog(i, cat, def, r);
     return { ok: true, title: r.title, details: String(r.desc || '').slice(0, 300) };
   } catch (e) { await ui.sendError(i, e, label); return { ok: false, error: String(e?.message || e).slice(0, 300) }; }
