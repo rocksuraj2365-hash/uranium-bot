@@ -5,6 +5,8 @@ const db = require('../lib/db');
 const { UserError, res, ts, trunc, snowflake, parseDuration, fmt, hexColor, checkRole } = require('../lib/util');
 const { isSafeSelfAssignableRole, blockedSelfAssignablePermissions } = require('../lib/role-safety');
 const { FOOT } = require('../lib/ui');
+const cv2 = require('../lib/cv2');
+const icons = require('../lib/emojis');
 
 const GOLD = 0xffd166;
 const EPH = MessageFlags.Ephemeral;
@@ -17,6 +19,17 @@ const O = { owner: true };
 const PREMIUM_ACCESS = { premium: true };
 const btn = (id, label, emoji, style = ButtonStyle.Secondary, off = false) => new ButtonBuilder().setCustomId(id).setLabel(label).setEmoji(emoji).setStyle(style).setDisabled(off);
 const goldEmbed = (t, d) => new EmbedBuilder().setColor(GOLD).setTitle(t).setDescription(d || null).setFooter({ text: `Uranium Premium` }).setTimestamp();
+function v2View(embed, rows = []) {
+  const data = embed.toJSON();
+  const parts = [];
+  if (data.title) parts.push(`# ${icons.E('premium')} ${data.title}`);
+  if (data.description) parts.push(data.description);
+  for (const field of data.fields || []) parts.push(`**${field.name}**\\n${field.value}`);
+  if (data.footer?.text) parts.push(`-# ${data.footer.text}`);
+  const children = [cv2.text(parts.join('\\n\\n').slice(0, 4000))];
+  for (const row of rows) children.push(cv2.separator(), cv2.row(row.toJSON().components));
+  return cv2.message(children, data.color ?? GOLD);
+}
 
 /* ---------- interactive views ---------- */
 function pollView(id, closed = false) {
@@ -25,12 +38,12 @@ function pollView(id, closed = false) {
   const e = goldEmbed(`📊 ${p.q}`, lines.join('\n\n')).setFooter({ text: `${total} vote(s) • ${closed ? 'Poll closed' : 'Click a button to vote'}` });
   const row1 = new ActionRowBuilder().addComponents(p.opts.map((o, k) => btn(`poll:${id}:${k}`, trunc(o, 60), ['1️⃣', '2️⃣', '3️⃣', '4️⃣', '5️⃣'][k], ButtonStyle.Primary, closed)));
   const row2 = new ActionRowBuilder().addComponents(btn(`poll:${id}:end`, 'End poll', '🔒', ButtonStyle.Danger, closed));
-  return { embeds: [e], components: [row1, row2] };
+  return v2View(e, [row1, row2]);
 }
 function gwView(g, ended = false, winners = []) {
   const e = goldEmbed(`🎉 ${g.prize}`, ended ? (winners.length ? `**Winner(s):** ${winners.map((w) => `<@${w}>`).join(', ')}` : 'No valid entries.') : `Press the button to enter!\nEnds ${ts(g.end)}\nWinners: **${g.winners}**`)
     .setFooter({ text: `${g.entrants.length} entr${g.entrants.length === 1 ? 'y' : 'ies'} • Hosted by ${g.hostName || 'owner'}` });
-  return { embeds: [e], components: [new ActionRowBuilder().addComponents(btn('gw:enter', ended ? 'Ended' : 'Enter giveaway', '🎉', ButtonStyle.Success, ended))] };
+  return v2View(e, [new ActionRowBuilder().addComponents(btn('gw:enter', ended ? 'Ended' : 'Enter giveaway', icons.E('crown'), ButtonStyle.Success, ended))]);
 }
 async function endGiveaway(client, s) {
   const d = db.g(s.guildId); const g = d.giveaways?.[s.messageId];
@@ -109,7 +122,7 @@ async function liveStats(c) {
   const render = (n) => {
     hist.push(Math.round(cl.ws.ping)); if (hist.length > 16) hist.shift(); const mx = Math.max(...hist, 1);
     const mem = process.memoryUsage().rss; const load = os.loadavg()[0];
-    return goldEmbed('📈 Live stats', null).addFields(
+    return goldEmbed('Live stats', null).addFields(
       { name: '📡 Ping', value: `**${Math.round(cl.ws.ping)} ms**\n\`${hist.map((v) => spark[Math.min(7, Math.floor((v / mx) * 7))]).join('')}\``, inline: true },
       { name: '🧠 Memory', value: `${Math.round(mem / 1048576)} MB\n\`${bar(mem / os.totalmem())}\``, inline: true },
       { name: '⚙️ CPU load', value: `${load.toFixed(2)}\n\`${bar(Math.min(1, load / os.cpus().length))}\``, inline: true },
@@ -118,11 +131,11 @@ async function liveStats(c) {
   };
   const row = (off) => new ActionRowBuilder().addComponents(btn('lst:r', 'Refresh', '🔄', ButtonStyle.Primary, off), btn('lst:x', 'Stop', '⏹️', ButtonStyle.Danger, off));
   let n = 0;
-  const msg = await c.i.editReply({ embeds: [render(n)], components: [row(false)] });
-  const timer = setInterval(() => { n++; if (n > 12) return col.stop(); c.i.editReply({ embeds: [render(n)] }).catch(() => {}); }, 5000);
+  const msg = await c.i.editReply(v2View(render(n), [row(false)]));
+  const timer = setInterval(() => { n++; if (n > 12) return col.stop(); c.i.editReply(v2View(render(n), [row(false)])).catch(() => {}); }, 5000);
   const col = msg.createMessageComponentCollector({ time: 75000, filter: (b) => b.customId.startsWith('lst:') && b.user.id === c.i.user.id });
-  col.on('collect', async (b) => { if (b.customId === 'lst:x') return col.stop(); await b.update({ embeds: [render(n)] }); });
-  col.on('end', () => { clearInterval(timer); c.i.editReply({ components: [row(true)] }).catch(() => {}); });
+  col.on('collect', async (b) => { if (b.customId === 'lst:x') return col.stop(); await b.update(v2View(render(n), [row(false)])); });
+  col.on('end', () => { clearInterval(timer); c.i.editReply(v2View(render(n), [row(true)])).catch(() => {}); });
   return { handled: true };
 }
 async function builder(c) {
