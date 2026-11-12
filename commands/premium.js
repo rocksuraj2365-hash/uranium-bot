@@ -68,40 +68,40 @@ async function endGiveaway(client, s) {
 async function onButton(i) {
   const [kind, a, b] = i.customId.split(':');
   if (kind === 'poll') {
-    const p = polls.get(a); if (!p) return i.reply({ content: 'This poll is no longer active (the bot restarted).', flags: EPH });
-    if (b === 'end') { if (i.user.id !== p.by) return i.reply({ content: 'Only the poll creator can end it.', flags: EPH }); polls.set(a, p); return i.update(pollView(a, true)); }
+    const p = polls.get(a); if (!p) return i.reply(cv2.ephemeralMessage([cv2.text('# ⚠️ Poll unavailable\nThis poll is no longer active (the bot restarted).')], GOLD));
+    if (b === 'end') { if (i.user.id !== p.by) return i.reply(cv2.ephemeralMessage([cv2.text('# 🔒 Poll control\nOnly the poll creator can end it.')], GOLD)); polls.set(a, p); return i.update(pollView(a, true)); }
     p.votes.set(i.user.id, Number(b)); return i.update(pollView(a));
   }
   if (kind === 'gw') {
-    const g = db.g(i.guildId).giveaways?.[i.message.id]; if (!g || g.ended) return i.reply({ content: 'This giveaway has ended.', flags: EPH });
+    const g = db.g(i.guildId).giveaways?.[i.message.id]; if (!g || g.ended) return i.reply(cv2.ephemeralMessage([cv2.text('# 🎉 Giveaway ended')], GOLD));
     const k = g.entrants.indexOf(i.user.id); if (k >= 0) g.entrants.splice(k, 1); else g.entrants.push(i.user.id); db.save();
     return i.update(gwView(g));
   }
   if (kind === 'rp') {
     const role = i.guild.roles.cache.get(a); const me = i.guild.members.me;
-    if (!role) return i.reply({ content: 'That role no longer exists.', flags: EPH });
-    if (!isSafeSelfAssignableRole(role) || role.id === i.guild.id) return i.reply({ content: `**${role.name}** is not eligible for self-assignment because it is managed or has powerful permissions.`, flags: EPH });
-    if (role.position >= me.roles.highest.position) return i.reply({ content: `I cannot give **${role.name}** (my role must be above it).`, flags: EPH });
+    if (!role) return i.reply(cv2.ephemeralMessage([cv2.text('# ⚠️ Role unavailable\nThat role no longer exists.')], GOLD));
+    if (!isSafeSelfAssignableRole(role) || role.id === i.guild.id) return i.reply(cv2.ephemeralMessage([cv2.text(`# ⚠️ Role unavailable\n**${role.name}** is managed or has powerful permissions and cannot be self-assigned.`)], GOLD));
+    if (role.position >= me.roles.highest.position) return i.reply(cv2.ephemeralMessage([cv2.text(`# ⚠️ Role hierarchy\nI cannot give **${role.name}** because my highest role must be above it.`)], GOLD));
     const has = i.member.roles.cache.has(role.id);
     await (has ? i.member.roles.remove(role) : i.member.roles.add(role));
-    return i.reply({ content: has ? `➖ Removed **${role.name}**` : `✅ You now have **${role.name}**`, flags: EPH });
+    return i.reply(cv2.ephemeralMessage([cv2.text(has ? `# ${icons.E('cross')} Role removed\n**${role.name}**` : `# ${icons.E('check')} Role added\nYou now have **${role.name}**`)], GOLD));
   }
   if (kind === 'tk' && a === 'open') {
     const [, , sup, cat] = i.customId.split(':'); await i.deferReply({ flags: EPH });
     const old = i.guild.channels.cache.find((c) => c.topic === `ticket:${i.user.id}`);
-    if (old) return i.editReply({ content: `You already have a ticket: <#${old.id}>` });
+    if (old) return i.editReply(cv2.message([cv2.text(`# ${icons.E('warn')} Ticket already exists\nYou already have a ticket: <#${old.id}>`)], GOLD));
     const allow = ['ViewChannel', 'SendMessages', 'ReadMessageHistory', 'AttachFiles'];
     const ow = [{ id: i.guild.id, deny: ['ViewChannel'] }, { id: i.user.id, allow }, { id: i.client.user.id, allow: [...allow, 'ManageChannels', 'EmbedLinks'] }];
     if (sup !== '0') ow.push({ id: sup, allow });
     const ch = await i.guild.channels.create({ name: `ticket-${i.user.username}`.slice(0, 90), type: CT.GuildText, parent: cat !== '0' ? cat : undefined, topic: `ticket:${i.user.id}`, permissionOverwrites: ow });
-    await ch.send({ content: `<@${i.user.id}>${sup !== '0' ? ` <@&${sup}>` : ''}`, embeds: [goldEmbed('🎫 Ticket opened', 'Explain your problem. A moderator will help you soon.')], components: [new ActionRowBuilder().addComponents(btn('tk:close', 'Close ticket', '🔒', ButtonStyle.Danger))] });
-    return i.editReply({ content: `✅ Ticket created: <#${ch.id}>` });
+    await ch.send({ ...cv2.message([cv2.text(`<@${i.user.id}>${sup !== '0' ? ` <@&${sup}>` : ''}\n\n# ${icons.E('support')} Ticket opened\nExplain your problem. A moderator will help you soon.`), cv2.separator(), cv2.row([cv2.button('tk:close', 'Close ticket', 4, icons.E('lock'))])], GOLD), allowedMentions: { users: [i.user.id], roles: sup !== '0' ? [sup] : [] } });
+    return i.editReply(cv2.message([cv2.text(`# ${icons.E('check')} Ticket created\n<#${ch.id}>`)], GOLD));
   }
   if (kind === 'tk' && a === 'close') {
     const ownerId = (i.channel.topic || '').replace('ticket:', '');
-    if (i.user.id !== ownerId && !i.memberPermissions.has(P.ManageChannels)) return i.reply({ content: 'Only the ticket owner or a moderator can close this.', flags: EPH });
-    await i.reply({ embeds: [goldEmbed('🔒 Closing ticket', 'Deleting this channel in **3**…')] });
-    for (const n of [2, 1]) { await new Promise((r) => setTimeout(r, 1000)); await i.editReply({ embeds: [goldEmbed('🔒 Closing ticket', `Deleting this channel in **${n}**…`)] }).catch(() => {}); }
+    if (i.user.id !== ownerId && !i.memberPermissions.has(P.ManageChannels)) return i.reply(cv2.ephemeralMessage([cv2.text('# 🔒 Access denied\nOnly the ticket owner or a moderator can close this.')], GOLD));
+    await i.reply(cv2.message([cv2.text(`# ${icons.E('lock')} Closing ticket\nDeleting this channel in **3**…`)], GOLD));
+    for (const n of [2, 1]) { await new Promise((r) => setTimeout(r, 1000)); await i.editReply(cv2.message([cv2.text(`# ${icons.E('lock')} Closing ticket\nDeleting this channel in **${n}**…`)], GOLD)).catch(() => {}); }
     await new Promise((r) => setTimeout(r, 1000)); return i.channel.delete().catch(() => {});
   }
   return false;
