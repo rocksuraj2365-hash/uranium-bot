@@ -1,4 +1,6 @@
-const { PermissionFlagsBits: P, EmbedBuilder } = require('discord.js');
+const { PermissionFlagsBits: P } = require('discord.js');
+const cv2 = require('../lib/cv2');
+const icons = require('../lib/emojis');
 const { C, U, S, I, CH, R } = require('../lib/cmd');
 const { UserError, res, hexColor, snowflake, trunc, ts } = require('../lib/util');
 
@@ -66,14 +68,14 @@ module.exports = {
     }),
     C('say-embed', 'Make the bot send a nice embed', [S('title', 'Embed title', true, { max: 200 }), S('text', 'Embed text', true, { max: 3500 }), S('color', 'Hex color like #39d98a', false, { max: 10 }), CH('channel', 'Where (default: here)')], MM, async (c) => {
       const ch = sendable(target(c));
-      const e = new EmbedBuilder().setTitle(c.s('title')).setDescription(c.s('text')).setColor(c.s('color') ? hexColor(c.s('color')) : 0x39d98a).setTimestamp();
-      const m = await ch.send({ embeds: [e], allowedMentions: NOPING });
+      const color = c.s('color') ? hexColor(c.s('color')) : 0x39d98a;
+      const m = await ch.send(cv2.message([cv2.text(`# ${icons.E('message')} ${c.s('title')}\\n${c.s('text')}`)], color));
       return res('Embed sent', `Posted in <#${ch.id}>.`, { icon: '🖼️', links: [['Open', m.url]] });
     }),
     C('announce', 'Post an announcement embed (optionally ping a role)', [S('title', 'Title', true, { max: 200 }), S('text', 'Announcement text', true, { max: 3500 }), CH('channel', 'Where (default: here)'), R('ping', 'Role to ping', false)], MM, async (c) => {
       const ch = sendable(target(c)); const role = c.r('ping');
-      const e = new EmbedBuilder().setTitle(`📢 ${c.s('title')}`).setDescription(c.s('text')).setColor(0x5b8cff).setFooter({ text: `By ${c.i.user.username}` }).setTimestamp();
-      const m = await ch.send({ content: role ? `<@&${role.id}>` : undefined, embeds: [e], allowedMentions: role ? { roles: [role.id] } : NOPING });
+      const mention = role ? `<@&${role.id}>\\n` : '';
+      const m = await ch.send({ ...cv2.message([cv2.text(`${mention}# ${icons.E('message')} ${c.s('title')}\\n${c.s('text')}\\n\\n-# Announcement by ${c.i.user.username}`)], 0x5b8cff), allowedMentions: role ? { roles: [role.id] } : NOPING });
       return res('Announcement posted', `Posted in <#${ch.id}>.`, { icon: '📢', links: [['Open', m.url]] });
     }),
     C('edit-bot-message', 'Edit a message the bot sent', [S('message_id', 'Message ID', true, { max: 25 }), S('text', 'New text', true, { max: 1900 })], MM, async (c) => {
