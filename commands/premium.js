@@ -163,7 +163,7 @@ async function builder(c) {
     try { st.color = hexColor(m.fields.getTextInputValue('c')); } catch { /* keep old color */ }
     await c.i.editReply(v2View(mk(), [row(false)]));
   });
-  col.on('end', (_, why) => { if (why === 'time') c.i.editReply({ components: [] }).catch(() => {}); });
+  col.on('end', (_, why) => { if (why === 'time') c.i.editReply(v2View(mk(), [row(true)])).catch(() => {}); });
   return { handled: true };
 }
 
