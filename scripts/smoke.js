@@ -130,6 +130,10 @@ for (const category of allCommandCategories) {
     assert.ok(full, 'Full prefix route missing: ' + category.name + ' ' + command.name);
     assert.equal(full.cat, category);
     assert.equal(full.def, command);
+    const compactForm = prefix.shortOf(category.name, command.name);
+    const compact = prefix.resolve(prefix.tokenize(compactForm));
+    assert.ok(compact, 'Generated short form missing: ' + compactForm);
+    assert.equal(compact.def, command, 'Generated short form resolved to the wrong command: ' + compactForm);
     const shortCategory = prefix.CAT_SHORT[category.name];
     if (shortCategory) {
       const short = prefix.resolve(prefix.tokenize(shortCategory + ' ' + command.name));
