@@ -25,7 +25,7 @@ module.exports = {
     C('resume', 'Resume the music', [], null, async (c) => { music.resume(c.g.id); return m('Resumed', `${E('play')} Music resumed.`); }),
     C('volume', 'Change the volume (1-100)', [I('level', 'Volume percent', true, 1, 100)], null, async (c) => { music.volume(c.g.id, c.n('level')); return m('Volume set', `${E('vol')} **${c.n('level')}%**\n\`${music.bar(c.n('level') / 100)}\``); }),
     C('nowplaying', 'Show what is playing with a live equalizer', [], null, async (c) => {
-      for (let k = 0; k < 8; k++) { const p = music.panel(c.g); await c.i.editReply({ embeds: p.embeds, components: k === 7 ? p.components : [] }); if (!music.state(c.g.id)) break; await sleep(3000); }
+      for (let k = 0; k < 8; k++) { const p = music.panel(c.g); await c.i.editReply(p); if (!music.state(c.g.id)) break; await sleep(3000); }
       return { handled: true };
     }, { custom: true }),
     C('stations', 'List all radio stations', [], null, async () => m('Radio stations', music.STATIONS.map((s) => `🎶 \`${s[0]}\` — ${s[1]}`).join('\n') + '\n\nPlay one with `/music play station:<name>`', { icon: '📻' })),
