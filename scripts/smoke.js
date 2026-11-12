@@ -116,3 +116,28 @@ async function testSharedRenderer() {
   assert.ok(sent.components[0].components.some((part) => part.type === 13), 'Attachment results must use a V2 File component');
 }
 testSharedRenderer().then(() => console.log('Shared Components V2 command renderer checks passed.')).catch((error) => { console.error(error); process.exitCode = 1; });
+// Rebuild the actual 19-category router and verify every published command resolves.
+const allCommandCategories = catalog.categories.map((entry) => {
+  const category = require('../commands/' + entry.name);
+  category.map = new Map(category.commands.map((command) => [command.name, command]));
+  return category;
+});
+prefix.init(allCommandCategories);
+let routedCommandCount = 0;
+for (const category of allCommandCategories) {
+  for (const command of category.commands) {
+    const full = prefix.resolve(prefix.tokenize(category.name + ' ' + command.name));
+    assert.ok(full, 'Full prefix route missing: ' + category.name + ' ' + command.name);
+    assert.equal(full.cat, category);
+    assert.equal(full.def, command);
+    const shortCategory = prefix.CAT_SHORT[category.name];
+    if (shortCategory) {
+      const short = prefix.resolve(prefix.tokenize(shortCategory + ' ' + command.name));
+      assert.ok(short, 'Short category route missing: ' + shortCategory + ' ' + command.name);
+      assert.equal(short.def, command);
+    }
+    routedCommandCount += 1;
+  }
+}
+assert.equal(routedCommandCount, 354, 'Every one of the 354 commands must have a working full prefix route');
+console.log('All 354 full-name and available short-category prefix routes passed.');
