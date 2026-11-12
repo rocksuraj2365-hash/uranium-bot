@@ -1,6 +1,7 @@
 const assert = require('node:assert/strict');
 const prefix = require('../lib/prefix');
 const cv2 = require('../lib/cv2');
+const icons = require('../lib/emojis');
 const { isSafeSelfAssignableRole, blockedSelfAssignablePermissions } = require('../lib/role-safety');
 const { PermissionFlagsBits } = require('discord.js');
 const license = { name: 'license', commands: ['grant', 'revoke', 'access', 'profile'].map((name) => ({ name })) };
@@ -89,6 +90,10 @@ const selectRow = cv2.row([cv2.select('test:select', 'Choose', [{ label: 'One', 
 assert.equal(selectRow.type, 1, 'String select menus must be wrapped in an Action Row');
 assert.equal(selectRow.components[0].type, 3, 'Action Row should contain the String Select Menu');
 assert.equal(cv2.ephemeralMessage([cv2.text('Private')]).flags, (1 << 15) | (1 << 6), 'Private CV2 replies must preserve the ephemeral flag');
+const custom = cv2.emoji('<:ux_member:123456789012345678>');
+assert.deepEqual(custom, { id: '123456789012345678', name: 'ux_member', animated: false }, 'Custom emoji mentions must become valid component emoji objects');
+assert.deepEqual(cv2.emoji('🔒'), { name: '🔒' }, 'Unicode fallback emojis must remain supported');
+assert.ok(icons.FALLBACK.member && icons.FALLBACK.premium, 'Every major command category must have a safe icon fallback');
 
 console.log('Components V2 payload checks passed.');
 console.log('Command catalog and Discord subcommand-limit checks passed.');
