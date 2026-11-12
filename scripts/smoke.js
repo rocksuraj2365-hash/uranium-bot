@@ -98,3 +98,21 @@ assert.ok(icons.FALLBACK.member && icons.FALLBACK.premium, 'Every major command 
 console.log('Components V2 payload checks passed.');
 console.log('Command catalog and Discord subcommand-limit checks passed.');
 console.log('100 new prefix command and Premium shortcut smoke tests passed.');
+
+// Shared command renderer contract: every ordinary command result must be a CV2 payload.
+const renderer = require('../lib/ui2');
+async function testSharedRenderer() {
+  let sent = null;
+  const interaction = { user: { id: '123456789012345678', username: 'tester' }, editReply: async (payload) => { sent = payload; } };
+  await renderer.sendResult(interaction, { title: 'Member warned', desc: 'A moderation action completed.', fields: [['Reason', 'Repeated spam']] });
+  assert.equal(sent.flags, cv2.FLAG, 'Shared command result must use Components V2');
+  assert.deepEqual(sent.embeds, [], 'Shared command result must not use legacy embeds');
+  assert.equal(sent.components[0].type, 17, 'Shared command result must use a V2 container');
+  assert.ok(sent.components[0].components.some((part) => part.type === 10 && part.content.includes('Member warned')), 'Shared command result must include its title in Text Display');
+  assert.ok(sent.components[0].components.some((part) => part.type === 1), 'Shared command result must keep its action buttons in an Action Row');
+  sent = null;
+  await renderer.sendResult(interaction, { title: 'Image generated', files: [{ name: 'preview.png', data: Buffer.from('test') }] });
+  assert.equal(sent.flags, cv2.FLAG, 'Attachment command results must also use Components V2');
+  assert.ok(sent.components[0].components.some((part) => part.type === 13), 'Attachment results must use a V2 File component');
+}
+testSharedRenderer().then(() => console.log('Shared Components V2 command renderer checks passed.')).catch((error) => { console.error(error); process.exitCode = 1; });
