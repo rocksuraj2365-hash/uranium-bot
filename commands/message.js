@@ -63,7 +63,7 @@ module.exports = {
       return res('Reaction added', `Reacted with ${c.s('emoji')}.`, { icon: '😀' });
     }),
     C('say', 'Make the bot send a message', [S('text', 'What should I say?', true, { max: 1900 }), CH('channel', 'Where (default: here)')], MM, async (c) => {
-      const ch = sendable(target(c)); const m = await ch.send({ content: c.s('text'), allowedMentions: NOPING });
+      const ch = sendable(target(c)); const m = await ch.send({ ...cv2.message([cv2.text(`# ${icons.E('message')} Message\\n${c.s('text')}`)], 0x8b5cf6), allowedMentions: NOPING });
       return res('Message sent', `Posted in <#${ch.id}>.`, { icon: '💬', links: [['Open', m.url]] });
     }),
     C('say-embed', 'Make the bot send a nice embed', [S('title', 'Embed title', true, { max: 200 }), S('text', 'Embed text', true, { max: 3500 }), S('color', 'Hex color like #39d98a', false, { max: 10 }), CH('channel', 'Where (default: here)')], MM, async (c) => {
@@ -81,7 +81,7 @@ module.exports = {
     C('edit-bot-message', 'Edit a message the bot sent', [S('message_id', 'Message ID', true, { max: 25 }), S('text', 'New text', true, { max: 1900 })], MM, async (c) => {
       const m = await msgOf(c, c.s('message_id'));
       if (m.author.id !== c.me.id) throw new UserError('I can only edit my own messages', 'Pick a message that Uranium sent.');
-      await m.edit({ content: c.s('text'), allowedMentions: NOPING });
+      await m.edit({ ...cv2.message([cv2.text(`# ${icons.E('message')} Updated message\\n${c.s('text')}`)], 0x8b5cf6), allowedMentions: NOPING });
       return res('Message edited', `[Jump to message](${m.url})`, { icon: '✏️' });
     }),
     C('message-info', 'Show details about a message', [S('message_id', 'Message ID', true, { max: 25 })], MM, async (c) => {
@@ -89,7 +89,7 @@ module.exports = {
       return res('Message info', trunc(m.content || '(no text)', 800), { icon: '🔎', color: 0x5b8cff, user: m.author, fields: [['Author', `${m.author.username} (\`${m.author.id}\`)`], ['Sent', ts(m.createdTimestamp), true], ['Pinned', m.pinned ? 'Yes' : 'No', true], ['Files', String(m.attachments.size), true], ['Reactions', String(m.reactions.cache.size), true]], links: [['Open', m.url]] });
     }),
     C('reply', 'Make the bot reply to a message', [S('message_id', 'Message ID', true, { max: 25 }), S('text', 'Reply text', true, { max: 1900 })], MM, async (c) => {
-      const m = await msgOf(c, c.s('message_id')); const r = await m.reply({ content: c.s('text'), allowedMentions: NOPING });
+      const m = await msgOf(c, c.s('message_id')); const r = await m.reply({ ...cv2.message([cv2.text(`# ${icons.E('message')} Reply\\n${c.s('text')}`)], 0x8b5cf6), allowedMentions: NOPING });
       return res('Reply sent', 'Replied to the message.', { icon: '↩️', links: [['Open', r.url]] });
     }),
   ],
