@@ -1,4 +1,6 @@
 const { EmbedBuilder, Routes } = require('discord.js');
+const cv2 = require('../lib/cv2');
+const icons = require('../lib/emojis');
 const { C, U, S } = require('../lib/cmd');
 const db = require('../lib/db');
 const { UserError, hexColor } = require('../lib/util');
@@ -92,7 +94,11 @@ module.exports = {
         .setFooter({ text: `Uranium • ${c.g.name}` }).setTimestamp();
       if (brand.avatar) e.setThumbnail(brand.avatar);
       if (brand.banner) e.setImage(brand.banner);
-      await c.i.editReply({ embeds: [e] });
+      const body = [cv2.text(`# ${icons.E('atom')} ${brand.name || c.g.name}\n${brand.bio || 'Server-specific Uranium profile'}`)];
+      const media = [brand.avatar, brand.banner].filter((url) => typeof url === 'string' && /^https?:\\/\\//i.test(url));
+      if (media.length) body.push({ type: 12, items: media.map((url) => ({ media: { url } })) });
+      body.push(cv2.separator(), cv2.text(`-# Uranium • ${c.g.name}`));
+      await c.i.editReply(cv2.message(body, brand.color || GOLD));
       return { handled: true };
     }, { ...P, custom: true }),
   ],
