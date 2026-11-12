@@ -15,7 +15,7 @@ async function submitReport(c) {
   const details = String(c.s('details') || '').trim();
   if (details.length < 8) throw new UserError('Please add a little more detail.', 'A useful report needs at least 8 characters.');
   const payload = {
-    ...cv2.message([cv2.text(`# ${icons.E('support')} Uranium user report\\n\\n${trunc(details, 1000)}\\n\\n**Reporter:** ${c.i.user.username} (\`${userId}\`)\\n**Server:** ${trunc(c.g.name, 100)}\\n**Channel:** #${trunc(c.ch?.name || 'unknown', 90)} (\`${c.ch?.id || 'unknown'}\`)`)], 0x8b5cf6),
+    ...cv2.message([cv2.text(`# ${icons.E('support')} Uranium user report\n\n${trunc(details, 1000)}\n\n**Reporter:** ${c.i.user.username} (\`${userId}\`)\n**Server:** ${trunc(c.g.name, 100)}\n**Channel:** #${trunc(c.ch?.name || 'unknown', 90)} (\`${c.ch?.id || 'unknown'}\`)`)], 0x8b5cf6),
     allowedMentions: { parse: [] },
   };
   let delivered = false;
@@ -51,7 +51,7 @@ async function submitFeedback(c) {
   const comment = String(c.s('comment') || '').trim();
   const stars = '⭐'.repeat(rating) + '☆'.repeat(5 - rating);
   const payload = {
-    ...cv2.message([cv2.text(`# ${icons.E('atom')} Uranium user feedback\\n\\n**Rating:** ${stars} **${rating}/5**\\n**User:** ${c.i.user.username} (\`${userId}\`)\\n**Server:** ${trunc(c.g.name, 100)}\\n\\n**Feedback**\\n${trunc(comment || 'No written comment provided.', 1000)}`)], rating >= 4 ? 0x39d98a : rating === 3 ? 0xffb84d : 0xff6b6b),
+    ...cv2.message([cv2.text(`# ${icons.E('atom')} Uranium user feedback\n\n**Rating:** ${stars} **${rating}/5**\n**User:** ${c.i.user.username} (\`${userId}\`)\n**Server:** ${trunc(c.g.name, 100)}\n\n**Feedback**\n${trunc(comment || 'No written comment provided.', 1000)}`)], rating >= 4 ? 0x39d98a : rating === 3 ? 0xffb84d : 0xff6b6b),
     allowedMentions: { parse: [] },
   };
   let delivered = false;
