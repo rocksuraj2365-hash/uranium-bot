@@ -15,7 +15,7 @@ module.exports = {
   commands: [
     C('set-modlog', 'Choose the channel where mod actions are logged', [CH('channel', 'Log channel', true, [CT.GuildText, CT.GuildAnnouncement])], MG, async (c) => {
       const ch = c.c('channel'); db.g(c.g.id).config.modlog = ch.id; db.save();
-      await ch.send({ content: '✅ Uranium will log moderation actions here.' }).catch(() => { throw new UserError(`I cannot write in <#${ch.id}>`, 'Give me View Channel and Send Messages there.'); });
+      await ch.send(cv2.message([cv2.text(`# ${icons.E('security')} Uranium moderation log\\nModeration actions will be recorded in this channel.`)], 0x8b5cf6)).catch(() => { throw new UserError(`I cannot write in <#${ch.id}>`, 'Give me View Channel and Send Messages there.'); });
       return res('Mod log set', `Actions will be logged in <#${ch.id}>.`, { icon: '📜' });
     }),
     C('clear-modlog', 'Stop logging mod actions', [], MG, async (c) => {
