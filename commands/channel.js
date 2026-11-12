@@ -84,7 +84,7 @@ module.exports = {
       const old = c.ch; if (old.type !== CT.GuildText) throw new UserError('Nuke only works in normal text channels');
       const n = await old.clone({ reason: c.audit() }); await n.setPosition(old.position);
       await c.i.deleteReply().catch(() => {}); await old.delete(c.audit());
-      await n.send({ embeds: [require('../lib/ui').resultEmbed(res('Channel nuked', `All messages were wiped by **${c.i.user.username}**.`, { icon: '💥', color: 0xff4d6d }))] });
+      await n.send(cv2.message([cv2.text(`# ${icons.E('cross')} Channel recreated\nAll messages were wiped by **${c.i.user.username}**.`)], 0xff4d6d));
       return { handled: true };
     }, { danger: 'This will **delete all messages** in this channel by recreating it.' }),
     C('lock-reactions', 'Stop @everyone from adding reactions', [CHN()], MC, (c) => setPerm(c, 'Reactions locked', { AddReactions: false }, { AddReactions: null }, '🚫')),

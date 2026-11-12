@@ -1,6 +1,7 @@
 const assert = require('node:assert/strict');
 const prefix = require('../lib/prefix');
 const cv2 = require('../lib/cv2');
+const icons = require('../lib/emojis');
 const { isSafeSelfAssignableRole, blockedSelfAssignablePermissions } = require('../lib/role-safety');
 const { PermissionFlagsBits } = require('discord.js');
 const license = { name: 'license', commands: ['grant', 'revoke', 'access', 'profile'].map((name) => ({ name })) };
@@ -89,7 +90,58 @@ const selectRow = cv2.row([cv2.select('test:select', 'Choose', [{ label: 'One', 
 assert.equal(selectRow.type, 1, 'String select menus must be wrapped in an Action Row');
 assert.equal(selectRow.components[0].type, 3, 'Action Row should contain the String Select Menu');
 assert.equal(cv2.ephemeralMessage([cv2.text('Private')]).flags, (1 << 15) | (1 << 6), 'Private CV2 replies must preserve the ephemeral flag');
+const custom = cv2.emoji('<:ux_member:123456789012345678>');
+assert.deepEqual(custom, { id: '123456789012345678', name: 'ux_member', animated: false }, 'Custom emoji mentions must become valid component emoji objects');
+assert.deepEqual(cv2.emoji('🔒'), { name: '🔒' }, 'Unicode fallback emojis must remain supported');
+assert.ok(icons.FALLBACK.member && icons.FALLBACK.premium, 'Every major command category must have a safe icon fallback');
 
 console.log('Components V2 payload checks passed.');
 console.log('Command catalog and Discord subcommand-limit checks passed.');
 console.log('100 new prefix command and Premium shortcut smoke tests passed.');
+
+// Shared command renderer contract: every ordinary command result must be a CV2 payload.
+const renderer = require('../lib/ui2');
+async function testSharedRenderer() {
+  let sent = null;
+  const interaction = { user: { id: '123456789012345678', username: 'tester' }, editReply: async (payload) => { sent = payload; } };
+  await renderer.sendResult(interaction, { title: 'Member warned', desc: 'A moderation action completed.', fields: [['Reason', 'Repeated spam']] });
+  assert.equal(sent.flags, cv2.FLAG, 'Shared command result must use Components V2');
+  assert.deepEqual(sent.embeds, [], 'Shared command result must not use legacy embeds');
+  assert.equal(sent.components[0].type, 17, 'Shared command result must use a V2 container');
+  assert.ok(sent.components[0].components.some((part) => part.type === 10 && part.content.includes('Member warned')), 'Shared command result must include its title in Text Display');
+  assert.ok(sent.components[0].components.some((part) => part.type === 1), 'Shared command result must keep its action buttons in an Action Row');
+  sent = null;
+  await renderer.sendResult(interaction, { title: 'Image generated', files: [{ name: 'preview.png', data: Buffer.from('test') }] });
+  assert.equal(sent.flags, cv2.FLAG, 'Attachment command results must also use Components V2');
+  assert.ok(sent.components[0].components.some((part) => part.type === 13), 'Attachment results must use a V2 File component');
+}
+testSharedRenderer().then(() => console.log('Shared Components V2 command renderer checks passed.')).catch((error) => { console.error(error); process.exitCode = 1; });
+// Rebuild the actual 19-category router and verify every published command resolves.
+const allCommandCategories = catalog.categories.map((entry) => {
+  const category = require('../commands/' + entry.name);
+  category.map = new Map(category.commands.map((command) => [command.name, command]));
+  return category;
+});
+prefix.init(allCommandCategories);
+let routedCommandCount = 0;
+for (const category of allCommandCategories) {
+  for (const command of category.commands) {
+    const full = prefix.resolve(prefix.tokenize(category.name + ' ' + command.name));
+    assert.ok(full, 'Full prefix route missing: ' + category.name + ' ' + command.name);
+    assert.equal(full.cat, category);
+    assert.equal(full.def, command);
+    const compactForm = prefix.shortOf(category.name, command.name);
+    const compact = prefix.resolve(prefix.tokenize(compactForm));
+    assert.ok(compact, 'Generated short form missing: ' + compactForm);
+    assert.equal(compact.def, command, 'Generated short form resolved to the wrong command: ' + compactForm);
+    const shortCategory = prefix.CAT_SHORT[category.name];
+    if (shortCategory) {
+      const short = prefix.resolve(prefix.tokenize(shortCategory + ' ' + command.name));
+      assert.ok(short, 'Short category route missing: ' + shortCategory + ' ' + command.name);
+      assert.equal(short.def, command);
+    }
+    routedCommandCount += 1;
+  }
+}
+assert.equal(routedCommandCount, 354, 'Every one of the 354 commands must have a working full prefix route');
+console.log('All 354 full-name and available short-category prefix routes passed.');

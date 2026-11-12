@@ -5,6 +5,8 @@ const db = require('../lib/db');
 const { UserError, res, ts, trunc, snowflake, parseDuration, fmt, hexColor, checkRole } = require('../lib/util');
 const { isSafeSelfAssignableRole, blockedSelfAssignablePermissions } = require('../lib/role-safety');
 const { FOOT } = require('../lib/ui');
+const cv2 = require('../lib/cv2');
+const icons = require('../lib/emojis');
 
 const GOLD = 0xffd166;
 const EPH = MessageFlags.Ephemeral;
@@ -17,6 +19,19 @@ const O = { owner: true };
 const PREMIUM_ACCESS = { premium: true };
 const btn = (id, label, emoji, style = ButtonStyle.Secondary, off = false) => new ButtonBuilder().setCustomId(id).setLabel(label).setEmoji(emoji).setStyle(style).setDisabled(off);
 const goldEmbed = (t, d) => new EmbedBuilder().setColor(GOLD).setTitle(t).setDescription(d || null).setFooter({ text: `Uranium Premium` }).setTimestamp();
+function v2View(embed, rows = []) {
+  const data = embed.toJSON();
+  const parts = [];
+  if (data.title) parts.push(`# ${icons.E('premium')} ${data.title}`);
+  if (data.description) parts.push(data.description);
+  for (const field of data.fields || []) parts.push(`**${field.name}**\n${field.value}`);
+  if (data.footer?.text) parts.push(`-# ${data.footer.text}`);
+  const children = [cv2.text(parts.join('\n\n').slice(0, 4000))];
+  if (data.image?.url) children.push({ type: 12, items: [{ media: { url: data.image.url } }] });
+  if (data.thumbnail?.url) children.push({ type: 12, items: [{ media: { url: data.thumbnail.url } }] });
+  for (const row of rows) children.push(cv2.separator(), cv2.row(row.toJSON().components));
+  return cv2.message(children, data.color ?? GOLD);
+}
 
 /* ---------- interactive views ---------- */
 function pollView(id, closed = false) {
@@ -25,12 +40,12 @@ function pollView(id, closed = false) {
   const e = goldEmbed(`📊 ${p.q}`, lines.join('\n\n')).setFooter({ text: `${total} vote(s) • ${closed ? 'Poll closed' : 'Click a button to vote'}` });
   const row1 = new ActionRowBuilder().addComponents(p.opts.map((o, k) => btn(`poll:${id}:${k}`, trunc(o, 60), ['1️⃣', '2️⃣', '3️⃣', '4️⃣', '5️⃣'][k], ButtonStyle.Primary, closed)));
   const row2 = new ActionRowBuilder().addComponents(btn(`poll:${id}:end`, 'End poll', '🔒', ButtonStyle.Danger, closed));
-  return { embeds: [e], components: [row1, row2] };
+  return v2View(e, [row1, row2]);
 }
 function gwView(g, ended = false, winners = []) {
   const e = goldEmbed(`🎉 ${g.prize}`, ended ? (winners.length ? `**Winner(s):** ${winners.map((w) => `<@${w}>`).join(', ')}` : 'No valid entries.') : `Press the button to enter!\nEnds ${ts(g.end)}\nWinners: **${g.winners}**`)
     .setFooter({ text: `${g.entrants.length} entr${g.entrants.length === 1 ? 'y' : 'ies'} • Hosted by ${g.hostName || 'owner'}` });
-  return { embeds: [e], components: [new ActionRowBuilder().addComponents(btn('gw:enter', ended ? 'Ended' : 'Enter giveaway', '🎉', ButtonStyle.Success, ended))] };
+  return v2View(e, [new ActionRowBuilder().addComponents(btn('gw:enter', ended ? 'Ended' : 'Enter giveaway', icons.E('crown'), ButtonStyle.Success, ended))]);
 }
 async function endGiveaway(client, s) {
   const d = db.g(s.guildId); const g = d.giveaways?.[s.messageId];
@@ -48,47 +63,47 @@ async function endGiveaway(client, s) {
   if (!msg) { g.ended = true; db.save(); return true; }
   const winners = g.winnersSelected || [];
   await msg.edit(gwView(g, true, winners));
-  await ch.send({ content: winners.length ? `🎉 Congratulations ${winners.map((w) => `<@${w}>`).join(', ')}! You won **${g.prize}**!` : `No one entered the giveaway for **${g.prize}**.`, allowedMentions: { users: winners } });
+  await ch.send({ ...cv2.message([cv2.text(winners.length ? `# ${icons.E('crown')} Giveaway winners\nCongratulations ${winners.map((w) => `<@${w}>`).join(', ')}! You won **${g.prize}**!` : `# Giveaway ended\nNo one entered for **${g.prize}**.`)], GOLD), allowedMentions: { users: winners } });
   g.ended = true; g.ending = false; db.save();
   return true;
 }
 async function onButton(i) {
   const [kind, a, b] = i.customId.split(':');
   if (kind === 'poll') {
-    const p = polls.get(a); if (!p) return i.reply({ content: 'This poll is no longer active (the bot restarted).', flags: EPH });
-    if (b === 'end') { if (i.user.id !== p.by) return i.reply({ content: 'Only the poll creator can end it.', flags: EPH }); polls.set(a, p); return i.update(pollView(a, true)); }
+    const p = polls.get(a); if (!p) return i.reply(cv2.ephemeralMessage([cv2.text('# ⚠️ Poll unavailable\nThis poll is no longer active (the bot restarted).')], GOLD));
+    if (b === 'end') { if (i.user.id !== p.by) return i.reply(cv2.ephemeralMessage([cv2.text('# 🔒 Poll control\nOnly the poll creator can end it.')], GOLD)); polls.set(a, p); return i.update(pollView(a, true)); }
     p.votes.set(i.user.id, Number(b)); return i.update(pollView(a));
   }
   if (kind === 'gw') {
-    const g = db.g(i.guildId).giveaways?.[i.message.id]; if (!g || g.ended) return i.reply({ content: 'This giveaway has ended.', flags: EPH });
+    const g = db.g(i.guildId).giveaways?.[i.message.id]; if (!g || g.ended) return i.reply(cv2.ephemeralMessage([cv2.text('# 🎉 Giveaway ended')], GOLD));
     const k = g.entrants.indexOf(i.user.id); if (k >= 0) g.entrants.splice(k, 1); else g.entrants.push(i.user.id); db.save();
     return i.update(gwView(g));
   }
   if (kind === 'rp') {
     const role = i.guild.roles.cache.get(a); const me = i.guild.members.me;
-    if (!role) return i.reply({ content: 'That role no longer exists.', flags: EPH });
-    if (!isSafeSelfAssignableRole(role) || role.id === i.guild.id) return i.reply({ content: `**${role.name}** is not eligible for self-assignment because it is managed or has powerful permissions.`, flags: EPH });
-    if (role.position >= me.roles.highest.position) return i.reply({ content: `I cannot give **${role.name}** (my role must be above it).`, flags: EPH });
+    if (!role) return i.reply(cv2.ephemeralMessage([cv2.text('# ⚠️ Role unavailable\nThat role no longer exists.')], GOLD));
+    if (!isSafeSelfAssignableRole(role) || role.id === i.guild.id) return i.reply(cv2.ephemeralMessage([cv2.text(`# ⚠️ Role unavailable\n**${role.name}** is managed or has powerful permissions and cannot be self-assigned.`)], GOLD));
+    if (role.position >= me.roles.highest.position) return i.reply(cv2.ephemeralMessage([cv2.text(`# ⚠️ Role hierarchy\nI cannot give **${role.name}** because my highest role must be above it.`)], GOLD));
     const has = i.member.roles.cache.has(role.id);
     await (has ? i.member.roles.remove(role) : i.member.roles.add(role));
-    return i.reply({ content: has ? `➖ Removed **${role.name}**` : `✅ You now have **${role.name}**`, flags: EPH });
+    return i.reply(cv2.ephemeralMessage([cv2.text(has ? `# ${icons.E('cross')} Role removed\n**${role.name}**` : `# ${icons.E('check')} Role added\nYou now have **${role.name}**`)], GOLD));
   }
   if (kind === 'tk' && a === 'open') {
     const [, , sup, cat] = i.customId.split(':'); await i.deferReply({ flags: EPH });
     const old = i.guild.channels.cache.find((c) => c.topic === `ticket:${i.user.id}`);
-    if (old) return i.editReply({ content: `You already have a ticket: <#${old.id}>` });
+    if (old) return i.editReply(cv2.message([cv2.text(`# ${icons.E('warn')} Ticket already exists\nYou already have a ticket: <#${old.id}>`)], GOLD));
     const allow = ['ViewChannel', 'SendMessages', 'ReadMessageHistory', 'AttachFiles'];
     const ow = [{ id: i.guild.id, deny: ['ViewChannel'] }, { id: i.user.id, allow }, { id: i.client.user.id, allow: [...allow, 'ManageChannels', 'EmbedLinks'] }];
     if (sup !== '0') ow.push({ id: sup, allow });
     const ch = await i.guild.channels.create({ name: `ticket-${i.user.username}`.slice(0, 90), type: CT.GuildText, parent: cat !== '0' ? cat : undefined, topic: `ticket:${i.user.id}`, permissionOverwrites: ow });
-    await ch.send({ content: `<@${i.user.id}>${sup !== '0' ? ` <@&${sup}>` : ''}`, embeds: [goldEmbed('🎫 Ticket opened', 'Explain your problem. A moderator will help you soon.')], components: [new ActionRowBuilder().addComponents(btn('tk:close', 'Close ticket', '🔒', ButtonStyle.Danger))] });
-    return i.editReply({ content: `✅ Ticket created: <#${ch.id}>` });
+    await ch.send({ ...cv2.message([cv2.text(`<@${i.user.id}>${sup !== '0' ? ` <@&${sup}>` : ''}\n\n# ${icons.E('support')} Ticket opened\nExplain your problem. A moderator will help you soon.`), cv2.separator(), cv2.row([cv2.button('tk:close', 'Close ticket', 4, icons.E('lock'))])], GOLD), allowedMentions: { users: [i.user.id], roles: sup !== '0' ? [sup] : [] } });
+    return i.editReply(cv2.message([cv2.text(`# ${icons.E('check')} Ticket created\n<#${ch.id}>`)], GOLD));
   }
   if (kind === 'tk' && a === 'close') {
     const ownerId = (i.channel.topic || '').replace('ticket:', '');
-    if (i.user.id !== ownerId && !i.memberPermissions.has(P.ManageChannels)) return i.reply({ content: 'Only the ticket owner or a moderator can close this.', flags: EPH });
-    await i.reply({ embeds: [goldEmbed('🔒 Closing ticket', 'Deleting this channel in **3**…')] });
-    for (const n of [2, 1]) { await new Promise((r) => setTimeout(r, 1000)); await i.editReply({ embeds: [goldEmbed('🔒 Closing ticket', `Deleting this channel in **${n}**…`)] }).catch(() => {}); }
+    if (i.user.id !== ownerId && !i.memberPermissions.has(P.ManageChannels)) return i.reply(cv2.ephemeralMessage([cv2.text('# 🔒 Access denied\nOnly the ticket owner or a moderator can close this.')], GOLD));
+    await i.reply(cv2.message([cv2.text(`# ${icons.E('lock')} Closing ticket\nDeleting this channel in **3**…`)], GOLD));
+    for (const n of [2, 1]) { await new Promise((r) => setTimeout(r, 1000)); await i.editReply(cv2.message([cv2.text(`# ${icons.E('lock')} Closing ticket\nDeleting this channel in **${n}**…`)], GOLD)).catch(() => {}); }
     await new Promise((r) => setTimeout(r, 1000)); return i.channel.delete().catch(() => {});
   }
   return false;
@@ -97,7 +112,7 @@ async function onButton(i) {
 /* ---------- custom (interactive) commands ---------- */
 async function servers(c) {
   const gs = [...c.i.client.guilds.cache.values()].sort((a, b) => b.memberCount - a.memberCount); let page = 0; const per = 8; const pages = Math.max(1, Math.ceil(gs.length / per));
-  const view = (off) => ({ embeds: [goldEmbed(`💎 Servers (${gs.length})`, gs.slice(page * per, page * per + per).map((g, k) => `**${page * per + k + 1}.** ${g.name}\n\`${g.id}\` • ${g.memberCount} members`).join('\n\n') || '_None_').setFooter({ text: `Page ${page + 1}/${pages} • ${FOOT}` })], components: [new ActionRowBuilder().addComponents(btn('sv:prev', 'Prev', '◀️', ButtonStyle.Secondary, off || page === 0), btn('sv:next', 'Next', '▶️', ButtonStyle.Secondary, off || page >= pages - 1), btn('sv:close', 'Close', '✖️', ButtonStyle.Danger, off))] });
+  const view = (off) => v2View(goldEmbed(`Servers (${gs.length})`, gs.slice(page * per, page * per + per).map((g, k) => `**${page * per + k + 1}.** ${g.name}\n\`${g.id}\` • ${g.memberCount} members`).join('\n\n') || '_None_').setFooter({ text: `Page ${page + 1}/${pages} • ${FOOT}` }), [new ActionRowBuilder().addComponents(btn('sv:prev', 'Prev', '◀️', ButtonStyle.Secondary, off || page === 0), btn('sv:next', 'Next', '▶️', ButtonStyle.Secondary, off || page >= pages - 1), btn('sv:close', 'Close', '✖️', ButtonStyle.Danger, off))]);
   const msg = await c.i.editReply(view(false));
   const col = msg.createMessageComponentCollector({ time: 120000, filter: (b) => b.customId.startsWith('sv:') && b.user.id === c.i.user.id });
   col.on('collect', async (b) => { const k = b.customId.split(':')[1]; if (k === 'close') { col.stop(); return b.update(view(true)); } page = k === 'next' ? Math.min(page + 1, pages - 1) : Math.max(page - 1, 0); await b.update(view(false)); });
@@ -109,7 +124,7 @@ async function liveStats(c) {
   const render = (n) => {
     hist.push(Math.round(cl.ws.ping)); if (hist.length > 16) hist.shift(); const mx = Math.max(...hist, 1);
     const mem = process.memoryUsage().rss; const load = os.loadavg()[0];
-    return goldEmbed('📈 Live stats', null).addFields(
+    return goldEmbed('Live stats', null).addFields(
       { name: '📡 Ping', value: `**${Math.round(cl.ws.ping)} ms**\n\`${hist.map((v) => spark[Math.min(7, Math.floor((v / mx) * 7))]).join('')}\``, inline: true },
       { name: '🧠 Memory', value: `${Math.round(mem / 1048576)} MB\n\`${bar(mem / os.totalmem())}\``, inline: true },
       { name: '⚙️ CPU load', value: `${load.toFixed(2)}\n\`${bar(Math.min(1, load / os.cpus().length))}\``, inline: true },
@@ -118,24 +133,24 @@ async function liveStats(c) {
   };
   const row = (off) => new ActionRowBuilder().addComponents(btn('lst:r', 'Refresh', '🔄', ButtonStyle.Primary, off), btn('lst:x', 'Stop', '⏹️', ButtonStyle.Danger, off));
   let n = 0;
-  const msg = await c.i.editReply({ embeds: [render(n)], components: [row(false)] });
-  const timer = setInterval(() => { n++; if (n > 12) return col.stop(); c.i.editReply({ embeds: [render(n)] }).catch(() => {}); }, 5000);
+  const msg = await c.i.editReply(v2View(render(n), [row(false)]));
+  const timer = setInterval(() => { n++; if (n > 12) return col.stop(); c.i.editReply(v2View(render(n), [row(false)])).catch(() => {}); }, 5000);
   const col = msg.createMessageComponentCollector({ time: 75000, filter: (b) => b.customId.startsWith('lst:') && b.user.id === c.i.user.id });
-  col.on('collect', async (b) => { if (b.customId === 'lst:x') return col.stop(); await b.update({ embeds: [render(n)] }); });
-  col.on('end', () => { clearInterval(timer); c.i.editReply({ components: [row(true)] }).catch(() => {}); });
+  col.on('collect', async (b) => { if (b.customId === 'lst:x') return col.stop(); await b.update(v2View(render(n), [row(false)])); });
+  col.on('end', () => { clearInterval(timer); c.i.editReply(v2View(render(n), [row(true)])).catch(() => {}); });
   return { handled: true };
 }
 async function builder(c) {
   const st = { title: 'Your title', description: 'Press ✏️ Edit to change this text.', color: GOLD, image: '', footer: '' };
   const mk = () => { const e = new EmbedBuilder().setColor(st.color).setTitle(st.title || null).setDescription(st.description || null); if (st.image) e.setImage(st.image); if (st.footer) e.setFooter({ text: st.footer }); return e; };
   const row = (off) => new ActionRowBuilder().addComponents(btn('eb:edit', 'Edit', '✏️', ButtonStyle.Primary, off), btn('eb:send', 'Send', '📤', ButtonStyle.Success, off), btn('eb:x', 'Cancel', '✖️', ButtonStyle.Danger, off));
-  const msg = await c.i.editReply({ content: '🛠️ **Embed builder** — preview below', embeds: [mk()], components: [row(false)] });
+  const msg = await c.i.editReply(v2View(mk(), [row(false)]));
   const col = msg.createMessageComponentCollector({ time: 300000, filter: (b) => b.customId.startsWith('eb:') && b.user.id === c.i.user.id });
   col.on('collect', async (b) => {
-    if (b.customId === 'eb:x') { col.stop('x'); return b.update({ content: '❌ Cancelled.', embeds: [], components: [] }); }
+    if (b.customId === 'eb:x') { col.stop('x'); return b.update(cv2.message([cv2.text('# ❌ Cancelled')], GOLD)); }
     if (b.customId === 'eb:send') {
       const ch = c.c('channel') || c.ch; await b.deferUpdate();
-      try { await ch.send({ embeds: [mk()] }); col.stop('sent'); return c.i.editReply({ content: `✅ Sent to <#${ch.id}>`, embeds: [mk()], components: [] }); } catch { return c.i.editReply({ content: '⚠️ I cannot send there.', components: [row(false)] }); }
+      try { await ch.send(v2View(mk())); col.stop('sent'); return c.i.editReply(v2View(goldEmbed('Builder sent', `Your Components V2 panel was sent to <#${ch.id}>.`))); } catch { return c.i.editReply(v2View(goldEmbed('Cannot send', 'I cannot send in that channel.'), [row(false)])); }
     }
     const inp = (id, label, style, val, req = false, max = 200) => new ActionRowBuilder().addComponents(new TextInputBuilder().setCustomId(id).setLabel(label).setStyle(style).setRequired(req).setMaxLength(max).setValue(String(val || '').slice(0, max)));
     await b.showModal(new ModalBuilder().setCustomId('eb:modal').setTitle('Edit embed').addComponents(
@@ -146,7 +161,7 @@ async function builder(c) {
     st.title = m.fields.getTextInputValue('t'); st.description = m.fields.getTextInputValue('d'); st.footer = m.fields.getTextInputValue('f');
     const img = m.fields.getTextInputValue('i'); st.image = /^https?:\/\//i.test(img) ? img : '';
     try { st.color = hexColor(m.fields.getTextInputValue('c')); } catch { /* keep old color */ }
-    await c.i.editReply({ embeds: [mk()], components: [row(false)] });
+    await c.i.editReply(v2View(mk(), [row(false)]));
   });
   col.on('end', (_, why) => { if (why === 'time') c.i.editReply({ components: [] }).catch(() => {}); });
   return { handled: true };
@@ -231,11 +246,11 @@ module.exports = {
         if (!isSafeSelfAssignableRole(role)) throw new UserError(`**${role.name}** cannot be placed in a self-assignment panel because it has powerful permissions.`, `Remove these permissions first: ${blockedSelfAssignablePermissions(role).join(', ')}`);
       }
       const e = goldEmbed(`🏷️ ${c.s('title')}`, roles.map((r) => `• <@&${r.id}>`).join('\n') + '\n\nPress a button to get or remove a role.');
-      const m = await c.ch.send({ embeds: [e], components: [new ActionRowBuilder().addComponents(roles.map((r) => btn(`rp:${r.id}`, trunc(r.name, 70), '🏷️')))] });
+      const m = await c.ch.send(v2View(e, [new ActionRowBuilder().addComponents(roles.map((r) => btn(`rp:${r.id}`, trunc(r.name, 70), icons.E('role'))))]));
       return own('Role panel posted', 'Members can pick roles with the buttons.', { icon: '🏷️', links: [['Open panel', m.url]] });
     }, PREMIUM_ACCESS),
     C('ticket-panel', 'Premium: support ticket panel with a button', [CH('channel', 'Where to post (default: here)', false, [CT.GuildText]), CH('category', 'Category for tickets', false, [CT.GuildCategory]), R('support', 'Support role to add', false)], null, async (c) => {
-      const ch = c.c('channel') || c.ch; const m = await ch.send({ embeds: [goldEmbed('🎫 Support tickets', 'Need help? Press the button to open a private ticket.')], components: [new ActionRowBuilder().addComponents(btn(`tk:open:${c.r('support')?.id || 0}:${c.c('category')?.id || 0}`, 'Open ticket', '🎫', ButtonStyle.Success))] });
+      const ch = c.c('channel') || c.ch; const m = await ch.send(v2View(goldEmbed('Support tickets', 'Need help? Press the button to open a private ticket.'), [new ActionRowBuilder().addComponents(btn(`tk:open:${c.r('support')?.id || 0}:${c.c('category')?.id || 0}`, 'Open ticket', icons.E('support'), ButtonStyle.Success))]));
       return own('Ticket panel posted', `Posted in <#${ch.id}>.`, { icon: '🎫', links: [['Open panel', m.url]] });
     }, PREMIUM_ACCESS),
     C('backup', 'Premium: download this server layout as a file', [], null, async (c) => {

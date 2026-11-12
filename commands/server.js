@@ -1,6 +1,8 @@
 const { PermissionFlagsBits: P, ChannelType: CT, AuditLogEvent, GuildVerificationLevel, GuildDefaultMessageNotifications } = require('discord.js');
 const { C, S, I, CH, RS } = require('../lib/cmd');
 const db = require('../lib/db');
+const cv2 = require('../lib/cv2');
+const icons = require('../lib/emojis');
 const { UserError, res, ts, trunc, snowflake } = require('../lib/util');
 
 const MG = P.ManageGuild;

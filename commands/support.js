@@ -1,4 +1,5 @@
-const { EmbedBuilder } = require('discord.js');
+const cv2 = require('../lib/cv2');
+const icons = require('../lib/emojis');
 const { C, S, I } = require('../lib/cmd');
 const { UserError, res, trunc } = require('../lib/util');
 
@@ -13,14 +14,10 @@ async function submitReport(c) {
   if (until > now) throw new UserError('Please wait before sending another report.', `Try again in ${Math.ceil((until - now) / 60000)} minute(s).`);
   const details = String(c.s('details') || '').trim();
   if (details.length < 8) throw new UserError('Please add a little more detail.', 'A useful report needs at least 8 characters.');
-  const embed = new EmbedBuilder().setColor(0x8b5cf6).setTitle('Uranium user report')
-    .setDescription(trunc(details, 1000))
-    .addFields(
-      { name: 'Reporter', value: `${c.i.user.username} (\`${userId}\`)`, inline: true },
-      { name: 'Server', value: trunc(c.g.name, 100), inline: true },
-      { name: 'Channel', value: `#${trunc(c.ch?.name || 'unknown', 90)} (\`${c.ch?.id || 'unknown'}\`)`, inline: true }
-    ).setTimestamp();
-  const payload = { embeds: [embed], allowedMentions: { parse: [] } };
+  const payload = {
+    ...cv2.message([cv2.text(`# ${icons.E('support')} Uranium user report\n\n${trunc(details, 1000)}\n\n**Reporter:** ${c.i.user.username} (\`${userId}\`)\n**Server:** ${trunc(c.g.name, 100)}\n**Channel:** #${trunc(c.ch?.name || 'unknown', 90)} (\`${c.ch?.id || 'unknown'}\`)`)], 0x8b5cf6),
+    allowedMentions: { parse: [] },
+  };
   let delivered = false;
   const reportChannelId = String(process.env.BOT_REPORT_CHANNEL_ID || '').trim();
   if (reportChannelId) {
@@ -53,15 +50,10 @@ async function submitFeedback(c) {
   if (!Number.isInteger(rating) || rating < 1 || rating > 5) throw new UserError('Choose a rating from 1 to 5.');
   const comment = String(c.s('comment') || '').trim();
   const stars = '⭐'.repeat(rating) + '☆'.repeat(5 - rating);
-  const embed = new EmbedBuilder().setColor(rating >= 4 ? 0x39d98a : rating === 3 ? 0xffb84d : 0xff6b6b)
-    .setTitle('☢️ Uranium user feedback')
-    .addFields(
-      { name: 'Rating', value: `${stars} **${rating}/5**`, inline: true },
-      { name: 'User', value: `${c.i.user.username} (\`${userId}\`)`, inline: true },
-      { name: 'Server', value: trunc(c.g.name, 100), inline: true },
-      { name: 'Feedback', value: trunc(comment || 'No written comment provided.', 1000) }
-    ).setTimestamp();
-  const payload = { embeds: [embed], allowedMentions: { parse: [] } };
+  const payload = {
+    ...cv2.message([cv2.text(`# ${icons.E('atom')} Uranium user feedback\n\n**Rating:** ${stars} **${rating}/5**\n**User:** ${c.i.user.username} (\`${userId}\`)\n**Server:** ${trunc(c.g.name, 100)}\n\n**Feedback**\n${trunc(comment || 'No written comment provided.', 1000)}`)], rating >= 4 ? 0x39d98a : rating === 3 ? 0xffb84d : 0xff6b6b),
+    allowedMentions: { parse: [] },
+  };
   let delivered = false;
   const feedbackChannelId = String(process.env.BOT_FEEDBACK_CHANNEL_ID || '').trim();
   if (feedbackChannelId) {
