@@ -94,11 +94,11 @@ module.exports = {
         .setFooter({ text: `Uranium • ${c.g.name}` }).setTimestamp();
       if (brand.avatar) e.setThumbnail(brand.avatar);
       if (brand.banner) e.setImage(brand.banner);
-      const body = [cv2.text(`# ${icons.E('atom')} ${brand.name || c.g.name}\n${brand.bio || 'Server-specific Uranium profile'}`)];
+      const profileBody = [cv2.text(`# ${icons.E('atom')} ${brand.name || c.g.name}\n${brand.bio || 'Server-specific Uranium profile'}`)];
       const media = [brand.avatar, brand.banner].filter((url) => typeof url === 'string' && /^https?:\\/\\//i.test(url));
-      if (media.length) body.push({ type: 12, items: media.map((url) => ({ media: { url } })) });
-      body.push(cv2.separator(), cv2.text(`-# Uranium • ${c.g.name}`));
-      await c.i.editReply(cv2.message(body, brand.color || GOLD));
+      if (media.length) profileBody.push({ type: 12, items: media.map((url) => ({ media: { url } })) });
+      profileBody.push(cv2.separator(), cv2.text(`-# Uranium • ${c.g.name}`));
+      await c.i.editReply(cv2.message(profileBody, brand.color || GOLD));
       return { handled: true };
     }, { ...P, custom: true }),
   ],
