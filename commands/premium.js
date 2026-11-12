@@ -27,6 +27,8 @@ function v2View(embed, rows = []) {
   for (const field of data.fields || []) parts.push(`**${field.name}**\\n${field.value}`);
   if (data.footer?.text) parts.push(`-# ${data.footer.text}`);
   const children = [cv2.text(parts.join('\\n\\n').slice(0, 4000))];
+  if (data.image?.url) children.push({ type: 12, items: [{ media: { url: data.image.url } }] });
+  if (data.thumbnail?.url) children.push({ type: 12, items: [{ media: { url: data.thumbnail.url } }] });
   for (const row of rows) children.push(cv2.separator(), cv2.row(row.toJSON().components));
   return cv2.message(children, data.color ?? GOLD);
 }
