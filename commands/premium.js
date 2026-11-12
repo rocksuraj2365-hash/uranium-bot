@@ -110,7 +110,7 @@ async function onButton(i) {
 /* ---------- custom (interactive) commands ---------- */
 async function servers(c) {
   const gs = [...c.i.client.guilds.cache.values()].sort((a, b) => b.memberCount - a.memberCount); let page = 0; const per = 8; const pages = Math.max(1, Math.ceil(gs.length / per));
-  const view = (off) => ({ embeds: [goldEmbed(`💎 Servers (${gs.length})`, gs.slice(page * per, page * per + per).map((g, k) => `**${page * per + k + 1}.** ${g.name}\n\`${g.id}\` • ${g.memberCount} members`).join('\n\n') || '_None_').setFooter({ text: `Page ${page + 1}/${pages} • ${FOOT}` })], components: [new ActionRowBuilder().addComponents(btn('sv:prev', 'Prev', '◀️', ButtonStyle.Secondary, off || page === 0), btn('sv:next', 'Next', '▶️', ButtonStyle.Secondary, off || page >= pages - 1), btn('sv:close', 'Close', '✖️', ButtonStyle.Danger, off))] });
+  const view = (off) => v2View(goldEmbed(`Servers (${gs.length})`, gs.slice(page * per, page * per + per).map((g, k) => `**${page * per + k + 1}.** ${g.name}\n\`${g.id}\` • ${g.memberCount} members`).join('\n\n') || '_None_').setFooter({ text: `Page ${page + 1}/${pages} • ${FOOT}` }), [new ActionRowBuilder().addComponents(btn('sv:prev', 'Prev', '◀️', ButtonStyle.Secondary, off || page === 0), btn('sv:next', 'Next', '▶️', ButtonStyle.Secondary, off || page >= pages - 1), btn('sv:close', 'Close', '✖️', ButtonStyle.Danger, off))]);
   const msg = await c.i.editReply(view(false));
   const col = msg.createMessageComponentCollector({ time: 120000, filter: (b) => b.customId.startsWith('sv:') && b.user.id === c.i.user.id });
   col.on('collect', async (b) => { const k = b.customId.split(':')[1]; if (k === 'close') { col.stop(); return b.update(view(true)); } page = k === 'next' ? Math.min(page + 1, pages - 1) : Math.max(page - 1, 0); await b.update(view(false)); });
@@ -142,13 +142,13 @@ async function builder(c) {
   const st = { title: 'Your title', description: 'Press ✏️ Edit to change this text.', color: GOLD, image: '', footer: '' };
   const mk = () => { const e = new EmbedBuilder().setColor(st.color).setTitle(st.title || null).setDescription(st.description || null); if (st.image) e.setImage(st.image); if (st.footer) e.setFooter({ text: st.footer }); return e; };
   const row = (off) => new ActionRowBuilder().addComponents(btn('eb:edit', 'Edit', '✏️', ButtonStyle.Primary, off), btn('eb:send', 'Send', '📤', ButtonStyle.Success, off), btn('eb:x', 'Cancel', '✖️', ButtonStyle.Danger, off));
-  const msg = await c.i.editReply({ content: '🛠️ **Embed builder** — preview below', embeds: [mk()], components: [row(false)] });
+  const msg = await c.i.editReply(v2View(mk(), [row(false)]));
   const col = msg.createMessageComponentCollector({ time: 300000, filter: (b) => b.customId.startsWith('eb:') && b.user.id === c.i.user.id });
   col.on('collect', async (b) => {
-    if (b.customId === 'eb:x') { col.stop('x'); return b.update({ content: '❌ Cancelled.', embeds: [], components: [] }); }
+    if (b.customId === 'eb:x') { col.stop('x'); return b.update(cv2.message([cv2.text('# ❌ Cancelled')], GOLD)); }
     if (b.customId === 'eb:send') {
       const ch = c.c('channel') || c.ch; await b.deferUpdate();
-      try { await ch.send({ embeds: [mk()] }); col.stop('sent'); return c.i.editReply({ content: `✅ Sent to <#${ch.id}>`, embeds: [mk()], components: [] }); } catch { return c.i.editReply({ content: '⚠️ I cannot send there.', components: [row(false)] }); }
+      try { await ch.send(v2View(mk())); col.stop('sent'); return c.i.editReply(v2View(goldEmbed('Builder sent', `Your Components V2 panel was sent to <#${ch.id}>.`))); } catch { return c.i.editReply(v2View(goldEmbed('Cannot send', 'I cannot send in that channel.'), [row(false)])); }
     }
     const inp = (id, label, style, val, req = false, max = 200) => new ActionRowBuilder().addComponents(new TextInputBuilder().setCustomId(id).setLabel(label).setStyle(style).setRequired(req).setMaxLength(max).setValue(String(val || '').slice(0, max)));
     await b.showModal(new ModalBuilder().setCustomId('eb:modal').setTitle('Edit embed').addComponents(
