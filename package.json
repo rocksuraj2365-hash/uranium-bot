@@ -15,8 +15,7 @@
     "discord.js": "^14.28.1",
     "express": "^4.21.1",
     "express-session": "^1.18.1",
-    "postgres": "^3.4.7",
-    "pngjs": "^7.0.0"
+    "postgres": "^3.4.7"
   },
   "optionalDependencies": {
     "@resvg/resvg-js": "*",
