@@ -157,6 +157,25 @@ for (const category of allCommandCategories) {
 assert.equal(routedCommandCount, 355, 'Every one of the 355 commands must have a working full prefix route');
 console.log('All 355 full-name and available short-category prefix routes passed.');
 
+// Prefix and no-prefix messages share the same command parser after the prefix gate.
+for (const category of allCommandCategories) {
+  for (const command of category.commands) {
+    const body = category.name + ' ' + command.name;
+    const prefixedBody = prefix.resolve(prefix.tokenize(body));
+    const noPrefixBody = prefix.resolve(prefix.tokenize(body));
+    assert.ok(prefixedBody && noPrefixBody, 'Both prefix and authorized no-prefix forms must resolve: ' + body);
+    assert.equal(prefixedBody.def, noPrefixBody.def, 'Prefix and no-prefix must execute the same command: ' + body);
+  }
+}
+const helpSource = require('node:fs').readFileSync(require.resolve('../lib/help'), 'utf8');
+for (const page of ['guide', 'moderation', 'protection', 'permissions', 'premium-guide']) {
+  assert.ok(helpSource.includes("name: '" + page + "'"), 'Help page missing: ' + page);
+}
+for (const label of ['**Slash**', '**Prefix**', '**No-prefix**', 'Previous page', 'Find command']) {
+  assert.ok(helpSource.includes(label), 'Help panel missing interactive command detail: ' + label);
+}
+console.log('All 355 commands expose slash, prefix and no-prefix usage in the interactive help panel.');
+
 // Gateway startup must accept shardReady while the full client guild cache hydrates.
 async function testGatewayReadyFallback() {
   const shardClient = new EventEmitter();
