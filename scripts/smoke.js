@@ -46,6 +46,7 @@ for (const entry of catalog.categories) {
   for (const item of entry.commands) {
     const command = sourceByName.get(item.name);
     assert.ok(command, 'Catalog command missing from source: ' + entry.name + ' ' + item.name);
+    assert.equal(typeof command.run, 'function', 'Every published command must have an executable handler: ' + entry.name + ' ' + item.name);
     assert.equal(item.description, command.desc, 'Catalog description mismatch: ' + entry.name + ' ' + item.name);
     assert.equal(item.slash, '/' + entry.name + ' ' + item.name);
   }
