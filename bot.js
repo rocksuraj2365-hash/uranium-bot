@@ -14,6 +14,7 @@ const np = require('./lib/np');
 const music = require('./lib/music');
 const supportTemplate = require('./lib/support-template');
 const emojis = require('./lib/emojis');
+const waitForGatewayReady = require('./lib/gateway-ready');
 const { UserError, permName } = require('./lib/util');
 
 const { DISCORD_BOT_TOKEN, DISCORD_CLIENT_ID, DEV_GUILD_ID, PORT } = process.env;
@@ -433,7 +434,18 @@ function makeClient(withContent) {
     } catch (e) { console.error('[starboard]', e.message); }
   });
   client.on('messageDelete', (m) => { if (m.guild && m.content && !m.author?.bot) premium.snipes.set(m.channelId, { content: m.content, author: m.author?.username || 'unknown', authorId: m.author?.id, at: Date.now() }); });
-  client.once('clientReady', onReady);
+  const startAfterGatewayReady = (source) => {
+    console.log(`[gateway] Startup readiness reached via ${source}.`);
+    void onReady().catch((error) => console.error('[startup] Ready initialization failed:', error));
+  };
+  client.once('clientReady', () => startAfterGatewayReady('clientReady'));
+  // shardReady fires as soon as Discord accepts the Gateway READY packet.
+  // clientReady can be delayed while a large guild cache is hydrated; do not
+  // tear down a healthy Gateway connection just because that cache is slow.
+  client.once('shardReady', (id) => {
+    console.log(`[gateway] Shard ${id} is ready; starting while guild cache finishes syncing.`);
+    startAfterGatewayReady('shardReady');
+  });
   client.on('error', (e) => console.error('[gateway] Client error:', e));
   client.on('shardError', (e) => console.error('[gateway] Shard error:', e));
   client.on('shardReady', (id) => console.log(`[gateway] Shard ${id} is ready.`));
@@ -458,22 +470,10 @@ function shutdown(signal) {
 process.once('SIGTERM', () => shutdown('SIGTERM'));
 process.once('SIGINT', () => shutdown('SIGINT'));
 async function loginAndWaitUntilReady(cl, timeoutMs = 45000) {
-  const ready = new Promise((resolve) => {
-    if (started) return resolve();
-    cl.once('clientReady', resolve);
-  });
   const login = cl.login(DISCORD_BOT_TOKEN);
-  let timer;
-  try {
-    await Promise.race([
-      Promise.all([login, ready]),
-      new Promise((_, reject) => {
-        timer = setTimeout(() => reject(new Error(`Discord gateway did not become ready within ${timeoutMs / 1000}s (WebSocket status: ${cl.ws.status}).`)), timeoutMs);
-      })
-    ]);
-  } finally {
-    if (timer) clearTimeout(timer);
-  }
+  const ready = waitForGatewayReady(cl, timeoutMs);
+  const source = await Promise.all([login, ready]).then(([, event]) => event);
+  console.log(`[gateway] Login confirmed by ${source}.`);
 }
 
 (async () => {

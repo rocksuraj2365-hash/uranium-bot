@@ -2,6 +2,8 @@ const assert = require('node:assert/strict');
 const prefix = require('../lib/prefix');
 const cv2 = require('../lib/cv2');
 const icons = require('../lib/emojis');
+const { EventEmitter } = require('node:events');
+const waitForGatewayReady = require('../lib/gateway-ready');
 const { isSafeSelfAssignableRole, blockedSelfAssignablePermissions } = require('../lib/role-safety');
 const { PermissionFlagsBits } = require('discord.js');
 const license = { name: 'license', commands: ['grant', 'revoke', 'access', 'profile'].map((name) => ({ name })) };
@@ -149,3 +151,20 @@ for (const category of allCommandCategories) {
 }
 assert.equal(routedCommandCount, 354, 'Every one of the 354 commands must have a working full prefix route');
 console.log('All 354 full-name and available short-category prefix routes passed.');
+
+// Gateway startup must accept shardReady while the full client guild cache hydrates.
+async function testGatewayReadyFallback() {
+  const shardClient = new EventEmitter();
+  shardClient.isReady = () => false;
+  const shardWait = waitForGatewayReady(shardClient, 1000);
+  shardClient.emit('shardReady', 0);
+  assert.equal(await shardWait, 'shardReady', 'A ready shard must unblock startup');
+
+  const client = new EventEmitter();
+  client.isReady = () => false;
+  const clientWait = waitForGatewayReady(client, 1000);
+  client.emit('clientReady');
+  assert.equal(await clientWait, 'clientReady', 'Full clientReady must remain supported');
+  console.log('Discord Gateway shardReady/clientReady startup checks passed.');
+}
+testGatewayReadyFallback().catch((error) => { console.error(error); process.exitCode = 1; });
