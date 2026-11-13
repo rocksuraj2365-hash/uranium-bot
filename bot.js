@@ -441,6 +441,11 @@ function makeClient(withContent) {
   client.on('shardDisconnect', (event, id) => console.warn('[gateway] Shard disconnected:', { shardId: id, code: event?.code, reason: event?.reason || 'No reason supplied', wasClean: event?.wasClean }));
   client.on('shardResume', (id, replayedEvents) => console.log('[gateway] Shard resumed:', { shardId: id, replayedEvents }));
   client.on('warn', (warning) => console.warn('[discord.js]', warning));
+  client.on('debug', (message) => {
+    if (/websocket|gateway|heartbeat|identify|resume|connect|close/i.test(message)) {
+      console.log('[discord.js debug]', message);
+    }
+  });
   return client;
 }
 process.on('unhandledRejection', (e) => console.error('Unhandled:', e));
