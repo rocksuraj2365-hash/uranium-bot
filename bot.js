@@ -434,8 +434,13 @@ function makeClient(withContent) {
   });
   client.on('messageDelete', (m) => { if (m.guild && m.content && !m.author?.bot) premium.snipes.set(m.channelId, { content: m.content, author: m.author?.username || 'unknown', authorId: m.author?.id, at: Date.now() }); });
   client.once('clientReady', onReady);
-  client.on('error', (e) => console.error('Client error:', e));
-  client.on('shardError', (e) => console.error('Shard error:', e));
+  client.on('error', (e) => console.error('[gateway] Client error:', e));
+  client.on('shardError', (e) => console.error('[gateway] Shard error:', e));
+  client.on('shardReady', (id) => console.log(`[gateway] Shard ${id} is ready.`));
+  client.on('shardReconnecting', (id) => console.warn(`[gateway] Shard ${id} is reconnecting.`));
+  client.on('shardDisconnect', (event, id) => console.warn('[gateway] Shard disconnected:', { shardId: id, code: event?.code, reason: event?.reason || 'No reason supplied', wasClean: event?.wasClean }));
+  client.on('shardResume', (id, replayedEvents) => console.log('[gateway] Shard resumed:', { shardId: id, replayedEvents }));
+  client.on('warn', (warning) => console.warn('[discord.js]', warning));
   return client;
 }
 process.on('unhandledRejection', (e) => console.error('Unhandled:', e));
@@ -447,12 +452,53 @@ function shutdown(signal) {
 }
 process.once('SIGTERM', () => shutdown('SIGTERM'));
 process.once('SIGINT', () => shutdown('SIGINT'));
+async function loginAndWaitUntilReady(cl, timeoutMs = 45000) {
+  const ready = new Promise((resolve) => {
+    if (started) return resolve();
+    cl.once('clientReady', resolve);
+  });
+  const login = cl.login(DISCORD_BOT_TOKEN);
+  let timer;
+  try {
+    await Promise.race([
+      Promise.all([login, ready]),
+      new Promise((_, reject) => {
+        timer = setTimeout(() => reject(new Error(`Discord gateway did not become ready within ${timeoutMs / 1000}s (WebSocket status: ${cl.ws.status}).`)), timeoutMs);
+      })
+    ]);
+  } finally {
+    if (timer) clearTimeout(timer);
+  }
+}
+
 (async () => {
-  for (const withContent of [true, false]) {
+  let withContent = true;
+  let attempt = 0;
+  while (true) {
     const cl = makeClient(withContent);
-    try { console.log('Logging in to Discord...'); await cl.login(DISCORD_BOT_TOKEN); return; } catch (e) {
-      if (withContent && /disallowed intents/i.test(String(e?.message || e))) { console.warn('⚠️ Message Content Intent is not enabled in the Developer Portal. Retrying without it...'); try { cl.destroy(); } catch { /* ignore */ } started = false; continue; }
-      console.error('Login failed:', e); process.exit(1);
+    try {
+      console.log(`[gateway] Starting Discord login (Message Content Intent: ${withContent ? 'enabled' : 'disabled'}).`);
+      await loginAndWaitUntilReady(cl);
+      return;
+    } catch (e) {
+      const message = String(e?.message || e);
+      if (withContent && /disallowed intents/i.test(message)) {
+        console.warn('⚠️ Message Content Intent is not enabled in the Developer Portal. Retrying without it...');
+        try { cl.destroy(); } catch { /* ignore */ }
+        if (client === cl) client = null;
+        started = false;
+        withContent = false;
+        attempt = 0;
+        continue;
+      }
+      console.error(`[gateway] Discord login attempt ${attempt + 1} failed:`, message);
+      try { cl.destroy(); } catch { /* ignore */ }
+      if (client === cl) client = null;
+      started = false;
+      const delay = Math.min(60000, 5000 * (2 ** Math.min(attempt, 4)));
+      attempt += 1;
+      console.warn(`[gateway] Retrying Discord login in ${Math.round(delay / 1000)} seconds.`);
+      await new Promise((resolve) => setTimeout(resolve, delay));
     }
   }
 })();
