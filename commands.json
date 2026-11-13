@@ -1,7 +1,7 @@
 {
   "version": 1,
   "generatedFrom": "commands/*.js",
-  "total": 354,
+  "total": 355,
   "categories": [
     {
       "name": "member",
@@ -2592,6 +2592,13 @@
           "slash": "/security drift",
           "prefix": "!security drift",
           "access": "Premium access required"
+        },
+        {
+          "name": "fortress",
+          "description": "Enable or manage Uranium maximum server protection",
+          "slash": "/security fortress",
+          "prefix": "!fortress",
+          "access": "Available subject to command permissions"
         }
       ]
     }
