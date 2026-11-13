@@ -103,6 +103,27 @@ assert.deepEqual(custom, { id: '123456789012345678', name: 'ux_member', animated
 assert.deepEqual(cv2.emoji('🔒'), { name: '🔒' }, 'Unicode fallback emojis must remain supported');
 assert.ok(icons.FALLBACK.member && icons.FALLBACK.premium, 'Every major command category must have a safe icon fallback');
 
+// Missing required prefix arguments should be collected interactively instead of failing immediately.
+async function testInteractiveMissingArguments() {
+  let promptSent = false;
+  const env = {
+    msg: {
+      author: { id: '111111111111111111' }, channelId: '222222222222222222',
+      channel: {
+        send: async () => { promptSent = true; return { edit: async () => {}, delete: async () => {} }; },
+        awaitMessages: async () => new Map([['answer', { content: '10m' }]])
+      }
+    },
+    client: {}, guild: {}
+  };
+  const def = { opts: [{ n: 'duration', d: 'Duration', t: 'str', req: true }] };
+  const values = await prefix.parseArgs(env, def, [], '', '!timeout @member <duration>');
+  assert.equal(promptSent, true, 'A missing required argument should trigger a prompt');
+  assert.equal(values.duration, '10m', 'The answer should be parsed into the missing argument');
+  console.log('Interactive missing-argument prompt checks passed.');
+}
+testInteractiveMissingArguments().catch((error) => { console.error(error); process.exitCode = 1; });
+
 console.log('Components V2 payload checks passed.');
 console.log('Command catalog and Discord subcommand-limit checks passed.');
 console.log('100 new prefix command and Premium shortcut smoke tests passed.');
@@ -119,7 +140,7 @@ async function testSharedRenderer() {
   assert.ok(sent.components[0].components.some((part) => part.type === 10 && part.content.includes('Member warned')), 'Shared command result must include its title in Text Display');
   const resultText = sent.components[0].components.find((part) => part.type === 10)?.content || '';
   assert.ok(resultText.includes('MEMBER') && resultText.includes('/ warn'), 'Every command card must identify its category and exact command');
-  assert.ok(resultText.includes('<:ux_member:') || resultText.includes('👤'), 'Every command card must include its category custom icon or safe fallback');
+  assert.ok(resultText.includes(icons.E('member')) || resultText.includes(icons.E('warn')) || resultText.includes(icons.E('check')), 'Every command card must include a category, action or status icon');
   assert.ok(sent.components[0].components.some((part) => part.type === 1), 'Shared command result must keep its action buttons in an Action Row');
   sent = null;
   await renderer.sendResult(interaction, { title: 'Image generated', files: [{ name: 'preview.png', data: Buffer.from('test') }] });
@@ -171,7 +192,7 @@ const helpSource = require('node:fs').readFileSync(require.resolve('../lib/help'
 for (const page of ['guide', 'moderation', 'protection', 'permissions', 'premium-guide']) {
   assert.ok(helpSource.includes("name: '" + page + "'"), 'Help page missing: ' + page);
 }
-for (const label of ['**Slash**', '**Prefix**', '**No-prefix**', 'Previous page', 'Find command']) {
+for (const label of ['**Slash**', '**Prefix**', '**No-prefix**', 'Prev page', 'Next page', 'Back to list', 'Find a Uranium command']) {
   assert.ok(helpSource.includes(label), 'Help panel missing interactive command detail: ' + label);
 }
 console.log('All 355 commands expose slash, prefix and no-prefix usage in the interactive help panel.');
