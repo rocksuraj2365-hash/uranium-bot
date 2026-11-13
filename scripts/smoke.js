@@ -6,6 +6,19 @@ const { EventEmitter } = require('node:events');
 const waitForGatewayReady = require('../lib/gateway-ready');
 const { isSafeSelfAssignableRole, blockedSelfAssignablePermissions } = require('../lib/role-safety');
 const { PermissionFlagsBits } = require('discord.js');
+const { normalizeRemotePayload } = require('../lib/db-state');
+
+// Legacy JSONB payloads can be double-encoded as strings and character-index maps.
+const stateFixture = { guilds: { demo: { cases: [], warns: [], notes: [], watch: [], config: {} } }, schedules: [], nextSchedule: 1 };
+let wrappedState = JSON.stringify(stateFixture);
+for (let depth = 0; depth < 4; depth += 1) {
+  const charMap = Object.fromEntries([...wrappedState].map((char, index) => [String(index), char]));
+  wrappedState = JSON.stringify({ ...charMap, guilds: {}, schedules: [], nextSchedule: 1 });
+}
+assert.deepEqual(normalizeRemotePayload(wrappedState), stateFixture, 'Legacy string/character-map state must recover without spreading millions of keys');
+assert.deepEqual(normalizeRemotePayload(JSON.stringify(stateFixture)), stateFixture, 'A JSON-encoded object state must parse safely');
+assert.deepEqual(normalizeRemotePayload(stateFixture), stateFixture, 'An already-decoded object state must remain unchanged');
+assert.equal(normalizeRemotePayload('not-json'), null, 'Malformed state must be rejected instead of spread into the database');
 const license = { name: 'license', commands: ['grant', 'revoke', 'access', 'profile'].map((name) => ({ name })) };
 license.map = new Map(license.commands.map((command) => [command.name, command]));
 const newCats = ['utility', 'community', 'fun', 'servertools'].map((name) => require('../commands/' + name));
