@@ -8,6 +8,7 @@ const art = require('./lib/art');
 const prefix = require('./lib/prefix');
 const ai = require('./lib/ai');
 const security = require('./lib/security');
+const fortress = require('./lib/fortress');
 const devTools = require('./lib/dev-tools');
 const dmAi = require('./lib/dm-ai');
 const np = require('./lib/np');
@@ -241,6 +242,7 @@ async function onMessage(msg) {
   try {
     if (msg.author.bot || !msg.content) return;
     if (!msg.guild) return handleDM(msg);
+    if (await fortress.inspectMessage(msg)) return;
     const px = getPrefix(msg.guild.id); const owner = isOwner(msg.author.id); let body = null, viaPrefix = true, mention = false, npAi = false;
     if (msg.content.startsWith(px)) body = msg.content.slice(px.length);
     else { const m = new RegExp(`^<@!?${client.user.id}>\s*`).exec(msg.content); if (m) { body = msg.content.slice(m[0].length); mention = true; } }
@@ -395,6 +397,7 @@ function makeClient(withContent) {
   });
   client.on('messageCreate', onMessage);
   client.on('guildMemberAdd', async (member) => {
+    fortress.onMemberJoin(member).catch((error) => console.error('[fortress join]', error.message));
     try {
       const cfg = db.g(member.guild.id).config, id = cfg.welcomeChannel;
       if (!id) return;
@@ -461,9 +464,9 @@ function makeClient(withContent) {
   return client;
 }
 process.on('unhandledRejection', (e) => console.error('Unhandled:', e));
-function shutdown(signal) {
+async function shutdown(signal) {
   console.log(`Received ${signal}; flushing Uranium data before shutdown.`);
-  db.flush();
+  await db.close().catch((error) => console.error('[db] Shutdown flush failed:', error.message));
   if (client) client.destroy();
   process.exit(0);
 }
@@ -477,6 +480,12 @@ async function loginAndWaitUntilReady(cl, timeoutMs = 45000) {
 }
 
 (async () => {
+  try { await db.ready; }
+  catch (error) {
+    console.error('[db] Persistent database initialization failed; refusing to start with an unloaded state:', error.message);
+    process.exit(1);
+    return;
+  }
   let withContent = true;
   let attempt = 0;
   // Run the REST diagnostic in the background: a slow Discord REST response must
