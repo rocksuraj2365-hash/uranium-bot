@@ -464,9 +464,9 @@ function makeClient(withContent) {
   return client;
 }
 process.on('unhandledRejection', (e) => console.error('Unhandled:', e));
-function shutdown(signal) {
+async function shutdown(signal) {
   console.log(`Received ${signal}; flushing Uranium data before shutdown.`);
-  db.flush();
+  await db.close().catch((error) => console.error('[db] Shutdown flush failed:', error.message));
   if (client) client.destroy();
   process.exit(0);
 }
@@ -480,6 +480,12 @@ async function loginAndWaitUntilReady(cl, timeoutMs = 45000) {
 }
 
 (async () => {
+  try { await db.ready; }
+  catch (error) {
+    console.error('[db] Persistent database initialization failed; refusing to start with an unloaded state:', error.message);
+    process.exit(1);
+    return;
+  }
   let withContent = true;
   let attempt = 0;
   // Run the REST diagnostic in the background: a slow Discord REST response must
