@@ -13,8 +13,14 @@ module.exports = {
   commands: [
     C('kick', 'Remove a member from the server (they can rejoin)', [U(), RS()], P.KickMembers, async (c) => {
       const m = await c.m('user'); checkTarget(c, m, 'kick');
-      const dm = await c.notify(m.user, '👢 You were kicked', `From **${c.g.name}**\nReason: ${c.reason()}`);
+      // Complete the moderation action before attempting a DM. A slow/blocked DM API
+      // must never leave the command sitting on its progress animation before the kick.
       await m.kick(c.audit());
+      const dmPromise = c.notify(m.user, '👢 You were kicked', `From **${c.g.name}**\nReason: ${c.reason()}`);
+      const dm = await Promise.race([
+        dmPromise,
+        new Promise((resolve) => setTimeout(() => resolve('⚠️ DM check timed out'), 1800)),
+      ]);
       return res('Member kicked', `**${m.user.username}** was removed from the server.`, { user: m.user, case: c.case('kick', m.id), fields: [['Reason', c.reason()], ['DM', dm, true]] });
     }),
     C('ban', 'Ban a user (works even if they already left)', [U(true, 'user', 'User to ban'), RS(), I('delete_days', 'Delete their messages from the last N days (0-7)', false, 0, 7)], P.BanMembers, async (c) => {
