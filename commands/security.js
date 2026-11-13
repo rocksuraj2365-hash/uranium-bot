@@ -2,6 +2,7 @@ const { PermissionFlagsBits: P, AuditLogEvent } = require('discord.js');
 const { C } = require('../lib/cmd');
 const { UserError, res, ts, trunc } = require('../lib/util');
 const db = require('../lib/db');
+const fortress = require('../lib/fortress');
 const PREMIUM = { premium: true };
 const title = (name) => '☢ Uranium Security • ' + name;
 function requireManager(ctx) { if (!ctx.i.memberPermissions.has(P.ManageGuild)) throw new UserError('You need Manage Server permission to use this security tool.'); }
@@ -111,10 +112,35 @@ async function drift(c) {
   const summary = changes.length ? changes.slice(0,22).join('\n') : 'No role or channel configuration changes were detected.';
   return res(title('Configuration drift'), 'Baseline: ' + ts(base.at) + '\nDetected changes: **' + changes.length + '**\n\n' + summary + (changes.length > 22 ? '\n…and ' + (changes.length - 22) + ' more.' : ''), { icon:changes.length ? '🔎' : '✅' });
 }
+
+async function fortressCommand(c) {
+  requireManager(c);
+  const mode = String(c.s('mode') || 'on').toLowerCase();
+  if (mode === 'status') {
+    const state = db.g(c.g.id).config.fortress;
+    return res(title('Fortress status'), state?.enabled
+      ? '🛡️ **MAXIMUM PROTECTION ACTIVE**\\nJoin-rate monitoring, spam detection and Discord AutoMod safeguards are enabled.'
+      : 'Fortress protection is currently off. Run `!fortress` to enable it.', { icon: state?.enabled ? '🛡️' : '🔎' });
+  }
+  if (mode === 'off') {
+    await fortress.disable(c.g);
+    return res(title('Fortress disabled'), 'Protection rules have been disabled and the previous verification level was restored when safe to do so.', { icon: '🔓' });
+  }
+  const result = await fortress.enable(c.g, c.i.user.id);
+  return res(title('FORTRESS MAXIMUM PROTECTION'), result.message, { icon: '🛡️', fields: [
+    ['Join defence', 'Burst detection + very-high verification escalation', true],
+    ['Spam defence', 'Rapid-repeat and message-flood detection', true],
+    ['Discord AutoMod', 'Spam and mention-spam rules', true],
+    ['Sanctions', 'Message removal + short timeout for detected spam', true],
+    ['DM notices', 'Attempts to notify sanctioned members', true],
+  ] });
+}
+
 module.exports = {
   name:'security',
   description:'Premium security intelligence: permission scans, audit review and configuration drift.',
   commands:[
+    C('fortress','Enable or manage Uranium maximum server protection',[{ n:'mode', d:'on, off, or status', t:'str', req:false, choices:['on','off','status'] }],P.ManageGuild,fortressCommand),
     C('scan','Premium: scan roles and channel overrides for sensitive permissions',[],null,scan,PREMIUM),
     C('audit','Premium: review recent server audit-log activity',[],P.ViewAuditLog,audit,PREMIUM),
     C('invites','Premium: inspect active server invites and usage limits',[],P.ManageGuild,invites,PREMIUM),
