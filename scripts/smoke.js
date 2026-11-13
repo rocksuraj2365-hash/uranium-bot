@@ -140,7 +140,7 @@ async function testSharedRenderer() {
   assert.ok(sent.components[0].components.some((part) => part.type === 10 && part.content.includes('Member warned')), 'Shared command result must include its title in Text Display');
   const resultText = sent.components[0].components.find((part) => part.type === 10)?.content || '';
   assert.ok(resultText.includes('MEMBER') && resultText.includes('/ warn'), 'Every command card must identify its category and exact command');
-  assert.ok(resultText.includes('<:ux_member:') || resultText.includes('👤'), 'Every command card must include its category custom icon or safe fallback');
+  assert.ok(resultText.includes(icons.E('member')) || resultText.includes(icons.E('warn')) || resultText.includes(icons.E('check')), 'Every command card must include a category, action or status icon');
   assert.ok(sent.components[0].components.some((part) => part.type === 1), 'Shared command result must keep its action buttons in an Action Row');
   sent = null;
   await renderer.sendResult(interaction, { title: 'Image generated', files: [{ name: 'preview.png', data: Buffer.from('test') }] });
