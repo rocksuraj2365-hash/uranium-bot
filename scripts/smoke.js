@@ -38,7 +38,7 @@ for (const [shortcut, expected] of [['add','grant'],['remove','revoke'],['check'
   assert.equal(hit.used, 2);
 }
 const catalog = require('../commands.json');
-assert.equal(catalog.total, 354, 'Published catalog total must match the implemented command set');
+assert.equal(catalog.total, 355, 'Published catalog total must match the implemented command set');
 assert.equal(catalog.categories.length, 19, 'Every command category must be published');
 for (const entry of catalog.categories) {
   const source = require('../commands/' + entry.name);
@@ -60,7 +60,12 @@ assert.ok(feedbackHit, 'Feedback prefix command should resolve');
 assert.equal(feedbackHit.def.name, 'feedback');
 assert.equal(template.commands.length, 2, 'Support template and refresh commands must be registered');
 assert.ok(template.commands.some((x) => x.name === 'refresh'), 'Support template refresh command must be registered');
-assert.equal(security.commands.length, 6, 'Premium security suite must register six commands');
+assert.equal(security.commands.length, 7, 'Security suite must register seven commands including Fortress');
+assert.ok(security.commands.some((x) => x.name === 'fortress' && !x.premium), 'Fortress must be available without Premium');
+const fortressHit = prefix.resolve(prefix.tokenize('fortress'));
+assert.ok(fortressHit, 'The one-word !fortress shortcut must resolve');
+assert.equal(fortressHit.cat, security);
+assert.equal(fortressHit.def.name, 'fortress');
 for (const def of security.commands) {
   const hit = prefix.resolve(prefix.tokenize('security ' + def.name));
   assert.ok(hit, 'Security prefix route missing: ' + def.name);
@@ -149,8 +154,8 @@ for (const category of allCommandCategories) {
     routedCommandCount += 1;
   }
 }
-assert.equal(routedCommandCount, 354, 'Every one of the 354 commands must have a working full prefix route');
-console.log('All 354 full-name and available short-category prefix routes passed.');
+assert.equal(routedCommandCount, 355, 'Every one of the 355 commands must have a working full prefix route');
+console.log('All 355 full-name and available short-category prefix routes passed.');
 
 // Gateway startup must accept shardReady while the full client guild cache hydrates.
 async function testGatewayReadyFallback() {
