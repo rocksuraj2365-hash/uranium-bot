@@ -171,7 +171,7 @@ const helpSource = require('node:fs').readFileSync(require.resolve('../lib/help'
 for (const page of ['guide', 'moderation', 'protection', 'permissions', 'premium-guide']) {
   assert.ok(helpSource.includes("name: '" + page + "'"), 'Help page missing: ' + page);
 }
-for (const label of ['**Slash**', '**Prefix**', '**No-prefix**', 'Previous page', 'Find command']) {
+for (const label of ['**Slash**', '**Prefix**', '**No-prefix**', 'Prev page', 'Next page', 'Back to list', 'Find a Uranium command']) {
   assert.ok(helpSource.includes(label), 'Help panel missing interactive command detail: ' + label);
 }
 console.log('All 355 commands expose slash, prefix and no-prefix usage in the interactive help panel.');
