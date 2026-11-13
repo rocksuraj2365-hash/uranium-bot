@@ -479,7 +479,9 @@ async function loginAndWaitUntilReady(cl, timeoutMs = 45000) {
 (async () => {
   let withContent = true;
   let attempt = 0;
-  while (true) {
+  // Run the REST diagnostic in the background: a slow Discord REST response must
+  // never prevent the independent Gateway connection attempt from starting.
+  void (async () => {
     try {
       const rest = new REST({ version: '10', timeout: 15000 }).setToken(DISCORD_BOT_TOKEN);
       const gateway = await rest.get(Routes.gatewayBot());
@@ -487,16 +489,10 @@ async function loginAndWaitUntilReady(cl, timeoutMs = 45000) {
     } catch (e) {
       const status = e?.status || e?.statusCode || null;
       console.error('[gateway] Discord REST preflight failed:', { status, code: e?.code || null, message: String(e?.message || e) });
-      if (status === 401 || status === 403) {
-        console.error('[gateway] Discord rejected the configured bot credentials or access. Check the Render secret in the dashboard; do not paste it into chat.');
-        process.exit(1);
-      }
-      const delay = Math.min(60000, 5000 * (2 ** Math.min(attempt, 4)));
-      attempt += 1;
-      console.warn(`[gateway] Retrying Discord REST preflight in ${Math.round(delay / 1000)} seconds.`);
-      await new Promise((resolve) => setTimeout(resolve, delay));
-      continue;
+      if (status === 401 || status === 403) console.error('[gateway] Discord rejected the configured bot credentials or access. Check the Render secret in the dashboard; do not paste it into chat.');
     }
+  })();
+  while (true) {
     const cl = makeClient(withContent);
     try {
       console.log(`[gateway] Starting Discord login (Message Content Intent: ${withContent ? 'enabled' : 'disabled'}).`);
