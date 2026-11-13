@@ -103,6 +103,27 @@ assert.deepEqual(custom, { id: '123456789012345678', name: 'ux_member', animated
 assert.deepEqual(cv2.emoji('🔒'), { name: '🔒' }, 'Unicode fallback emojis must remain supported');
 assert.ok(icons.FALLBACK.member && icons.FALLBACK.premium, 'Every major command category must have a safe icon fallback');
 
+// Missing required prefix arguments should be collected interactively instead of failing immediately.
+async function testInteractiveMissingArguments() {
+  let promptSent = false;
+  const env = {
+    msg: {
+      author: { id: '111111111111111111' }, channelId: '222222222222222222',
+      channel: {
+        send: async () => { promptSent = true; return { edit: async () => {}, delete: async () => {} }; },
+        awaitMessages: async () => new Map([['answer', { content: '10m' }]])
+      }
+    },
+    client: {}, guild: {}
+  };
+  const def = { opts: [{ n: 'duration', d: 'Duration', t: 'str', req: true }] };
+  const values = await prefix.parseArgs(env, def, [], '', '!timeout @member <duration>');
+  assert.equal(promptSent, true, 'A missing required argument should trigger a prompt');
+  assert.equal(values.duration, '10m', 'The answer should be parsed into the missing argument');
+  console.log('Interactive missing-argument prompt checks passed.');
+}
+testInteractiveMissingArguments().catch((error) => { console.error(error); process.exitCode = 1; });
+
 console.log('Components V2 payload checks passed.');
 console.log('Command catalog and Discord subcommand-limit checks passed.');
 console.log('100 new prefix command and Premium shortcut smoke tests passed.');
