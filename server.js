@@ -15,7 +15,7 @@ app.use(express.json({ limit: '12kb' }));
 // Persist dashboard login sessions in PostgreSQL so restarts and multiple instances
 // do not randomly log users out. MemoryStore is allowed only for local development.
 const sessionDatabaseUrl = process.env.SESSION_DATABASE_URL || process.env.DATABASE_URL;
-const isProduction = process.env.NODE_ENV === 'production';
+const isProduction = process.env.NODE_ENV === 'production' || process.env.RENDER === 'true';
 if (isProduction && (!SESSION_SECRET || SESSION_SECRET.length < 32)) {
   throw new Error('SESSION_SECRET must be set to a stable random value of at least 32 characters in production.');
 }
