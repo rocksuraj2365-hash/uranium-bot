@@ -12,16 +12,53 @@ const app = express();
 app.set('trust proxy', 1);
 app.use(express.json({ limit: '12kb' }));
 
-// NOTE: MemoryStore is only OK for a starter. Add a persistent store before production.
+// Persist dashboard login sessions in PostgreSQL so restarts and multiple instances
+// do not randomly log users out. MemoryStore is allowed only for local development.
+const sessionDatabaseUrl = process.env.SESSION_DATABASE_URL || process.env.DATABASE_URL;
+const isProduction = process.env.NODE_ENV === 'production';
+if (isProduction && (!SESSION_SECRET || SESSION_SECRET.length < 32)) {
+  throw new Error('SESSION_SECRET must be set to a stable random value of at least 32 characters in production.');
+}
+if (isProduction && !sessionDatabaseUrl) {
+  throw new Error('SESSION_DATABASE_URL (or DATABASE_URL) is required in production for persistent dashboard sessions.');
+}
+
+let sessionStore;
+if (sessionDatabaseUrl) {
+  const { Pool } = require('pg');
+  const PgSession = require('connect-pg-simple')(session);
+  const sessionPool = new Pool({
+    connectionString: sessionDatabaseUrl,
+    ssl: process.env.PGSSLMODE === 'disable' ? false : { rejectUnauthorized: true },
+    max: 5,
+    idleTimeoutMillis: 30000,
+    connectionTimeoutMillis: 10000,
+  });
+  sessionPool.on('error', (error) => {
+    console.error('[dashboard-session] PostgreSQL pool error:', error.message);
+  });
+  sessionStore = new PgSession({
+    pool: sessionPool,
+    tableName: 'uranium_dashboard_sessions',
+    createTableIfMissing: true,
+    pruneSessionInterval: 15 * 60,
+  });
+  console.log('[dashboard-session] Persistent PostgreSQL session store enabled.');
+} else {
+  console.warn('[dashboard-session] Using temporary MemoryStore for local development only.');
+}
+
 app.use(
   session({
+    name: 'uranium.sid',
     secret: SESSION_SECRET || crypto.randomBytes(32).toString('hex'),
+    ...(sessionStore ? { store: sessionStore } : {}),
     resave: false,
     saveUninitialized: false,
     cookie: {
       httpOnly: true,
       sameSite: 'lax',
-      secure: BASE.startsWith('https'),
+      secure: BASE.startsWith('https://'),
       maxAge: 7 * 24 * 60 * 60 * 1000,
     },
   })
