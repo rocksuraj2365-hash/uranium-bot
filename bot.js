@@ -441,6 +441,11 @@ function makeClient(withContent) {
   client.on('shardDisconnect', (event, id) => console.warn('[gateway] Shard disconnected:', { shardId: id, code: event?.code, reason: event?.reason || 'No reason supplied', wasClean: event?.wasClean }));
   client.on('shardResume', (id, replayedEvents) => console.log('[gateway] Shard resumed:', { shardId: id, replayedEvents }));
   client.on('warn', (warning) => console.warn('[discord.js]', warning));
+  client.on('debug', (message) => {
+    if (/websocket|gateway|heartbeat|identify|resume|connect|close/i.test(message)) {
+      console.log('[discord.js debug]', message);
+    }
+  });
   return client;
 }
 process.on('unhandledRejection', (e) => console.error('Unhandled:', e));
@@ -475,6 +480,23 @@ async function loginAndWaitUntilReady(cl, timeoutMs = 45000) {
   let withContent = true;
   let attempt = 0;
   while (true) {
+    try {
+      const rest = new REST({ version: '10', timeout: 15000 }).setToken(DISCORD_BOT_TOKEN);
+      const gateway = await rest.get(Routes.gatewayBot());
+      console.log(`[gateway] Discord REST authentication passed; gateway host ${new URL(gateway.url).host}; recommended shards ${gateway.shards}.`);
+    } catch (e) {
+      const status = e?.status || e?.statusCode || null;
+      console.error('[gateway] Discord REST preflight failed:', { status, code: e?.code || null, message: String(e?.message || e) });
+      if (status === 401 || status === 403) {
+        console.error('[gateway] Discord rejected the configured bot credentials or access. Check the Render secret in the dashboard; do not paste it into chat.');
+        process.exit(1);
+      }
+      const delay = Math.min(60000, 5000 * (2 ** Math.min(attempt, 4)));
+      attempt += 1;
+      console.warn(`[gateway] Retrying Discord REST preflight in ${Math.round(delay / 1000)} seconds.`);
+      await new Promise((resolve) => setTimeout(resolve, delay));
+      continue;
+    }
     const cl = makeClient(withContent);
     try {
       console.log(`[gateway] Starting Discord login (Message Content Intent: ${withContent ? 'enabled' : 'disabled'}).`);
