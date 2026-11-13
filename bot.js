@@ -96,7 +96,13 @@ if (PORT) http.createServer(async (req, res) => {
 
 const cats = ['member', 'message', 'channel', 'role', 'voice', 'server', 'automod', 'info', 'music', 'ai', 'premium', 'license', 'utility', 'community', 'fun', 'servertools', 'support', 'template', 'security'].map((n) => require('./commands/' + n));
 prefix.CAT_SHORT.utility = 'ut'; prefix.CAT_SHORT.community = 'cm'; prefix.CAT_SHORT.fun = 'fn'; prefix.CAT_SHORT.servertools = 'st'; prefix.CAT_SHORT.support = 'sp'; prefix.CAT_SHORT.template = 'tpl'; prefix.CAT_SHORT.security = 'sec';
-for (const cat of cats) cat.map = new Map(cat.commands.map((c) => [c.name, c]));
+for (const cat of cats) {
+  // A moderation reason is always optional for both slash and prefix commands.
+  for (const command of cat.commands) {
+    for (const option of command.opts || []) if (option.n === 'reason') option.req = false;
+  }
+  cat.map = new Map(cat.commands.map((c) => [c.name, c]));
+}
 const byName = new Map(cats.map((c) => [c.name, c]));
 require('./lib/patch')(byName);
 Object.assign(prefix.CURATED, { ai: 'ai ask', aichan: 'ai channel', aion: 'ai toggle', aistatus: 'ai status', aireset: 'ai reset' });
