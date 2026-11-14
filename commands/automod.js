@@ -57,7 +57,7 @@ module.exports = {
       const existing = [...(await c.g.autoModerationRules.fetch()).values()].find((r) => r.triggerType === TT.Spam);
       if (existing) {
         if (!existing.enabled) await existing.setEnabled(true, c.audit());
-        return res('Anti-spam enabled', 'Using the existing Discord SPAM rule **' + existing.name + '**. No duplicate rule was created.', { icon:'🛡️', fields:[['Rule ID', '\\`' + existing.id + '\\`']] });
+        return res('Anti-spam enabled', 'Using the existing Discord SPAM rule **' + existing.name + '**. No duplicate rule was created.', { icon:'🛡️', fields:[['Rule ID', String(existing.id)]] });
       }
       return made(await make(c, 'Uranium Anti-Spam', TT.Spam), 'Anti-spam rule');
     }),
