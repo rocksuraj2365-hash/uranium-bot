@@ -51,7 +51,7 @@ for (const [shortcut, expected] of [['add','grant'],['remove','revoke'],['check'
   assert.equal(hit.used, 2);
 }
 const catalog = require('../commands.json');
-assert.equal(catalog.total, 355, 'Published catalog total must match the implemented command set');
+assert.equal(catalog.total, 373, 'Published catalog total must match the implemented command set');
 assert.equal(catalog.categories.length, 19, 'Every command category must be published');
 for (const entry of catalog.categories) {
   const source = require('../commands/' + entry.name);
@@ -73,7 +73,9 @@ assert.ok(feedbackHit, 'Feedback prefix command should resolve');
 assert.equal(feedbackHit.def.name, 'feedback');
 assert.equal(template.commands.length, 2, 'Support template and refresh commands must be registered');
 assert.ok(template.commands.some((x) => x.name === 'refresh'), 'Support template refresh command must be registered');
-assert.equal(security.commands.length, 7, 'Security suite must register seven commands including Fortress');
+assert.equal(security.commands.length, 25, 'Security suite must register 25 executable commands including Fortress');
+assert.equal(new Set(security.commands.map((x) => x.name)).size, 25, 'Security command names must be unique');
+for (const def of security.commands) assert.equal(typeof def.run, 'function', 'Security command must have an executable handler: ' + def.name);
 assert.ok(security.commands.some((x) => x.name === 'fortress' && !x.premium), 'Fortress must be available without Premium');
 const fortressHit = prefix.resolve(prefix.tokenize('fortress'));
 assert.ok(fortressHit, 'The one-word !fortress shortcut must resolve');
@@ -188,8 +190,8 @@ for (const category of allCommandCategories) {
     routedCommandCount += 1;
   }
 }
-assert.equal(routedCommandCount, 355, 'Every one of the 355 commands must have a working full prefix route');
-console.log('All 355 full-name and available short-category prefix routes passed.');
+assert.equal(routedCommandCount, 373, 'Every one of the 373 commands must have a working full prefix route');
+console.log('All 373 full-name and available short-category prefix routes passed.');
 
 // Prefix and no-prefix messages share the same command parser after the prefix gate.
 for (const category of allCommandCategories) {
@@ -208,7 +210,7 @@ for (const page of ['guide', 'moderation', 'protection', 'permissions', 'premium
 for (const label of ['**Slash**', '**Prefix**', '**No-prefix**', 'Prev page', 'Next page', 'Back to list', 'Find a Uranium command']) {
   assert.ok(helpSource.includes(label), 'Help panel missing interactive command detail: ' + label);
 }
-console.log('All 355 commands expose slash, prefix and no-prefix usage in the interactive help panel.');
+console.log('All 373 commands expose slash, prefix and no-prefix usage in the interactive help panel.');
 
 // Gateway startup must accept shardReady while the full client guild cache hydrates.
 async function testGatewayReadyFallback() {
@@ -226,3 +228,37 @@ async function testGatewayReadyFallback() {
   console.log('Discord Gateway shardReady/clientReady startup checks passed.');
 }
 testGatewayReadyFallback().catch((error) => { console.error(error); process.exitCode = 1; });
+
+
+// Fortress and the manual spam-enable command must reuse Discord's single SPAM rule.
+async function testSpamRuleReuse() {
+  const { AutoModerationRuleTriggerType: Trigger } = require('discord.js');
+  const db = require('../lib/db');
+  const fortress = require('../lib/fortress');
+  const automod = require('../commands/automod');
+  const spam = { id:'spam-rule-test', name:'Existing server spam rule', triggerType:Trigger.Spam, enabled:false,
+    setEnabled:async function(value){ this.enabled=value; } };
+  const mentions = { id:'mention-rule-test', name:'Existing mention rule', triggerType:Trigger.MentionSpam, enabled:true,
+    setEnabled:async function(value){ this.enabled=value; } };
+  const rules = new Map([[spam.id,spam],[mentions.id,mentions]]);
+  let creates = 0;
+  const guild = {
+    id:'999999999999999991', verificationLevel:1,
+    members:{ me:{ permissions:{ has:()=>true } }, fetchMe:async()=>({ permissions:{ has:()=>true } }) },
+    autoModerationRules:{ fetch:async(id)=>id ? (rules.get(id)||null) : rules,
+      create:async()=>{ creates++; throw new Error('A duplicate AutoMod rule was attempted'); } }
+  };
+  await fortress.enable(guild,'999999999999999992');
+  assert.equal(creates,0,'Fortress must reuse an existing SPAM and mention-spam rule');
+  assert.equal(spam.enabled,true,'Fortress should enable the existing SPAM rule');
+  assert.deepEqual(db.g(guild.id).config.fortress.createdRuleIds,[],'Reused rules must not be marked as Fortress-created');
+  await fortress.disable(guild);
+  assert.equal(spam.enabled,false,'Disabling Fortress must restore the reused SPAM rule state');
+  assert.equal(mentions.enabled,true,'Disabling Fortress must preserve the reused mention rule state');
+  const spamCommand=automod.commands.find(x=>x.name==='spam-enable');
+  const result=await spamCommand.run({g:guild,audit:()=> 'smoke test'});
+  assert.equal(creates,0,'Manual spam-enable must not create a duplicate SPAM rule');
+  assert.match(result.desc,/existing Discord SPAM rule/i);
+  console.log('Discord AutoMod single-SPAM-rule reuse checks passed.');
+}
+testSpamRuleReuse().catch(error=>{console.error(error);process.exitCode=1;});
