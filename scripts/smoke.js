@@ -228,3 +228,37 @@ async function testGatewayReadyFallback() {
   console.log('Discord Gateway shardReady/clientReady startup checks passed.');
 }
 testGatewayReadyFallback().catch((error) => { console.error(error); process.exitCode = 1; });
+
+
+// Fortress and the manual spam-enable command must reuse Discord's single SPAM rule.
+async function testSpamRuleReuse() {
+  const { AutoModerationRuleTriggerType: Trigger } = require('discord.js');
+  const db = require('../lib/db');
+  const fortress = require('../lib/fortress');
+  const automod = require('../commands/automod');
+  const spam = { id:'spam-rule-test', name:'Existing server spam rule', triggerType:Trigger.Spam, enabled:false,
+    setEnabled:async function(value){ this.enabled=value; } };
+  const mentions = { id:'mention-rule-test', name:'Existing mention rule', triggerType:Trigger.MentionSpam, enabled:true,
+    setEnabled:async function(value){ this.enabled=value; } };
+  const rules = new Map([[spam.id,spam],[mentions.id,mentions]]);
+  let creates = 0;
+  const guild = {
+    id:'999999999999999991', verificationLevel:1,
+    members:{ me:{ permissions:{ has:()=>true } }, fetchMe:async()=>({ permissions:{ has:()=>true } }) },
+    autoModerationRules:{ fetch:async(id)=>id ? (rules.get(id)||null) : rules,
+      create:async()=>{ creates++; throw new Error('A duplicate AutoMod rule was attempted'); } }
+  };
+  await fortress.enable(guild,'999999999999999992');
+  assert.equal(creates,0,'Fortress must reuse an existing SPAM and mention-spam rule');
+  assert.equal(spam.enabled,true,'Fortress should enable the existing SPAM rule');
+  assert.deepEqual(db.g(guild.id).config.fortress.createdRuleIds,[],'Reused rules must not be marked as Fortress-created');
+  await fortress.disable(guild);
+  assert.equal(spam.enabled,false,'Disabling Fortress must restore the reused SPAM rule state');
+  assert.equal(mentions.enabled,true,'Disabling Fortress must preserve the reused mention rule state');
+  const spamCommand=automod.commands.find(x=>x.name==='spam-enable');
+  const result=await spamCommand.run({g:guild,audit:()=> 'smoke test'});
+  assert.equal(creates,0,'Manual spam-enable must not create a duplicate SPAM rule');
+  assert.match(result.desc,/existing Discord SPAM rule/i);
+  console.log('Discord AutoMod single-SPAM-rule reuse checks passed.');
+}
+testSpamRuleReuse().catch(error=>{console.error(error);process.exitCode=1;});
