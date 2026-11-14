@@ -1,6 +1,8 @@
 const { PermissionFlagsBits: P, ChannelType: CT } = require('discord.js');
 const { C, S, I, B, CH, RS } = require('../lib/cmd');
 const { UserError, res } = require('../lib/util');
+const cv2 = require('../lib/cv2');
+const icons = require('../lib/emojis');
 
 const MC = P.ManageChannels;
 const TEXT = [CT.GuildText, CT.GuildAnnouncement];
