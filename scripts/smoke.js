@@ -51,7 +51,7 @@ for (const [shortcut, expected] of [['add','grant'],['remove','revoke'],['check'
   assert.equal(hit.used, 2);
 }
 const catalog = require('../commands.json');
-assert.equal(catalog.total, 355, 'Published catalog total must match the implemented command set');
+assert.equal(catalog.total, 373, 'Published catalog total must match the implemented command set');
 assert.equal(catalog.categories.length, 19, 'Every command category must be published');
 for (const entry of catalog.categories) {
   const source = require('../commands/' + entry.name);
@@ -73,7 +73,9 @@ assert.ok(feedbackHit, 'Feedback prefix command should resolve');
 assert.equal(feedbackHit.def.name, 'feedback');
 assert.equal(template.commands.length, 2, 'Support template and refresh commands must be registered');
 assert.ok(template.commands.some((x) => x.name === 'refresh'), 'Support template refresh command must be registered');
-assert.equal(security.commands.length, 7, 'Security suite must register seven commands including Fortress');
+assert.equal(security.commands.length, 25, 'Security suite must register 25 executable commands including Fortress');
+assert.equal(new Set(security.commands.map((x) => x.name)).size, 25, 'Security command names must be unique');
+for (const def of security.commands) assert.equal(typeof def.run, 'function', 'Security command must have an executable handler: ' + def.name);
 assert.ok(security.commands.some((x) => x.name === 'fortress' && !x.premium), 'Fortress must be available without Premium');
 const fortressHit = prefix.resolve(prefix.tokenize('fortress'));
 assert.ok(fortressHit, 'The one-word !fortress shortcut must resolve');
