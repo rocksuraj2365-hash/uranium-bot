@@ -1,7 +1,7 @@
 {
   "version": 1,
   "generatedFrom": "commands/*.js",
-  "total": 355,
+  "total": 373,
   "categories": [
     {
       "name": "member",
@@ -2549,8 +2549,15 @@
     },
     {
       "name": "security",
-      "description": "Premium security intelligence: permission scans, audit review and configuration drift.",
+      "description": "Server security, permission reviews, audit intelligence and protection controls.",
       "commands": [
+        {
+          "name": "fortress",
+          "description": "Enable or manage Uranium maximum server protection",
+          "slash": "/security fortress",
+          "prefix": "!fortress",
+          "access": "Available subject to command permissions"
+        },
         {
           "name": "scan",
           "description": "Premium: scan roles and channel overrides for sensitive permissions",
@@ -2594,11 +2601,130 @@
           "access": "Premium access required"
         },
         {
-          "name": "fortress",
-          "description": "Enable or manage Uranium maximum server protection",
-          "slash": "/security fortress",
-          "prefix": "!fortress",
-          "access": "Available subject to command permissions"
+          "name": "status",
+          "description": "Premium: show the server security configuration at a glance",
+          "slash": "/security status",
+          "prefix": "!security status",
+          "access": "Premium access required"
+        },
+        {
+          "name": "verification",
+          "description": "Premium: set the server verification level",
+          "slash": "/security verification",
+          "prefix": "!security verification",
+          "access": "Premium access required"
+        },
+        {
+          "name": "lockdown",
+          "description": "Premium: lock this text channel and save its previous permission",
+          "slash": "/security lockdown",
+          "prefix": "!security lockdown",
+          "access": "Premium access required"
+        },
+        {
+          "name": "unlockdown",
+          "description": "Premium: restore the channel permission saved by Uranium",
+          "slash": "/security unlockdown",
+          "prefix": "!security unlockdown",
+          "access": "Premium access required"
+        },
+        {
+          "name": "slowmode",
+          "description": "Premium: set slowmode in this channel",
+          "slash": "/security slowmode",
+          "prefix": "!security slowmode",
+          "access": "Premium access required"
+        },
+        {
+          "name": "slowmode-off",
+          "description": "Premium: turn off slowmode in this channel",
+          "slash": "/security slowmode-off",
+          "prefix": "!security slowmode-off",
+          "access": "Premium access required"
+        },
+        {
+          "name": "role-audit",
+          "description": "Premium: list roles with sensitive permissions",
+          "slash": "/security role-audit",
+          "prefix": "!security role-audit",
+          "access": "Premium access required"
+        },
+        {
+          "name": "admin-audit",
+          "description": "Premium: list every role with Administrator permission",
+          "slash": "/security admin-audit",
+          "prefix": "!security admin-audit",
+          "access": "Premium access required"
+        },
+        {
+          "name": "channel-audit",
+          "description": "Premium: inspect explicit sensitive @everyone channel grants",
+          "slash": "/security channel-audit",
+          "prefix": "!security channel-audit",
+          "access": "Premium access required"
+        },
+        {
+          "name": "bot-audit",
+          "description": "Premium: review cached bot accounts and their effective permissions",
+          "slash": "/security bot-audit",
+          "prefix": "!security bot-audit",
+          "access": "Premium access required"
+        },
+        {
+          "name": "audit-user",
+          "description": "Premium: filter audit-log entries by an optional user",
+          "slash": "/security audit-user",
+          "prefix": "!security audit-user",
+          "access": "Premium access required"
+        },
+        {
+          "name": "invite-audit",
+          "description": "Premium: review active invites, creators, limits and expiry",
+          "slash": "/security invite-audit",
+          "prefix": "!security invite-audit",
+          "access": "Premium access required"
+        },
+        {
+          "name": "webhook-audit",
+          "description": "Premium: review webhook names, channels and owners without tokens",
+          "slash": "/security webhook-audit",
+          "prefix": "!security webhook-audit",
+          "access": "Premium access required"
+        },
+        {
+          "name": "baseline-clear",
+          "description": "Premium: remove the saved security comparison snapshot",
+          "slash": "/security baseline-clear",
+          "prefix": "!security baseline-clear",
+          "access": "Premium access required"
+        },
+        {
+          "name": "report",
+          "description": "Premium: create a compact overview of important server security settings",
+          "slash": "/security report",
+          "prefix": "!security report",
+          "access": "Premium access required"
+        },
+        {
+          "name": "modlog-check",
+          "description": "Premium: check whether Uranium can access the configured moderation log",
+          "slash": "/security modlog-check",
+          "prefix": "!security modlog-check",
+          "access": "Premium access required"
+        },
+        {
+          "name": "permission-check",
+          "description": "Premium: inspect sensitive permissions for a member in this channel",
+          "slash": "/security permission-check",
+          "prefix": "!security permission-check",
+          "access": "Premium access required"
+        },
+        {
+          "name": "alert-test",
+          "description": "Premium: send a test notice to the configured moderation log",
+          "slash": "/security alert-test",
+          "prefix": "!security alert-test",
+          "access": "Premium access required"
         }
       ]
     }
