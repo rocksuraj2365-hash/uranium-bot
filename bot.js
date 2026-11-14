@@ -304,7 +304,12 @@ async function button(i) {
   if (kind === 'ai') { ai.resetHistory(i.channelId, i.user.id, i.guildId || 'dm'); return i.reply({ content: '🧠 I forgot our earlier messages here.', flags: ui.EPH }); }
   if (['poll', 'gw', 'rp', 'tk'].includes(kind)) { if (i.inGuild() && blacklisted(i.user.id)) return i.reply({ content: 'You are not allowed to use this bot.', flags: ui.EPH }); return premium.onButton(i); }
   const deny = (m) => i.reply({ embeds: [ui.errorEmbed(m)], flags: ui.EPH });
-  if (kind === 'dismiss') { if (i.user.id !== a) return deny('Only the moderator who ran the command can dismiss it.'); return i.update({ components: [] }); }
+  if (kind === 'dismiss') {
+    if (i.user.id !== a) return deny('Only the moderator who ran the command can dismiss it.');
+    // Components V2 messages cannot be emptied (Discord error 50006), so they are removed instead.
+    if (i.message?.flags?.has?.(1 << 15)) { await i.deferUpdate().catch(() => {}); return i.message.delete().catch(() => {}); }
+    return i.update({ components: [] });
+  }
   if (kind === 'case') {
     const x = db.getCase(i.guildId, Number(a)); if (!x) return deny('That case no longer exists.');
     return i.reply({ flags: ui.EPH, embeds: [ui.infoEmbed(`📋 Case #${x.id} — ${x.type}`, null).addFields({ name: 'User', value: `<@${x.userId}> (\`${x.userId}\`)` }, { name: 'Moderator', value: `<@${x.modId}>`, inline: true }, { name: 'When', value: `<t:${Math.floor(x.at / 1000)}:R>`, inline: true }, { name: 'Reason', value: x.reason || '—' })] });
