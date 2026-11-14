@@ -307,7 +307,7 @@ async function alertTest(c) {
 
 module.exports = {
   name:'security',
-  description:'Premium security intelligence: permission scans, audit review and configuration drift.',
+  description:'Server security, permission reviews, audit intelligence and protection controls.',
   commands:[
     C('fortress','Enable or manage Uranium maximum server protection',[{ n:'mode', d:'on, off, or status', t:'str', req:false, choices:['on','off','status'] }],P.ManageGuild,fortressCommand),
     C('scan','Premium: scan roles and channel overrides for sensitive permissions',[],null,scan,PREMIUM),
