@@ -53,7 +53,14 @@ module.exports = {
       await r.setTriggerMetadata({ keywordFilter: left, regexPatterns: r.triggerMetadata.regexPatterns }, c.audit());
       return res('Words removed', `**${r.name}** now has **${left.length}** word(s).`, { icon: '➖' });
     }),
-    C('spam-enable', 'Block spam messages automatically', [], MG, async (c) => made(await make(c, 'Uranium Anti-Spam', TT.Spam), 'Anti-spam rule')),
+    C('spam-enable', 'Block spam messages automatically', [], MG, async (c) => {
+      const existing = [...(await c.g.autoModerationRules.fetch()).values()].find((r) => r.triggerType === TT.Spam);
+      if (existing) {
+        if (!existing.enabled) await existing.setEnabled(true, c.audit());
+        return res('Anti-spam enabled', 'Using the existing Discord SPAM rule **' + existing.name + '**. No duplicate rule was created.', { icon:'🛡️', fields:[['Rule ID', '\\`' + existing.id + '\\`']] });
+      }
+      return made(await make(c, 'Uranium Anti-Spam', TT.Spam), 'Anti-spam rule');
+    }),
     C('mention-spam', 'Block messages with too many mentions', [I('limit', 'Max mentions per message (1-50)', true, 1, 50)], MG, async (c) => made(await make(c, `Max ${c.n('limit')} mentions`, TT.MentionSpam, { mentionTotalLimit: c.n('limit') }), 'Mention limit')),
     C('preset-profanity', 'Turn on Discord\'s profanity filter', [], MG, (c) => preset(c, [PS.Profanity], 'Profanity filter')),
     C('preset-sexual', 'Turn on Discord\'s sexual content filter', [], MG, (c) => preset(c, [PS.SexualContent], 'Sexual content filter')),
