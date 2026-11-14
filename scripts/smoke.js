@@ -190,8 +190,8 @@ for (const category of allCommandCategories) {
     routedCommandCount += 1;
   }
 }
-assert.equal(routedCommandCount, 355, 'Every one of the 355 commands must have a working full prefix route');
-console.log('All 355 full-name and available short-category prefix routes passed.');
+assert.equal(routedCommandCount, 373, 'Every one of the 373 commands must have a working full prefix route');
+console.log('All 373 full-name and available short-category prefix routes passed.');
 
 // Prefix and no-prefix messages share the same command parser after the prefix gate.
 for (const category of allCommandCategories) {
@@ -210,7 +210,7 @@ for (const page of ['guide', 'moderation', 'protection', 'permissions', 'premium
 for (const label of ['**Slash**', '**Prefix**', '**No-prefix**', 'Prev page', 'Next page', 'Back to list', 'Find a Uranium command']) {
   assert.ok(helpSource.includes(label), 'Help panel missing interactive command detail: ' + label);
 }
-console.log('All 355 commands expose slash, prefix and no-prefix usage in the interactive help panel.');
+console.log('All 373 commands expose slash, prefix and no-prefix usage in the interactive help panel.');
 
 // Gateway startup must accept shardReady while the full client guild cache hydrates.
 async function testGatewayReadyFallback() {
