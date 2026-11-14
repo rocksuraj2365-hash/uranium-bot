@@ -9,7 +9,7 @@
   "scripts": {
     "start": "node server.js",
     "bot": "node bot.js",
-    "test": "node scripts/smoke.js"
+    "test": "node scripts/smoke.js && node scripts/ai-core-smoke.js"
   },
   "dependencies": {
     "discord.js": "^14.28.1",

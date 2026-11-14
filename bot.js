@@ -301,7 +301,7 @@ async function button(i) {
   if (kind === 'template') return supportTemplate.onButton(i);
   if (['cf', 'help', 'eb', 'lst', 'sv'].includes(kind)) return; // handled by collectors
   if (kind === 'mu') return music.onComponent(i);
-  if (kind === 'ai') { ai.resetHistory(i.channelId, i.user.id); return i.reply({ content: '🧠 I forgot our earlier messages here.', flags: ui.EPH }); }
+  if (kind === 'ai') { ai.resetHistory(i.channelId, i.user.id, i.guildId || 'dm'); return i.reply({ content: '🧠 I forgot our earlier messages here.', flags: ui.EPH }); }
   if (['poll', 'gw', 'rp', 'tk'].includes(kind)) { if (i.inGuild() && blacklisted(i.user.id)) return i.reply({ content: 'You are not allowed to use this bot.', flags: ui.EPH }); return premium.onButton(i); }
   const deny = (m) => i.reply({ embeds: [ui.errorEmbed(m)], flags: ui.EPH });
   if (kind === 'dismiss') { if (i.user.id !== a) return deny('Only the moderator who ran the command can dismiss it.'); return i.update({ components: [] }); }

@@ -1,0 +1,17 @@
+const assert=require('node:assert/strict');
+const core=require('../lib/ai-core');
+const a=core.normalizeInput('hlo plz delte tht msg https://example.com/a?id=123456789012345678 <@123456789012345678>');
+assert.match(a.normalized,/hello please/);
+assert.match(a.normalized,/delete that message/);
+assert.match(a.normalized,/https:\/\/example\.com\/a\?id=123456789012345678/);
+assert.match(a.normalized,/<@123456789012345678>/);
+assert.equal(core.normalizeInput('whts the rulz').normalized,'what is the rules');
+assert.equal(core.provider.localEndpoint(),null);
+assert.ok(core.connectors.list().every(x=>x.connected===false));
+const memory=core.memory;
+memory.forget('g','c','u');
+memory.add('g','c','u','user','hello');
+assert.equal(memory.get('g','c','u').length,1);
+assert.equal(memory.forget('g','c','u'),true);
+assert.equal(memory.get('g','c','u').length,0);
+console.log('Uranium AI Core smoke checks passed.');
