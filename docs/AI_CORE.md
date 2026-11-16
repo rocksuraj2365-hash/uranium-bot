@@ -33,6 +33,7 @@ eligible service operator and comply with the provider's age, usage and data ter
 For OpenRouter (after eligibility and terms review):
 - `AI_PROVIDER=openrouter`
 - `OPENROUTER_API_KEY=` (store only in the bot service's secret environment)
+- `OPENROUTER_DAILY_LIMIT=40` (in-memory daily cap; default 40 and maximum 50 per process/day)
 - `OPENROUTER_MODEL=openrouter/free` (optional; this is the default)
 - `OPENROUTER_FALLBACK_MODELS=` (optional comma-separated OpenRouter model IDs)
 
