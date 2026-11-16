@@ -8,6 +8,24 @@ const { isSafeSelfAssignableRole, blockedSelfAssignablePermissions } = require('
 const { PermissionFlagsBits } = require('discord.js');
 const { normalizeRemotePayload } = require('../lib/db-state');
 const { friendlyDiscordError } = require('../lib/ui');
+const { startRenderKeepAlive, DEFAULT_INTERVAL_MS } = require('../lib/render-keepalive');
+let keepAliveUrl = '';
+let keepAliveInterval = 0;
+let keepAliveTimer = null;
+let keepAliveCleared = false;
+const stopKeepAlive = startRenderKeepAlive({
+  baseUrl: 'https://uranium-bot.onrender.com',
+  fetchImpl: (url) => { keepAliveUrl = url; return Promise.resolve({ ok: true, status: 200 }); },
+  schedule: (callback, delay) => { keepAliveTimer = callback; keepAliveInterval = delay; return { unref() {} }; },
+  cancel: () => { keepAliveCleared = true; },
+  logger: { info() {}, warn() {} },
+});
+assert.equal(keepAliveUrl, 'https://uranium-bot.onrender.com/health');
+assert.equal(keepAliveInterval, DEFAULT_INTERVAL_MS);
+assert.equal(typeof keepAliveTimer, 'function');
+stopKeepAlive();
+assert.equal(keepAliveCleared, true, 'SIGTERM cleanup must stop the Render keep-alive timer');
+
 const duplicateSpam = friendlyDiscordError({ code:30032, message:'Invalid Form Body AUTO_MODERATION_MAX_RULES_OF_TYPE_EXCEEDED' }, '/automod spam-enable');
 assert.equal(duplicateSpam.title, 'Spam rule already exists');
 assert.match(duplicateSpam.message, /already has a Spam AutoMod rule/i);
