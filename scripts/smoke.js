@@ -204,6 +204,9 @@ for (const category of allCommandCategories) {
   }
 }
 const helpSource = require('node:fs').readFileSync(require.resolve('../lib/help'), 'utf8');
+assert.match(helpSource, /const passes = \(d\) => !d\.owner/, 'Owner-only commands must be excluded from category and search results');
+assert.ok(!helpSource.includes("{ id: 'owner', label: 'Owner' }"), 'Public help filters must not expose an Owner command filter');
+assert.match(helpSource, /if \(d\.owner\) continue;/, 'Owner-only commands must be excluded from help search results');
 for (const page of ['guide', 'moderation', 'protection', 'permissions', 'premium-guide']) {
   assert.ok(helpSource.includes("name: '" + page + "'"), 'Help page missing: ' + page);
 }
