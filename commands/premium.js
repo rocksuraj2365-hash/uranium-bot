@@ -193,7 +193,7 @@ module.exports = {
   name: 'premium', description: 'Owner-managed Premium access and server customization', polls, snipes, endGiveaway, onButton,
   hasAccess(guildId, userId) { const owners = (process.env.OWNER_IDS || '').split(/[\s,]+/).filter(Boolean); return !!(guildId && userId && (owners.includes(userId) || db.g(guildId).premiumUsers?.includes(userId))); },
   commands: [
-    C('noprefix', 'Premium: use commands without any prefix', [S('mode', 'on, off or status', false, { choices: ['on', 'off', 'status'] })], null, async (c) => {
+    C('noprefix', 'Owner only: use commands without any prefix', [S('mode', 'on, off or status', false, { choices: ['on', 'off', 'status'] })], null, async (c) => {
       const g = G(); const m = c.s('mode') || 'status'; if (m !== 'status') { g.config.np = m === 'on'; db.save(); }
       const on = g.config.np !== false;
       return own('No-prefix mode', `No-prefix is **${on ? 'ON' : 'OFF'}** for you.\nType commands like \`b @user spam\` or \`ping\` without any prefix.\nTurn it off with \`np off\`.`, { icon: on ? '⚡' : '💤' });
