@@ -11,7 +11,7 @@ messages while keeping Discord permissions as the authority for server actions.
 - Per-user, per-channel, in-memory conversation context with a TTL and explicit forget.
   It does not persist raw conversations into the guild database.
 - OpenRouter provider support using its OpenAI-compatible Chat Completions API. Configure
-  `AI_PROVIDER=openrouter`, `OPENROUTER_API_KEY`, and optionally `AI_MODEL`.
+  `AI_PROVIDER=openrouter`, `OPENROUTER_API_KEY`, and optionally `OPENROUTER_MODEL`.
   The default model route is `openrouter/free`; free model availability and limits vary.
   The adapter preserves the existing server command tools and verified-owner DM tools.
 - Optional OpenAI-compatible local model endpoint. Configure
@@ -33,8 +33,8 @@ eligible service operator and comply with the provider's age, usage and data ter
 For OpenRouter (after eligibility and terms review):
 - `AI_PROVIDER=openrouter`
 - `OPENROUTER_API_KEY=` (store only in the bot service's secret environment)
-- `AI_MODEL=openrouter/free` (optional; this is the default for OpenRouter)
-- `AI_FALLBACK_MODELS=` (optional comma-separated OpenRouter model IDs)
+- `OPENROUTER_MODEL=openrouter/free` (optional; this is the default)
+- `OPENROUTER_FALLBACK_MODELS=` (optional comma-separated OpenRouter model IDs)
 
 For a separately operated local model server:
 - `AI_PROVIDER=local`
