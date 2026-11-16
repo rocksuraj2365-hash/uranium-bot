@@ -211,7 +211,7 @@ async function execute(i, cat, def) {
   const label = `/${cat.name} ${def.name}`;
   await i.deferReply(def.ephemeral ? { flags: ui.EPH } : undefined);
   try {
-    if (def.owner && !isOwner(i.user.id)) throw new UserError('💎 This is a **Premium** command and it is only for the bot owner.', 'Normal moderation commands are in the other groups. Use the help menu.');
+    if (def.owner && !isOwner(i.user.id)) throw new UserError('🔒 Owner-only control', 'This command can only be used by the Uranium bot owner.');
     if (def.premium && !premium.hasAccess(i.guildId, i.user.id)) throw new UserError('💎 This server feature requires Premium access.', 'Only the bot owner can grant it with `/license grant` or `!premium add @member`.');
     const me = await i.guild.members.fetchMe();
     if (def.perm) {
