@@ -16,12 +16,14 @@ const music = require('./lib/music');
 const supportTemplate = require('./lib/support-template');
 const emojis = require('./lib/emojis');
 const waitForGatewayReady = require('./lib/gateway-ready');
+const { startRenderKeepAlive } = require('./lib/render-keepalive');
 const { UserError, permName } = require('./lib/util');
 
 const { DISCORD_BOT_TOKEN, DISCORD_CLIENT_ID, DEV_GUILD_ID, PORT } = process.env;
 if (!DISCORD_BOT_TOKEN || !DISCORD_CLIENT_ID) { console.error('Missing DISCORD_BOT_TOKEN or DISCORD_CLIENT_ID'); process.exit(1); }
 
 let client = null, started = false, contentIntent = false;
+let stopRenderKeepAlive = () => {};
 
 function safeEqual(a, b) {
   const x = Buffer.from(String(a || '')), y = Buffer.from(String(b || ''));
@@ -92,7 +94,10 @@ if (PORT) http.createServer(async (req, res) => {
     db.save();
     return sendJson(res, 200, { ok: true, settings: { ai: !aiLocked && ai.available(guild.id), aiLocked, prefix: config.prefix, aiChannel: config.aiChannel || '', modlog: config.modlog || '' } });
   } catch (error) { console.error('[dashboard control]', error.message); return sendJson(res, 502, { error: 'Could not reach that server through Uranium.' }); }
-}).listen(PORT, () => console.log('Bot API listening on ' + PORT));
+}).listen(PORT, () => {
+  console.log('Bot API listening on ' + PORT);
+  stopRenderKeepAlive = startRenderKeepAlive();
+});
 
 const cats = ['member', 'message', 'channel', 'role', 'voice', 'server', 'automod', 'info', 'music', 'ai', 'premium', 'license', 'utility', 'community', 'fun', 'servertools', 'support', 'template', 'security'].map((n) => require('./commands/' + n));
 prefix.CAT_SHORT.utility = 'ut'; prefix.CAT_SHORT.community = 'cm'; prefix.CAT_SHORT.fun = 'fn'; prefix.CAT_SHORT.servertools = 'st'; prefix.CAT_SHORT.support = 'sp'; prefix.CAT_SHORT.template = 'tpl'; prefix.CAT_SHORT.security = 'sec';
@@ -477,6 +482,7 @@ function makeClient(withContent) {
 process.on('unhandledRejection', (e) => console.error('Unhandled:', e));
 async function shutdown(signal) {
   console.log(`Received ${signal}; flushing Uranium data before shutdown.`);
+  stopRenderKeepAlive();
   await db.close().catch((error) => console.error('[db] Shutdown flush failed:', error.message));
   if (client) client.destroy();
   process.exit(0);
