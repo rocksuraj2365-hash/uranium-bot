@@ -7,6 +7,18 @@ const waitForGatewayReady = require('../lib/gateway-ready');
 const { isSafeSelfAssignableRole, blockedSelfAssignablePermissions } = require('../lib/role-safety');
 const { PermissionFlagsBits } = require('discord.js');
 const { normalizeRemotePayload } = require('../lib/db-state');
+const { friendlyDiscordError } = require('../lib/ui');
+const duplicateSpam = friendlyDiscordError({ code:30032, message:'Invalid Form Body AUTO_MODERATION_MAX_RULES_OF_TYPE_EXCEEDED' }, '/automod spam-enable');
+assert.equal(duplicateSpam.title, 'Spam rule already exists');
+assert.match(duplicateSpam.message, /already has a Spam AutoMod rule/i);
+assert.match(duplicateSpam.hint, /\/automod rules/i);
+const invalidForm = friendlyDiscordError({ code:50035, message:'Invalid Form Body 0[FIELD]: raw discord internals' }, '/automod keyword-create');
+assert.equal(invalidForm.title, 'Invalid settings');
+assert.doesNotMatch(invalidForm.message + invalidForm.hint, /raw discord internals|Invalid Form Body/);
+const missingPermission = friendlyDiscordError({ code:50013, message:'Missing Permissions' }, '/channel lock');
+assert.match(missingPermission.message, /permission/i);
+const rateLimited = friendlyDiscordError({ code:429, message:'Too Many Requests' }, '/utility test');
+assert.match(rateLimited.message, /too many requests/i);
 
 // Legacy JSONB payloads can be double-encoded as strings and character-index maps.
 const stateFixture = { guilds: { demo: { cases: [], warns: [], notes: [], watch: [], config: {} } }, schedules: [], nextSchedule: 1 };
