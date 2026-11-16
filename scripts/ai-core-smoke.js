@@ -20,6 +20,7 @@ assert.equal(openRouterMessages[3].tool_call_id,openRouterMessages[2].tool_calls
 const converted=core.provider.normalizeOpenRouterResponse({model:'openrouter/free',choices:[{message:{tool_calls:[{function:{name:'set_prefix',arguments:'{"prefix":"!"}'}}]}}]});
 assert.deepEqual(converted.candidates[0].content.parts[0].functionCall,{name:'set_prefix',args:{prefix:'!'}});
 assert.equal(core.provider.openRouterReady(),false);
+assert.equal(core.provider.claimOpenRouterRequest().limit,40);
 const toolSchema=core.provider.openRouterTools([{name:'run_command',input_schema:{type:'OBJECT',properties:{command:{type:'STRING'}},required:['command']}}]);
 assert.equal(toolSchema[0].function.parameters.type,'object');
 assert.equal(toolSchema[0].function.parameters.properties.command.type,'string');
