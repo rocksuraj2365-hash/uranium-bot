@@ -198,8 +198,8 @@ module.exports = {
       const on = g.config.np !== false;
       return own('No-prefix mode', `No-prefix is **${on ? 'ON' : 'OFF'}** for you.\nType commands like \`b @user spam\` or \`ping\` without any prefix.\nTurn it off with \`np off\`.`, { icon: on ? '⚡' : '💤' });
     }, O),
-    C('servers', 'Premium: list all servers the bot is in', [], null, servers, { ...O, custom: true }),
-    C('server-info', 'Premium: details of a server by ID', [S('id', 'Server ID', true, { max: 25 })], null, async (c) => {
+    C('servers', 'Owner only: list all servers the bot is in', [], null, servers, { ...O, custom: true }),
+    C('server-info', 'Owner only: details of a server by ID', [S('id', 'Server ID', true, { max: 25 })], null, async (c) => {
       const g = c.i.client.guilds.cache.get(snowflake(c.s('id'))); if (!g) throw new UserError('I am not in that server', 'Use /premium servers to see IDs.');
       return own(g.name, g.description || null, { fields: [['ID', `\`${g.id}\``, true], ['Owner', `<@${g.ownerId}>`, true], ['Members', String(g.memberCount), true], ['Created', ts(g.createdTimestamp), true], ['Boost', String(g.premiumTier), true], ['Channels', String(g.channels.cache.size), true]] });
     }, O),
@@ -212,7 +212,7 @@ module.exports = {
       const r = await all((g) => g.members.ban(u.id, { reason: `GBAN: ${c.reason()}` }))(c); const ok = r.filter((x) => x[1]).length;
       return own('Global ban done', `**${u.username}** banned in **${ok}** of **${r.length}** servers.`, { icon: '🌍', user: u, fields: [['Reason', c.reason()]] });
     }, { ...O, danger: 'This will **ban the user in every server** the bot is in.' }),
-    C('ungban', 'Premium: unban a user in every server', [U(true, 'user', 'User to unban everywhere')], null, async (c) => {
+    C('ungban', 'Owner only: unban a user in every server', [U(true, 'user', 'User to unban everywhere')], null, async (c) => {
       const u = c.u('user'); const r = await all((g) => g.members.unban(u.id, 'Global unban'))(c); const ok = r.filter((x) => x[1]).length;
       return own('Global unban done', `**${u.username}** unbanned in **${ok}** server(s).`, { icon: '🌍', user: u });
     }, O),
@@ -222,22 +222,22 @@ module.exports = {
       g.blacklist.push({ id: u.id, reason: c.reason(), at: Date.now() }); db.save();
       return own('User blacklisted', `**${u.username}** can no longer use Uranium.`, { icon: '🚫', user: u, fields: [['Total blacklisted', String(g.blacklist.length), true]] });
     }, O),
-    C('unblacklist', 'Premium: allow a blocked user again', [U()], null, async (c) => {
+    C('unblacklist', 'Owner only: allow a blocked user again', [U()], null, async (c) => {
       const u = c.u('user'); const g = G(); const n = (g.blacklist || []).length; g.blacklist = (g.blacklist || []).filter((x) => x.id !== u.id); db.save();
       if (g.blacklist.length === n) throw new UserError(`**${u.username}** is not blacklisted`);
       return own('User unblocked', `**${u.username}** can use Uranium again.`, { icon: '✅', user: u });
     }, O),
-    C('status', 'Owner only: change the bot activity', [S('type', 'playing, watching, listening or competing', true, { choices: ['playing', 'watching', 'listening', 'competing'] }), S('text', 'Status text', true, { max: 100 })], null, async (c) => {
+    C('status', 'Owner only: change what the bot is doing', [S('type', 'playing, watching, listening or competing', true, { choices: ['playing', 'watching', 'listening', 'competing'] }), S('text', 'Status text', true, { max: 100 })], null, async (c) => {
       const map = { playing: ActivityType.Playing, watching: ActivityType.Watching, listening: ActivityType.Listening, competing: ActivityType.Competing };
       c.i.client.user.setActivity(c.s('text'), { type: map[c.s('type')] }); G().config.status = { type: c.s('type'), text: c.s('text') }; db.save();
       return own('Status changed', `Now **${c.s('type')}** ${c.s('text')}`, { icon: '🎮' });
     }, O),
-    C('bot-avatar', 'Premium: change Uranium’s avatar in this server only', [S('url', 'Public HTTPS image URL', true, { max: 400 })], null, async (c) => {
+    C('bot-avatar', 'Premium: change Uranium\'s avatar in this server only', [S('url', 'Public HTTPS image URL', true, { max: 400 })], null, async (c) => {
       const data = await imageDataFromUrl(c.s('url'));
       await c.g.members.editMe({ avatar: data, reason: `Guild avatar updated by ${c.i.user.username}` });
       return own('Server avatar changed', 'Uranium’s avatar was updated in this server only. Other servers and the global bot avatar are unchanged.', { icon: '🖼️' });
     }, PREMIUM_ACCESS),
-    C('bot-banner', 'Premium: change Uranium’s banner in this server only', [S('url', 'Public HTTPS image URL', true, { max: 400 })], null, async (c) => {
+    C('bot-banner', 'Premium: change Uranium\'s banner in this server only', [S('url', 'Public HTTPS image URL', true, { max: 400 })], null, async (c) => {
       const data = await imageDataFromUrl(c.s('url'));
       await c.g.members.editMe({ banner: data, reason: `Guild banner updated by ${c.i.user.username}` });
       return own('Server banner changed', 'Uranium’s banner was updated in this server only. Other servers and the global bot banner are unchanged.', { icon: '🌄' });
@@ -245,7 +245,7 @@ module.exports = {
     C('restart', 'Owner only: restart the bot', [], null, async () => {
       setTimeout(() => { db.flush(); process.exit(0); }, 2500); return own('Restarting', 'Uranium will be back in about a minute.', { icon: '♻️' });
     }, { ...O, danger: 'The bot will **restart** and be offline for a minute.' }),
-    C('live-stats', 'Premium: live animated bot statistics', [], null, liveStats, { ...O, custom: true }),
+    C('live-stats', 'Owner only: live animated bot statistics', [], null, liveStats, { ...O, custom: true }),
     C('emoji-add', 'Premium: add an emoji to this server', [S('name', 'Emoji name', true, { max: 32 }), S('source', 'Image URL or a custom emoji', true, { max: 300 })], P.ManageGuildExpressions, async (c) => {
       let url = c.s('source'); const m = /^<(a?):\w+:(\d+)>$/.exec(url); if (m) url = `https://cdn.discordapp.com/emojis/${m[2]}.${m[1] ? 'gif' : 'png'}`;
       if (!/^https?:\/\//i.test(url)) throw new UserError('Give an image link or a custom emoji', 'Example: https://.../image.png');
