@@ -10,10 +10,16 @@ messages while keeping Discord permissions as the authority for server actions.
   are protected from rewriting. The original text remains available for auditing.
 - Per-user, per-channel, in-memory conversation context with a TTL and explicit forget.
   It does not persist raw conversations into the guild database.
+- OpenRouter provider support using its OpenAI-compatible Chat Completions API. Configure
+  `AI_PROVIDER=openrouter`, `OPENROUTER_API_KEY`, and optionally `AI_MODEL`.
+  The default model route is `openrouter/free`; free model availability and limits vary.
+  The adapter preserves the existing server command tools and verified-owner DM tools.
 - Optional OpenAI-compatible local model endpoint. Configure
   `AI_PROVIDER=local`, `AI_LOCAL_BASE_URL`, and `AI_LOCAL_MODEL`. Remote endpoints
-  must use HTTPS; HTTP is allowed only for loopback development. An operator must
-  separately verify hosting, model licence, age eligibility and data handling.
+  must use HTTPS; HTTP is allowed only for loopback development. The local adapter is
+  text-only and does not provide model tool calls.
+- An eligible operator must separately verify hosting, model licence, age eligibility,
+  provider terms and Discord data handling before enabling any provider.
 - Connector registry with explicit adapter registration and least-privilege intent.
   GitHub, Drive, Notion and Discord are definitions only until real OAuth/API adapters
   are installed and authorized. No fake connected status is shown.
@@ -23,6 +29,12 @@ messages while keeping Discord permissions as the authority for server actions.
 
 AI remains disabled unless `AI_ENABLED=true`. The provider must be approved by the
 eligible service operator and comply with the provider's age, usage and data terms.
+
+For OpenRouter (after eligibility and terms review):
+- `AI_PROVIDER=openrouter`
+- `OPENROUTER_API_KEY=` (store only in the bot service's secret environment)
+- `AI_MODEL=openrouter/free` (optional; this is the default for OpenRouter)
+- `AI_FALLBACK_MODELS=` (optional comma-separated OpenRouter model IDs)
 
 For a separately operated local model server:
 - `AI_PROVIDER=local`
@@ -50,6 +62,5 @@ Do not put API keys in Discord, source files, logs or prompts.
 
 This foundation does not itself provide a trained foundation model, hosted compute,
 OAuth app registrations, external connector credentials, or a production web-search
-provider. Those must be provisioned and tested separately. The local provider currently
-supports text chat only; it does not advertise model tool-calling until a validated
-provider-specific adapter is added.
+provider. Those must be provisioned and tested separately. The local provider currently supports text chat only. OpenRouter supports tool calls through
+its compatible API; Uranium still enforces its own permission checks and confirmation flows.
