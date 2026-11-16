@@ -1,5 +1,6 @@
 const { PermissionFlagsBits: P, ChannelType: CT, EmbedBuilder, ActionRowBuilder, ButtonBuilder, ButtonStyle, ModalBuilder, TextInputBuilder, TextInputStyle, ActivityType, MessageFlags } = require('discord.js');
 const os = require('os');
+const { isIP } = require('node:net');
 const { C, U, S, I, CH, R } = require('../lib/cmd');
 const db = require('../lib/db');
 const { UserError, res, ts, trunc, snowflake, parseDuration, fmt, hexColor, checkRole } = require('../lib/util');
@@ -17,6 +18,24 @@ const polls = new Map();
 const snipes = new Map();
 const O = { owner: true };
 const PREMIUM_ACCESS = { premium: true };
+
+async function imageDataFromUrl(raw) {
+  let url;
+  try { url = new URL(raw); } catch { throw new UserError('Invalid image URL', 'Use a direct HTTPS image link.'); }
+  if (url.protocol !== 'https:' || url.username || url.password || !url.hostname || isIP(url.hostname) || ['localhost', 'localhost.localdomain'].includes(url.hostname.toLowerCase()) || url.hostname.endsWith('.local')) {
+    throw new UserError('Unsafe image URL', 'Use a public HTTPS image URL, not a local or private address.');
+  }
+  const response = await fetch(url, { redirect: 'error', signal: AbortSignal.timeout(10000) }).catch(() => null);
+  if (!response?.ok) throw new UserError('Could not fetch that image', 'Check that the public HTTPS image link works.');
+  const type = (response.headers.get('content-type') || '').split(';')[0].trim().toLowerCase();
+  if (!/^image\/(png|jpeg|jpg|webp|gif)$/.test(type)) throw new UserError('Unsupported image type', 'Use a PNG, JPG, WEBP or GIF image.');
+  const declared = Number(response.headers.get('content-length') || 0);
+  if (declared > 10 * 1024 * 1024) throw new UserError('Image is too large', 'The image must be 10 MB or smaller.');
+  const bytes = Buffer.from(await response.arrayBuffer());
+  if (!bytes.length || bytes.length > 10 * 1024 * 1024) throw new UserError('Image is too large or empty', 'The image must be non-empty and 10 MB or smaller.');
+  const mime = type === 'image/jpg' ? 'image/jpeg' : type;
+  return `data:${mime};base64,${bytes.toString('base64')}`;
+}
 const btn = (id, label, emoji, style = ButtonStyle.Secondary, off = false) => new ButtonBuilder().setCustomId(id).setLabel(label).setEmoji(emoji).setStyle(style).setDisabled(off);
 const goldEmbed = (t, d) => new EmbedBuilder().setColor(GOLD).setTitle(t).setDescription(d || null).setFooter({ text: `Uranium Premium` }).setTimestamp();
 function v2View(embed, rows = []) {
@@ -184,11 +203,11 @@ module.exports = {
       const g = c.i.client.guilds.cache.get(snowflake(c.s('id'))); if (!g) throw new UserError('I am not in that server', 'Use /premium servers to see IDs.');
       return own(g.name, g.description || null, { fields: [['ID', `\`${g.id}\``, true], ['Owner', `<@${g.ownerId}>`, true], ['Members', String(g.memberCount), true], ['Created', ts(g.createdTimestamp), true], ['Boost', String(g.premiumTier), true], ['Channels', String(g.channels.cache.size), true]] });
     }, O),
-    C('leave', 'Premium: make the bot leave a server', [S('id', 'Server ID', true, { max: 25 })], null, async (c) => {
+    C('leave', 'Owner only: make the bot leave a server', [S('id', 'Server ID', true, { max: 25 })], null, async (c) => {
       const g = c.i.client.guilds.cache.get(snowflake(c.s('id'))); if (!g) throw new UserError('I am not in that server', 'Use /premium servers to see IDs.');
       const n = g.name; await g.leave(); return own('Left server', `Uranium left **${n}**.`, { icon: '🚪' });
     }, { ...O, danger: 'The bot will **leave** that server.' }),
-    C('gban', 'Premium: ban a user in every server', [U(true, 'user', 'User to ban everywhere'), S('reason', 'Reason', false, { max: 300 })], null, async (c) => {
+    C('gban', 'Owner only: ban a user in every server', [U(true, 'user', 'User to ban everywhere'), S('reason', 'Reason', false, { max: 300 })], null, async (c) => {
       const u = c.u('user'); if (u.id === c.i.user.id) throw new UserError('You cannot gban yourself');
       const r = await all((g) => g.members.ban(u.id, { reason: `GBAN: ${c.reason()}` }))(c); const ok = r.filter((x) => x[1]).length;
       return own('Global ban done', `**${u.username}** banned in **${ok}** of **${r.length}** servers.`, { icon: '🌍', user: u, fields: [['Reason', c.reason()]] });
@@ -197,7 +216,7 @@ module.exports = {
       const u = c.u('user'); const r = await all((g) => g.members.unban(u.id, 'Global unban'))(c); const ok = r.filter((x) => x[1]).length;
       return own('Global unban done', `**${u.username}** unbanned in **${ok}** server(s).`, { icon: '🌍', user: u });
     }, O),
-    C('blacklist', 'Premium: block a user from using the bot', [U(), S('reason', 'Reason', false, { max: 200 })], null, async (c) => {
+    C('blacklist', 'Owner only: block a user from using the bot', [U(), S('reason', 'Reason', false, { max: 200 })], null, async (c) => {
       const u = c.u('user'); if (u.id === c.i.user.id) throw new UserError('You cannot blacklist yourself'); const g = G(); g.blacklist ||= [];
       if (g.blacklist.some((x) => x.id === u.id)) throw new UserError(`**${u.username}** is already blacklisted`);
       g.blacklist.push({ id: u.id, reason: c.reason(), at: Date.now() }); db.save();
@@ -208,16 +227,22 @@ module.exports = {
       if (g.blacklist.length === n) throw new UserError(`**${u.username}** is not blacklisted`);
       return own('User unblocked', `**${u.username}** can use Uranium again.`, { icon: '✅', user: u });
     }, O),
-    C('status', 'Premium: change what the bot is doing', [S('type', 'playing, watching, listening or competing', true, { choices: ['playing', 'watching', 'listening', 'competing'] }), S('text', 'Status text', true, { max: 100 })], null, async (c) => {
+    C('status', 'Owner only: change the bot activity', [S('type', 'playing, watching, listening or competing', true, { choices: ['playing', 'watching', 'listening', 'competing'] }), S('text', 'Status text', true, { max: 100 })], null, async (c) => {
       const map = { playing: ActivityType.Playing, watching: ActivityType.Watching, listening: ActivityType.Listening, competing: ActivityType.Competing };
       c.i.client.user.setActivity(c.s('text'), { type: map[c.s('type')] }); G().config.status = { type: c.s('type'), text: c.s('text') }; db.save();
       return own('Status changed', `Now **${c.s('type')}** ${c.s('text')}`, { icon: '🎮' });
     }, O),
-    C('bot-avatar', 'Premium: change the bot profile picture', [S('url', 'Image URL (https://...)', true, { max: 400 })], null, async (c) => {
-      if (!/^https?:\/\//i.test(c.s('url'))) throw new UserError('That is not a link', 'Use a direct image link starting with https://');
-      await c.i.client.user.setAvatar(c.s('url')); return own('Avatar changed', 'The bot has a new profile picture.', { icon: '🖼️' });
-    }, O),
-    C('restart', 'Premium: restart the bot', [], null, async () => {
+    C('bot-avatar', 'Premium: change Uranium’s avatar in this server only', [S('url', 'Public HTTPS image URL', true, { max: 400 })], null, async (c) => {
+      const data = await imageDataFromUrl(c.s('url'));
+      await c.g.members.editMe({ avatar: data, reason: `Guild avatar updated by ${c.i.user.username}` });
+      return own('Server avatar changed', 'Uranium’s avatar was updated in this server only. Other servers and the global bot avatar are unchanged.', { icon: '🖼️' });
+    }, PREMIUM_ACCESS),
+    C('bot-banner', 'Premium: change Uranium’s banner in this server only', [S('url', 'Public HTTPS image URL', true, { max: 400 })], null, async (c) => {
+      const data = await imageDataFromUrl(c.s('url'));
+      await c.g.members.editMe({ banner: data, reason: `Guild banner updated by ${c.i.user.username}` });
+      return own('Server banner changed', 'Uranium’s banner was updated in this server only. Other servers and the global bot banner are unchanged.', { icon: '🌄' });
+    }, PREMIUM_ACCESS),
+    C('restart', 'Owner only: restart the bot', [], null, async () => {
       setTimeout(() => { db.flush(); process.exit(0); }, 2500); return own('Restarting', 'Uranium will be back in about a minute.', { icon: '♻️' });
     }, { ...O, danger: 'The bot will **restart** and be offline for a minute.' }),
     C('live-stats', 'Premium: live animated bot statistics', [], null, liveStats, { ...O, custom: true }),
