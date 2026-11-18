@@ -16,7 +16,7 @@ const appEmojiCommand = require('../commands/application').commands.find((comman
 assert.ok(serverEmojiCommand && !serverEmojiCommand.owner, 'eadd must remain the server emoji command');
 assert.match(serverEmojiCommand.desc, /this server/i);
 assert.ok(appEmojiCommand?.owner, 'epadd application emoji upload must be owner-only');
-assert.equal(appEmojiCommand.opts[0].n, 'source', 'The image link must be the only required input');
+assert.equal(appEmojiCommand.opts[0].n, 'source', 'The emoji source must be the first input');
 assert.equal(appEmojiCommand.opts[0].req, true);
 assert.equal(appEmojiCommand.opts[1].n, 'name');
 assert.equal(appEmojiCommand.opts[1].req, true, 'Emoji name is required in epadd <emoji> <name> syntax');
@@ -24,7 +24,6 @@ assert.match(appEmojiCommand.desc, /application emojis/i);
 assert.equal(appEmojiTools.sourceUrl('<:hello:123456789012345678>').pathname, '/emojis/123456789012345678.png');
 assert.equal(appEmojiTools.sourceUrl('<a:hello:123456789012345678>').pathname, '/emojis/123456789012345678.gif');
 assert.match(appEmojiTools.sourceUrl('😎').hostname, /jsdelivr\\.net$/);
-assert.equal(prefix.resolve(prefix.tokenize('epadd 😎 cool')).cat.name, 'application');
 assert.equal(appEmojiTools.deriveEmojiName(new URL('https://images.example.org/Some-Emoji.gif?x=1')), 'some_emoji');
 assert.equal(appEmojiTools.normalizeEmojiName('My Emoji!!', 'fallback'), 'my_emoji');
 assert.equal(appEmojiTools.imageType(Buffer.from('GIF89a000000')), 'image/gif');
@@ -220,13 +219,14 @@ async function testSharedRenderer() {
   assert.ok(sent.components[0].components.some((part) => part.type === 13), 'Attachment results must use a V2 File component');
 }
 testSharedRenderer().then(() => console.log('Shared Components V2 command renderer checks passed.')).catch((error) => { console.error(error); process.exitCode = 1; });
-// Rebuild the actual 19-category router and verify every published command resolves.
+// Rebuild the actual command router and verify every published command resolves.
 const allCommandCategories = catalog.categories.map((entry) => {
   const category = require('../commands/' + entry.name);
   category.map = new Map(category.commands.map((command) => [command.name, command]));
   return category;
 });
 prefix.init(allCommandCategories);
+assert.equal(prefix.resolve(prefix.tokenize('epadd 😎 cool')).cat.name, 'application', 'epadd emoji-name prefix syntax must resolve');
 let routedCommandCount = 0;
 for (const category of allCommandCategories) {
   for (const command of category.commands) {
