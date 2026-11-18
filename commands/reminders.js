@@ -11,7 +11,7 @@ function duration(value) {
   return ms;
 }
 const state = g => db.g(g.id);
-const mine = c => db.dueSchedules().filter(x => x.type === 'reminder' && x.guildId === c.g.id && x.userId === c.i.user.id);
+const mine = c => db.schedules().filter(x => x.type === 'reminder' && x.guildId === c.g.id && x.userId === c.i.user.id);
 const fmt = x => '#' + x.id + ' · ' + ts(x.at, 'R') + ' · ' + String(x.text).slice(0, 100);
 function schedule(c, text, ms, channelId = null) {
   const d = state(c.g), active = mine(c);
@@ -28,8 +28,8 @@ C('remind-cancel','Cancel one of your reminders',[I('id','Reminder ID',true,1,21
 C('remind-clear','Cancel all your pending reminders',[],null,async c=>{const a=mine(c);for(const x of a)db.dropSchedule(x.id);return res('Reminders cleared','Cancelled '+a.length+' pending reminder(s).',{icon:'🧹'});}),
 C('remind-snooze','Move one reminder to a later time',[I('id','Reminder ID',true,1,2147483647),S('duration','New delay, such as 30m')],null,async c=>{const x=mine(c).find(v=>v.id===c.n('id'));if(!x)throw new UserError('Reminder not found');x.at=Date.now()+duration(c.s('duration'));db.save();return res('Reminder snoozed',fmt(x),{icon:'💤'});}),
 C('remind-server','Schedule a public server notice',[S('duration','10m, 2h or 1d'),S('text','Notice text')],P.ManageGuild,async c=>{const channel=state(c.g).config.reminderChannel||c.ch.id;const x=schedule(c,c.s('text'),duration(c.s('duration')),channel);return res('Server notice scheduled',fmt(x)+'\nDestination: <#'+channel+'>',{icon:'📢'});}),
-C('remind-server-list','List scheduled server notices',[],P.ManageGuild,async c=>{const a=db.dueSchedules().filter(x=>x.type==='reminder'&&x.guildId===c.g.id&&x.channelId).sort((x,y)=>x.at-y.at);return res('Scheduled server notices',a.length?trunc(a.map(fmt).join('\n'),3500):'No server notices are pending.',{icon:'📢'});}),
-C('remind-server-cancel','Cancel a scheduled server notice',[I('id','Reminder ID',true,1,2147483647)],P.ManageGuild,async c=>{const x=db.dueSchedules().find(v=>v.type==='reminder'&&v.guildId===c.g.id&&v.channelId&&v.id===c.n('id'));if(!x)throw new UserError('Server notice not found');db.dropSchedule(x.id);return res('Server notice cancelled','Removed notice #'+x.id,{icon:'🗑️'});}),
+C('remind-server-list','List scheduled server notices',[],P.ManageGuild,async c=>{const a=db.schedules().filter(x=>x.type==='reminder'&&x.guildId===c.g.id&&x.channelId).sort((x,y)=>x.at-y.at);return res('Scheduled server notices',a.length?trunc(a.map(fmt).join('\n'),3500):'No server notices are pending.',{icon:'📢'});}),
+C('remind-server-cancel','Cancel a scheduled server notice',[I('id','Reminder ID',true,1,2147483647)],P.ManageGuild,async c=>{const x=db.schedules().find(v=>v.type==='reminder'&&v.guildId===c.g.id&&v.channelId&&v.id===c.n('id'));if(!x)throw new UserError('Server notice not found');db.dropSchedule(x.id);return res('Server notice cancelled','Removed notice #'+x.id,{icon:'🗑️'});}),
 C('remind-default','Set your default reminder delay',[S('duration','Default delay, such as 1h')],null,async c=>{duration(c.s('duration'));const d=state(c.g);d.reminderDefaults ||= {};d.reminderDefaults[c.i.user.id]=c.s('duration');db.save();return res('Default delay saved','Your default is now '+c.s('duration')+'.',{icon:'⏱️'});}),
 C('remind-template-set','Set the server reminder message template',[S('text','Use {text} where the reminder should appear')],P.ManageGuild,async c=>{if(!c.s('text').includes('{text}'))throw new UserError('Template must contain {text}.');state(c.g).config.reminderTemplate=c.s('text').slice(0,1200);db.save();return res('Reminder template saved',c.s('text'),{icon:'📝'});}),
 C('remind-template-clear','Reset the reminder message template',[],P.ManageGuild,async c=>{delete state(c.g).config.reminderTemplate;db.save();return res('Template reset','Reminders will use the default message format.',{icon:'♻️'});}),
