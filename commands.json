@@ -1665,10 +1665,10 @@
         },
         {
           "name": "emoji-add",
-          "description": "Owner only: upload a linked emoji to Uranium application emojis",
+          "description": "Premium: add an emoji to the current server",
           "slash": "/premium emoji-add",
           "prefix": "!premium emoji-add",
-          "access": "Owner only"
+          "access": "ManageGuildExpressions"
         },
         {
           "name": "embed-builder",
@@ -1753,6 +1753,13 @@
           "slash": "/premium bot-banner",
           "prefix": "!premium bot-banner",
           "access": "Premium access"
+        },
+        {
+          "name": "epadd",
+          "description": "Owner only: upload a linked emoji to Uranium application emojis",
+          "slash": "/premium epadd",
+          "prefix": "!epadd",
+          "access": "Owner only"
         }
       ]
     },
