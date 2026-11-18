@@ -1665,7 +1665,7 @@
         },
         {
           "name": "emoji-add",
-          "description": "Premium: add an emoji to the current server",
+          "description": "Premium: add an emoji to this server",
           "slash": "/premium emoji-add",
           "prefix": "!premium emoji-add",
           "access": "ManageGuildExpressions"
