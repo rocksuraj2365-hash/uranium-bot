@@ -23,7 +23,7 @@ assert.equal(appEmojiCommand.opts[1].req, true, 'Emoji name is required in epadd
 assert.match(appEmojiCommand.desc, /application emojis/i);
 assert.equal(appEmojiTools.sourceUrl('<:hello:123456789012345678>').pathname, '/emojis/123456789012345678.png');
 assert.equal(appEmojiTools.sourceUrl('<a:hello:123456789012345678>').pathname, '/emojis/123456789012345678.gif');
-assert.match(appEmojiTools.sourceUrl('😎').hostname, /jsdelivr\.net$/);
+assert.equal(appEmojiTools.sourceUrl('😎').hostname, 'cdn.jsdelivr.net');
 assert.equal(appEmojiTools.deriveEmojiName(new URL('https://images.example.org/Some-Emoji.gif?x=1')), 'some_emoji');
 assert.equal(appEmojiTools.normalizeEmojiName('My Emoji!!', 'fallback'), 'my_emoji');
 assert.equal(appEmojiTools.imageType(Buffer.from('GIF89a000000')), 'image/gif');
