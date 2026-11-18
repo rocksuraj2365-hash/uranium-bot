@@ -1,7 +1,7 @@
 {
   "version": 1,
   "generatedFrom": "commands/*.js",
-  "total": 376,
+  "total": 396,
   "categories": [
     {
       "name": "member",
@@ -2752,6 +2752,152 @@
           "slash": "/application list-emojis",
           "prefix": "!appemojis",
           "access": "Owner only"
+        }
+      ]
+    },
+    {
+      "name": "stats",
+      "description": "Server statistics, activity tracking and AFK tools.",
+      "commands": [
+        {
+          "name": "overview",
+          "description": "Show server statistics overview",
+          "slash": "/stats overview",
+          "prefix": "!stats overview",
+          "access": "Available subject to command permissions"
+        },
+        {
+          "name": "members",
+          "description": "Show member and bot counts",
+          "slash": "/stats members",
+          "prefix": "!stats members",
+          "access": "Available subject to command permissions"
+        },
+        {
+          "name": "growth",
+          "description": "Show joins and leaves for the last 7 days",
+          "slash": "/stats growth",
+          "prefix": "!stats growth",
+          "access": "Available subject to command permissions"
+        },
+        {
+          "name": "messages",
+          "description": "Show messages tracked today",
+          "slash": "/stats messages",
+          "prefix": "!stats messages",
+          "access": "Available subject to command permissions"
+        },
+        {
+          "name": "voice",
+          "description": "Show voice activity tracked today",
+          "slash": "/stats voice",
+          "prefix": "!stats voice",
+          "access": "Available subject to command permissions"
+        },
+        {
+          "name": "top",
+          "description": "Show overall activity leaderboard",
+          "slash": "/stats top",
+          "prefix": "!stats top",
+          "access": "Available subject to command permissions"
+        },
+        {
+          "name": "top-messages",
+          "description": "Show top message contributors",
+          "slash": "/stats top-messages",
+          "prefix": "!stats top-messages",
+          "access": "Available subject to command permissions"
+        },
+        {
+          "name": "top-voice",
+          "description": "Show top voice contributors",
+          "slash": "/stats top-voice",
+          "prefix": "!stats top-voice",
+          "access": "Available subject to command permissions"
+        },
+        {
+          "name": "daily",
+          "description": "Show today statistics",
+          "slash": "/stats daily",
+          "prefix": "!stats daily",
+          "access": "Available subject to command permissions"
+        },
+        {
+          "name": "weekly",
+          "description": "Show last 7 days statistics",
+          "slash": "/stats weekly",
+          "prefix": "!stats weekly",
+          "access": "Available subject to command permissions"
+        },
+        {
+          "name": "monthly",
+          "description": "Show last 30 days statistics",
+          "slash": "/stats monthly",
+          "prefix": "!stats monthly",
+          "access": "Available subject to command permissions"
+        },
+        {
+          "name": "roles",
+          "description": "Show role count and largest roles",
+          "slash": "/stats roles",
+          "prefix": "!stats roles",
+          "access": "Available subject to command permissions"
+        },
+        {
+          "name": "channels",
+          "description": "Show channel counts by type",
+          "slash": "/stats channels",
+          "prefix": "!stats channels",
+          "access": "Available subject to command permissions"
+        },
+        {
+          "name": "emojis",
+          "description": "Show emoji and sticker counts",
+          "slash": "/stats emojis",
+          "prefix": "!stats emojis",
+          "access": "Available subject to command permissions"
+        },
+        {
+          "name": "boosts",
+          "description": "Show boost count and level",
+          "slash": "/stats boosts",
+          "prefix": "!stats boosts",
+          "access": "Available subject to command permissions"
+        },
+        {
+          "name": "counter-setup",
+          "description": "Create member, bot and boost counters",
+          "slash": "/stats counter-setup",
+          "prefix": "!stats counter-setup",
+          "access": "Available subject to command permissions"
+        },
+        {
+          "name": "counter-off",
+          "description": "Remove statistics counter channels",
+          "slash": "/stats counter-off",
+          "prefix": "!stats counter-off",
+          "access": "Available subject to command permissions"
+        },
+        {
+          "name": "config",
+          "description": "Show statistics configuration",
+          "slash": "/stats config",
+          "prefix": "!stats config",
+          "access": "Available subject to command permissions"
+        },
+        {
+          "name": "afk",
+          "description": "Set AFK status and choose scope and DM alerts",
+          "slash": "/stats afk",
+          "prefix": "!stats afk",
+          "access": "Available subject to command permissions"
+        },
+        {
+          "name": "afk-clear",
+          "description": "Clear your AFK status",
+          "slash": "/stats afk-clear",
+          "prefix": "!stats afk-clear",
+          "access": "Available subject to command permissions"
         }
       ]
     }
