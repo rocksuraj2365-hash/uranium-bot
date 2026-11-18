@@ -2,6 +2,7 @@ const express = require('express');
 const session = require('express-session');
 const crypto = require('crypto');
 const path = require('path');
+const PostgresSessionStore = require('./lib/postgres-session-store');
 
 const { DISCORD_CLIENT_ID, DISCORD_CLIENT_SECRET, SESSION_SECRET, PUBLIC_BASE_URL } = process.env;
 const BASE = (PUBLIC_BASE_URL || 'http://localhost:3000').replace(/\/$/, '');
@@ -9,15 +10,47 @@ const REDIRECT_URI = BASE + '/auth/callback';
 const DISCORD_API = 'https://discord.com/api/v10';
 
 const app = express();
+app.disable('x-powered-by');
 app.set('trust proxy', 1);
-app.use(express.json({ limit: '12kb' }));
+app.use((req, res, next) => {
+  res.setHeader('X-Content-Type-Options', 'nosniff');
+  res.setHeader('X-Frame-Options', 'DENY');
+  res.setHeader('Referrer-Policy', 'strict-origin-when-cross-origin');
+  res.setHeader('Permissions-Policy', 'camera=(), microphone=(), geolocation=()');
+  if (req.secure || req.get('x-forwarded-proto') === 'https') res.setHeader('Strict-Transport-Security', 'max-age=31536000; includeSubDomains');
+  next();
+});
+app.use(express.json({ limit: '12kb', strict: true }));
+
+function rateLimit({ windowMs = 60000, max = 60 } = {}) {
+  const buckets = new Map();
+  const cleanup = setInterval(() => { const now = Date.now(); for (const [key, value] of buckets) if (value.resetAt <= now) buckets.delete(key); }, Math.min(windowMs, 60000));
+  cleanup.unref?.();
+  return (req, res, next) => {
+    const key = String(req.ip || req.socket.remoteAddress || 'unknown');
+    const now = Date.now();
+    let bucket = buckets.get(key);
+    if (!bucket || bucket.resetAt <= now) { bucket = { count: 0, resetAt: now + windowMs }; buckets.set(key, bucket); }
+    bucket.count += 1;
+    res.setHeader('RateLimit-Limit', String(max));
+    res.setHeader('RateLimit-Remaining', String(Math.max(0, max - bucket.count)));
+    if (bucket.count > max) { res.setHeader('Retry-After', String(Math.ceil((bucket.resetAt - now) / 1000))); return res.status(429).json({ error: 'Too many requests. Please wait and retry.' }); }
+    next();
+  };
+}
+app.use('/api', rateLimit({ windowMs: 60000, max: 90 }));
+app.use(['/login', '/auth/callback'], rateLimit({ windowMs: 15 * 60 * 1000, max: 12 }));
 
 // NOTE: MemoryStore is only OK for a starter. Add a persistent store before production.
 app.use(
   session({
     secret: SESSION_SECRET || crypto.randomBytes(32).toString('hex'),
+    ...(process.env.DATABASE_URL ? {
+      store: new PostgresSessionStore(require('postgres')(process.env.DATABASE_URL, { max: 2, idle_timeout: 20, connect_timeout: 12, prepare: false, ssl: 'require', connection: { application_name: 'uranium-dashboard-sessions' } }))
+    } : {}),
     resave: false,
     saveUninitialized: false,
+    rolling: true,
     cookie: {
       httpOnly: true,
       sameSite: 'lax',
@@ -140,7 +173,7 @@ function requireAuth(req, res, next) {
   next();
 }
 
-app.get('/api/me', requireAuth, (req, res) => res.json(req.session.user));
+app.get('/api/me', requireAuth, (req, res) => { res.setHeader('Cache-Control', 'no-store'); res.json(req.session.user); });
 function requireAdmin(req, res, next) {
   if (!req.session.user) return res.status(401).json({ error: 'Not logged in' });
   const admins = new Set((process.env.ADMIN_DISCORD_IDS || process.env.OWNER_IDS || '').split(/[\s,]+/).filter(Boolean));
@@ -157,7 +190,7 @@ app.get('/api/admin/stats', requireAdmin, async (req, res) => {
     return res.status(response.status).json(data);
   } catch { return res.status(502).json({ error: 'Could not reach the bot service. It may be starting or sleeping.' }); }
 });
-app.get('/api/guilds', requireAuth, (req, res) => res.json(req.session.guilds || []));
+app.get('/api/guilds', requireAuth, (req, res) => { res.setHeader('Cache-Control', 'no-store'); res.json(req.session.guilds || []); });
 
 function manageableGuild(req, res, next) {
   const guild = (req.session.guilds || []).find(g => g.id === String(req.params.guildId) && g.manageable);
@@ -189,5 +222,25 @@ app.post('/api/guilds/:guildId/control', requireAuth, manageableGuild, (req, res
 
 app.get('/logout', (req, res) => req.session.destroy(() => res.redirect('/')));
 
+// Keep internal stack traces and provider details out of public responses.
+app.use((err, req, res, next) => {
+  if (res.headersSent) return next(err);
+  const malformedJson = err instanceof SyntaxError && err.status === 400 && 'body' in err;
+  if (malformedJson) return res.status(400).json({ error: 'Invalid JSON request body.' });
+  console.error('[web error]', req.method, req.path, err?.message || 'Unknown error');
+  return res.status(500).json({ error: 'An internal server error occurred. Please retry.' });
+});
+
 const port = process.env.PORT || 3000;
-app.listen(port, () => console.log('Uranium web running on port ' + port));
+async function start() {
+  if (process.env.DATABASE_URL) {
+    const store = app._router.stack.find(layer => layer.name === 'session')?.handle?.store;
+    if (store instanceof PostgresSessionStore) await store.init();
+    console.log('[web] Persistent PostgreSQL session store enabled.');
+  } else {
+    console.warn('[web] DATABASE_URL missing: dashboard sessions use temporary in-memory storage and reset on restart.');
+  }
+  if (!SESSION_SECRET) console.warn('[web] SESSION_SECRET missing: sessions will be invalidated whenever this process restarts.');
+  app.listen(port, () => console.log('Uranium web running on port ' + port));
+}
+start().catch(error => { console.error('[web] Startup failed:', error.message); process.exit(1); });
