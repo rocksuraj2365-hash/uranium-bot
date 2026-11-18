@@ -12,17 +12,19 @@ const { startRenderKeepAlive, DEFAULT_INTERVAL_MS } = require('../lib/render-kee
 const appEmojiTools = require('../lib/application-emojis');
 const premiumCommands = require('../commands/premium').commands;
 const serverEmojiCommand = premiumCommands.find((command) => command.name === 'emoji-add');
-const appEmojiCommand = premiumCommands.find((command) => command.name === 'epadd');
+const appEmojiCommand = require('../commands/application').commands.find((command) => command.name === 'epadd');
 assert.ok(serverEmojiCommand && !serverEmojiCommand.owner, 'eadd must remain the server emoji command');
 assert.match(serverEmojiCommand.desc, /this server/i);
 assert.ok(appEmojiCommand?.owner, 'epadd application emoji upload must be owner-only');
 assert.equal(appEmojiCommand.opts[0].n, 'source', 'The image link must be the only required input');
 assert.equal(appEmojiCommand.opts[0].req, true);
 assert.equal(appEmojiCommand.opts[1].n, 'name');
-assert.equal(appEmojiCommand.opts[1].req, false, 'Emoji name must be optional');
+assert.equal(appEmojiCommand.opts[1].req, true, 'Emoji name is required in epadd <emoji> <name> syntax');
 assert.match(appEmojiCommand.desc, /application emojis/i);
 assert.equal(appEmojiTools.sourceUrl('<:hello:123456789012345678>').pathname, '/emojis/123456789012345678.png');
 assert.equal(appEmojiTools.sourceUrl('<a:hello:123456789012345678>').pathname, '/emojis/123456789012345678.gif');
+assert.match(appEmojiTools.sourceUrl('😎').hostname, /jsdelivr\\.net$/);
+assert.equal(prefix.resolve(prefix.tokenize('epadd 😎 cool')).cat.name, 'application');
 assert.equal(appEmojiTools.deriveEmojiName(new URL('https://images.example.org/Some-Emoji.gif?x=1')), 'some_emoji');
 assert.equal(appEmojiTools.normalizeEmojiName('My Emoji!!', 'fallback'), 'my_emoji');
 assert.equal(appEmojiTools.imageType(Buffer.from('GIF89a000000')), 'image/gif');
@@ -107,7 +109,7 @@ for (const [shortcut, expected] of [['add','grant'],['remove','revoke'],['check'
 }
 const catalog = require('../commands.json');
 assert.equal(catalog.total, 374, 'Published catalog total must match the implemented command set');
-assert.equal(catalog.categories.length, 19, 'Every command category must be published');
+assert.equal(catalog.categories.length, 20, 'Every command category must be published');
 for (const entry of catalog.categories) {
   const source = require('../commands/' + entry.name);
   assert.ok(source.commands.length <= 25, entry.name + ' exceeds Discord subcommand limit');
