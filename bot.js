@@ -30,13 +30,26 @@ function safeEqual(a, b) {
   return x.length === y.length && x.length > 0 && crypto.timingSafeEqual(x, y);
 }
 function sendJson(res, status, body) {
-  res.writeHead(status, { 'content-type': 'application/json; charset=utf-8', 'cache-control': 'no-store' });
+  if (res.headersSent || res.writableEnded) return;
+  res.writeHead(status, { 'content-type': 'application/json; charset=utf-8', 'cache-control': 'no-store', 'x-content-type-options': 'nosniff' });
   res.end(JSON.stringify(body));
+}
+const apiBuckets = new Map();
+function allowApiRequest(req, res, limit = 45) {
+  const now = Date.now();
+  const key = String(req.socket.remoteAddress || 'unknown');
+  let bucket = apiBuckets.get(key);
+  if (!bucket || bucket.resetAt <= now) { bucket = { count: 0, resetAt: now + 60000 }; apiBuckets.set(key, bucket); }
+  bucket.count += 1;
+  if (apiBuckets.size > 2000) for (const [ip, value] of apiBuckets) if (value.resetAt <= now) apiBuckets.delete(ip);
+  if (bucket.count > limit) { sendJson(res, 429, { error: 'Too many requests. Wait a minute and retry.' }); return false; }
+  return true;
 }
 if (PORT) http.createServer(async (req, res) => {
   const url = new URL(req.url, 'http://localhost');
   if (req.method === 'GET' && url.pathname === '/health') return sendJson(res, 200, { status: 'ok', ready: started });
   if (req.method === 'GET' && url.pathname === '/owner/stats') {
+    if (!allowApiRequest(req, res, 20)) return;
     const secret = process.env.DASHBOARD_API_SECRET;
     if (!secret || !safeEqual(req.headers['x-dashboard-secret'], secret)) return sendJson(res, 401, { error: 'Unauthorized dashboard request' });
     const ownerId = String(req.headers['x-owner-user-id'] || '');
@@ -57,8 +70,9 @@ if (PORT) http.createServer(async (req, res) => {
   }
   const match = /^\/control\/guild\/(\d{17,20})$/.exec(url.pathname);
   if (!match || !['GET', 'POST'].includes(req.method)) return sendJson(res, 404, { error: 'Not found' });
+  if (!allowApiRequest(req, res, 45)) return;
   const secret = process.env.DASHBOARD_API_SECRET;
-  if (!secret || !safeEqual(req.headers['x-dashboard-secret'], secret)) return sendJson(res, 401, { error: 'Unauthorized dashboard request' });
+  if (!secret || !safeEqual(req.headers['x-dashboard-api-secret'], secret)) return sendJson(res, 401, { error: 'Unauthorized dashboard request' });
   const userId = String(req.headers['x-discord-user-id'] || '');
   if (!/^\d{17,20}$/.test(userId)) return sendJson(res, 401, { error: 'Invalid Discord user' });
   if (!client || !started) return sendJson(res, 503, { error: 'Bot is still starting. Retry shortly.' });
@@ -73,9 +87,16 @@ if (PORT) http.createServer(async (req, res) => {
       const aiLocked = process.env.AI_ENABLED !== 'true' || !process.env.GEMINI_API_KEY;
       return sendJson(res, 200, { settings: { ai: !aiLocked && ai.available(guild.id), aiLocked, prefix: config.prefix || '!', aiChannel: config.aiChannel || '', modlog: config.modlog || '' }, channels });
     }
+    if (!String(req.headers['content-type'] || '').toLowerCase().startsWith('application/json')) return sendJson(res, 415, { error: 'Content-Type must be application/json.' });
     let raw = '';
-    for await (const chunk of req) { raw += chunk; if (raw.length > 12000) return sendJson(res, 413, { error: 'Request too large' }); }
-    const input = JSON.parse(raw || '{}');
+    for await (const chunk of req) {
+      raw += chunk.toString('utf8');
+      if (Buffer.byteLength(raw, 'utf8') > 12000) return sendJson(res, 413, { error: 'Request too large' });
+    }
+    let input;
+    try { input = JSON.parse(raw || '{}'); } catch { return sendJson(res, 400, { error: 'Invalid JSON request body.' }); }
+    if (!input || typeof input !== 'object' || Array.isArray(input)) return sendJson(res, 400, { error: 'Request body must be a JSON object.' });
+    if (input.ai !== undefined && typeof input.ai !== 'boolean') return sendJson(res, 400, { error: 'The ai setting must be true or false.' });
     const nextPrefix = String(input.prefix ?? config.prefix ?? '!');
     if (!nextPrefix || nextPrefix.length > 3 || /[`\s]/.test(nextPrefix)) return sendJson(res, 400, { error: 'Prefix must be 1 to 3 characters with no spaces.' });
     const aiLocked = process.env.AI_ENABLED !== 'true' || !process.env.GEMINI_API_KEY;
@@ -84,6 +105,7 @@ if (PORT) http.createServer(async (req, res) => {
     for (const key of ['aiChannel', 'modlog']) {
       const id = String(input[key] || '');
       if (!id) { selected[key] = ''; continue; }
+      if (!/^\\d{17,20}$/.test(id)) return sendJson(res, 400, { error: 'Invalid channel ID.' });
       const channel = await guild.channels.fetch(id).catch(() => null);
       if (!channel || ![0, 5].includes(channel.type)) return sendJson(res, 400, { error: 'Choose a valid text channel from this server.' });
       selected[key] = channel.id;
