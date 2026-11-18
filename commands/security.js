@@ -325,7 +325,6 @@ module.exports = {
   description:'Server security, permission reviews, audit intelligence and protection controls.',
   commands:[
     C('fortress','Enable or manage Uranium maximum server protection',[{ n:'mode', d:'on, off, or status', t:'str', req:false, choices:['on','off','status'] }],P.ManageGuild,fortressCommand),
-    C('extraowner-list','List Extra Owners',[],null,accessCommand('extraOwners','list')),
     C('scan','Scan roles and channel overrides for sensitive permissions',[],null,scan),
     C('audit','Premium: review recent server audit-log activity',[],P.ViewAuditLog,audit,PREMIUM),
     C('invites','Premium: inspect active server invites and usage limits',[],P.ManageGuild,invites,PREMIUM),
