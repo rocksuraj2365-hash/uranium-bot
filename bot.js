@@ -105,7 +105,7 @@ if (PORT) http.createServer(async (req, res) => {
     for (const key of ['aiChannel', 'modlog']) {
       const id = String(input[key] || '');
       if (!id) { selected[key] = ''; continue; }
-      if (!/^\\d{17,20}$/.test(id)) return sendJson(res, 400, { error: 'Invalid channel ID.' });
+      if (!/^\d{17,20}$/.test(id)) return sendJson(res, 400, { error: 'Invalid channel ID.' });
       const channel = await guild.channels.fetch(id).catch(() => null);
       if (!channel || ![0, 5].includes(channel.type)) return sendJson(res, 400, { error: 'Choose a valid text channel from this server.' });
       selected[key] = channel.id;
