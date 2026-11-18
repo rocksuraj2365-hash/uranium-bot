@@ -3,6 +3,7 @@ const { C, S, I, U } = require('../lib/cmd');
 const { UserError, res, ts, trunc } = require('../lib/util');
 const db = require('../lib/db');
 const fortress = require('../lib/fortress');
+const securityChecklist = require('../lib/security-checklist');
 const PREMIUM = { premium: true };
 const title = (name) => '☢ Uranium Security • ' + name;
 function requireManager(ctx) { if (!ctx.i.memberPermissions.has(P.ManageGuild)) throw new UserError('You need Manage Server permission to use this security tool.'); }
@@ -257,21 +258,33 @@ async function clearBaseline(c) {
 }
 async function securityReport(c) {
   requireManager(c);
-  await c.g.roles.fetch();
-  await c.g.channels.fetch();
-  const adminRoles = [...c.g.roles.cache.values()].filter(role => role.permissions.has(P.Administrator));
-  const everyone = flags.filter(x => c.g.roles.everyone.permissions.has(x[1])).map(x => x[0]);
   const cfg = db.g(c.g.id).config;
-  const rules = await c.g.autoModerationRules.fetch().catch(() => null);
-  return res(title('Security overview'), [
-    '**Administrator roles:** ' + adminRoles.length,
-    '**Sensitive @everyone permissions:** ' + (everyone.join(', ') || 'None detected'),
-    '**Channels:** ' + c.g.channels.cache.size,
-    '**AutoMod rules:** ' + (rules ? rules.size : 'Could not fetch'),
-    '**Fortress:** ' + (cfg.fortress?.enabled ? 'Active' : 'Off'),
-    '**Baseline:** ' + (cfg.securityBaseline ? 'Saved' : 'Not saved'),
-    '**Mod-log:** ' + (cfg.modlog ? '<#' + cfg.modlog + '>' : 'Not configured')
-  ].join('\n'), { icon:'🛡️' });
+  const results = await securityChecklist.evaluate(c.g, cfg);
+  const counts = results.reduce((out, item) => { out[item.status] = (out[item.status] || 0) + 1; return out; }, {});
+  const scoreable = (counts.pass || 0) + (counts.warning || 0) + (counts.review || 0);
+  const score = scoreable ? Math.round((counts.pass || 0) / scoreable * 100) : 0;
+  const categoryLines = securityChecklist.categories.map(category => {
+    const rows = results.filter(item => item.category === category);
+    const pass = rows.filter(item => item.status === 'pass').length;
+    const warning = rows.filter(item => item.status === 'warning').length;
+    const manual = rows.filter(item => item.status === 'manual' || item.status === 'review').length;
+    return '**' + category + ':** ' + pass + '/10 passed • ' + warning + ' warnings • ' + manual + ' review';
+  });
+  const warnings = results.filter(item => item.status === 'warning').slice(0, 12)
+    .map(item => '• **#' + item.id + ' ' + item.name + '** — ' + item.note);
+  const manual = results.filter(item => item.status === 'manual' || item.status === 'review').length;
+  return res(title('100-point security audit'), [
+    '**Security score:** ' + score + '/100 of automatically assessable checks',
+    '**Results:** 🟢 ' + (counts.pass || 0) + ' passed • 🔴 ' + (counts.warning || 0) + ' warnings • 🟡 ' + manual + ' manual/review',
+    '',
+    '**Category breakdown**',
+    ...categoryLines,
+    '',
+    '**Priority findings**',
+    warnings.length ? warnings.join('\n') : 'No automatically detected warnings.',
+    '',
+    'Manual/review checks are not counted as passed. Account 2FA, external backups, threat-intelligence freshness and human procedures cannot be verified by a Discord bot. This score is a checklist indicator, not a guarantee of security.'
+  ].join('\n'), { icon:(counts.warning || 0) ? '🛡️' : '✅' });
 }
 async function modlogCheck(c) {
   requireManager(c);
