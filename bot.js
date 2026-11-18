@@ -121,8 +121,8 @@ if (PORT) http.createServer(async (req, res) => {
   stopRenderKeepAlive = startRenderKeepAlive();
 });
 
-const cats = ['member', 'message', 'channel', 'role', 'voice', 'server', 'automod', 'info', 'music', 'ai', 'premium', 'license', 'utility', 'community', 'fun', 'servertools', 'support', 'template', 'security', 'application'].map((n) => require('./commands/' + n));
-prefix.CAT_SHORT.utility = 'ut'; prefix.CAT_SHORT.community = 'cm'; prefix.CAT_SHORT.fun = 'fn'; prefix.CAT_SHORT.servertools = 'st'; prefix.CAT_SHORT.support = 'sp'; prefix.CAT_SHORT.template = 'tpl'; prefix.CAT_SHORT.security = 'sec';
+const cats = ['member', 'message', 'channel', 'role', 'voice', 'server', 'automod', 'info', 'music', 'ai', 'premium', 'license', 'utility', 'community', 'fun', 'servertools', 'support', 'template', 'security', 'application', 'antinuke'].map((n) => require('./commands/' + n));
+prefix.CAT_SHORT.utility = 'ut'; prefix.CAT_SHORT.community = 'cm'; prefix.CAT_SHORT.fun = 'fn'; prefix.CAT_SHORT.servertools = 'st'; prefix.CAT_SHORT.support = 'sp'; prefix.CAT_SHORT.template = 'tpl'; prefix.CAT_SHORT.security = 'sec'; prefix.CAT_SHORT.antinuke = 'an';
 for (const cat of cats) {
   // A moderation reason is always optional for both slash and prefix commands.
   for (const command of cat.commands) {
