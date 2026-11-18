@@ -275,8 +275,9 @@ async function modlog(i, cat, def, r) {
 /* ---------- prefix / no-prefix messages ---------- */
 async function onMessage(msg) {
   try {
-    if (msg.author.bot || !msg.content) return;
-    if (!msg.guild) return handleDM(msg);
+    if (msg.author.bot) return;
+    if (!msg.guild) { if (msg.content) return handleDM(msg); return; }
+    if (!msg.content) { stats.recordMessage(msg); return; }
     if (await fortress.inspectMessage(msg)) return;
     await stats.inspectAfkMessage(msg);
     stats.recordMessage(msg);
