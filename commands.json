@@ -2741,7 +2741,7 @@
       "commands": [
         {
           "name": "epadd",
-          "description": "Owner only: upload a linked emoji to Uranium application emojis",
+          "description": "Owner only: upload a Unicode or Discord emoji to Uranium application emojis",
           "slash": "/application epadd",
           "prefix": "!epadd",
           "access": "Owner only"
