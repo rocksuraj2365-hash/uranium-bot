@@ -253,23 +253,6 @@ module.exports = {
       const e = await c.g.emojis.create({ attachment: url, name: c.s('name').replace(/\W/g, '_'), reason: c.audit() });
       return own('Emoji added to this server', `${e} \`:${e.name}:\``, { icon: '😀', undo: { label: 'Emoji deleted', fn: () => e.delete() } });
     }, PREMIUM_ACCESS),
-    C('epadd', 'Owner only: upload a linked emoji to Uranium application emojis', [S('source', 'Direct HTTPS image URL or Discord emoji link', true, { max: 500 }), S('name', 'Optional name; defaults from the link', false, { max: 32 })], null, async (c) => {
-      const source = c.s('source').trim();
-      const customMention = /^<a?:([a-zA-Z0-9_]{2,32}):([0-9]{17,20})>$/.exec(source);
-      const sourceLink = appEmojiTools.sourceUrl(source);
-      const image = await appEmojiTools.fetchEmojiImage(source);
-      const name = appEmojiTools.normalizeEmojiName(c.s('name'), customMention?.[1] || appEmojiTools.deriveEmojiName(sourceLink));
-      const app = c.i.client.application;
-      const existing = await app.emojis.fetch();
-      if (existing.size >= 2000) throw new UserError('Application emoji limit reached', 'Discord allows up to 2,000 emojis for an application. Delete an unused app emoji in the Developer Portal first.');
-      const duplicate = existing.find((emoji) => emoji.name.toLowerCase() === name);
-      if (duplicate) throw new UserError('That application emoji name already exists', `Use another name or manage the existing emoji \`:${duplicate.name}:\` in the Developer Portal.`);
-      const emoji = await app.emojis.create({ attachment: image.bytes, name });
-      return own('Application emoji uploaded', `${emoji} \`:${emoji.name}:\` is now stored in **Uranium → Developer Portal → Emojis**.`, {
-        icon: '😀',
-        fields: [['Name', `:${emoji.name}:`, true], ['Type', image.animated || emoji.animated ? 'Animated' : 'Static', true], ['File size', `${image.bytes.length} / 262,144 bytes`, true]]
-      });
-    }, { ...O, ephemeral: true }),
     C('embed-builder', 'Premium: build and send a custom embed with buttons', [CH('channel', 'Where to send (default: here)')], null, builder, { ...PREMIUM_ACCESS, custom: true }),
     C('poll', 'Premium: live poll with buttons', [S('question', 'Poll question', true, { max: 200 }), S('options', 'Options separated by | or commas (2-5)', true, { max: 400 })], null, async (c) => {
       const opts = c.s('options').split(/[|,]/).map((x) => x.trim()).filter(Boolean).slice(0, 5); if (opts.length < 2) throw new UserError('Give at least 2 options', 'Example: yes | no | maybe');
