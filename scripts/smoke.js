@@ -120,7 +120,7 @@ for (const def of security.commands) {
   assert.ok(hit, 'Security prefix route missing: ' + def.name);
   assert.equal(hit.cat, security);
   assert.equal(hit.def, def);
-  if (def.name !== 'fortress') assert.equal(def.premium, true, 'Existing security intelligence commands must require Premium access');
+  if (!['fortress','scan','report'].includes(def.name)) assert.equal(def.premium, true, 'Only the core Fortress, scan and 100-point report are free security commands');
 }
 const templateHit = prefix.resolve(prefix.tokenize('template support'));
 assert.ok(templateHit, 'Support template prefix command must resolve');
