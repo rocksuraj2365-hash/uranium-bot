@@ -438,6 +438,14 @@ function makeClient(withContent) {
   client.on('guildAuditLogEntryCreate', (entry, guild) => {
     fortress.inspectAuditEntry(entry, guild, client.user?.id).catch((error) => console.error('[fortress anti-nuke]', error.message));
   });
+  client.on('guildWebhooksUpdate', async (channel) => {
+    try {
+      const { AuditLogEvent } = require('discord.js');
+      const logs = await channel.guild.fetchAuditLogs({ limit: 8 });
+      const recent = [...logs.entries.values()].filter(entry => [AuditLogEvent.WebhookCreate, AuditLogEvent.WebhookUpdate, AuditLogEvent.WebhookDelete].includes(entry.action) && Date.now() - entry.createdTimestamp < 30000);
+      for (const entry of recent) await fortress.inspectAuditEntry(entry, channel.guild, client.user?.id);
+    } catch (error) { console.error('[fortress webhook monitor]', error.message); }
+  });
   client.on('guildMemberAdd', async (member) => {
     fortress.onMemberJoin(member).catch((error) => console.error('[fortress join]', error.message));
     try {
