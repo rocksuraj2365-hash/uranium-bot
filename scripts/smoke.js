@@ -234,6 +234,9 @@ const allCommandCategories = catalog.categories.map((entry) => {
   return category;
 });
 prefix.init(allCommandCategories);
+assert.equal(prefix.resolve(prefix.tokenize('stats overview')).cat.name, 'stats', 'Stats category prefix must not be shadowed by the legacy server stats shortcut');
+assert.equal(prefix.resolve(prefix.tokenize('stt overview')).def.name, 'overview', 'Short stats category route must resolve');
+assert.equal(prefix.resolve(prefix.tokenize('serverstats')).def.name, 'stats', 'Legacy server stats shortcut must remain available as serverstats');
 assert.equal(prefix.resolve(prefix.tokenize('epadd 😎 cool')).cat.name, 'application', 'epadd emoji-name prefix syntax must resolve');
 let routedCommandCount = 0;
 for (const category of allCommandCategories) {
