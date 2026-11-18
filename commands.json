@@ -2732,6 +2732,55 @@
           "slash": "/security alert-test",
           "prefix": "!security alert-test",
           "access": "Premium access required"
+        },
+        {
+          "name": "antinuke",
+          "description": "Configure the per-feature Anti-Nuke protection matrix",
+          "slash": "/security antinuke",
+          "prefix": "!antinuke",
+          "access": "Server owner, Extra Owner, or Manage Server"
+        },
+        {
+          "name": "wl-add",
+          "description": "Add a user or role to the Anti-Nuke whitelist",
+          "slash": "/security wl-add",
+          "prefix": "!wladd",
+          "access": "Server owner, Extra Owner, or Manage Server"
+        },
+        {
+          "name": "wl-remove",
+          "description": "Remove a user or role from the Anti-Nuke whitelist",
+          "slash": "/security wl-remove",
+          "prefix": "!wlremove",
+          "access": "Server owner, Extra Owner, or Manage Server"
+        },
+        {
+          "name": "wl-list",
+          "description": "List Anti-Nuke whitelist entries",
+          "slash": "/security wl-list",
+          "prefix": "!wllist",
+          "access": "Server owner, Extra Owner, or Manage Server"
+        },
+        {
+          "name": "extraowner-add",
+          "description": "Grant a trusted member Extra Owner access",
+          "slash": "/security extraowner-add",
+          "prefix": "!extraowneradd",
+          "access": "Server owner, Extra Owner, or Manage Server"
+        },
+        {
+          "name": "extraowner-remove",
+          "description": "Remove Extra Owner access",
+          "slash": "/security extraowner-remove",
+          "prefix": "!extraownerremove",
+          "access": "Server owner, Extra Owner, or Manage Server"
+        },
+        {
+          "name": "extraowner-list",
+          "description": "List Extra Owners",
+          "slash": "/security extraowner-list",
+          "prefix": "!extraownerlist",
+          "access": "Server owner, Extra Owner, or Manage Server"
         }
       ]
     },
@@ -2756,4 +2805,4 @@
       ]
     }
   ]
-}\n
+}
