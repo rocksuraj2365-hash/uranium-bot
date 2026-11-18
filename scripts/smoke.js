@@ -109,9 +109,14 @@ for (const [shortcut, expected] of [['add','grant'],['remove','revoke'],['check'
   assert.equal(hit.def.name, expected);
   assert.equal(hit.used, 2);
 }
+const statsCommands = require('../commands/stats');
+assert.equal(statsCommands.commands.length, 20, 'Stats and AFK suite must register 20 commands');
+assert.equal(new Set(statsCommands.commands.map(x => x.name)).size, 20, 'Stats and AFK command names must be unique');
+assert.equal(typeof statsCommands.recordMessage, 'function');
+assert.equal(typeof statsCommands.inspectAfkMessage, 'function');
 const catalog = require('../commands.json');
-assert.equal(catalog.total, 376, 'Published catalog total must match the implemented command set');
-assert.equal(catalog.categories.length, 20, 'Every command category must be published');
+assert.equal(catalog.total, 396, 'Published catalog total must match the implemented command set');
+assert.equal(catalog.categories.length, 21, 'Every command category must be published');
 for (const entry of catalog.categories) {
   const source = require('../commands/' + entry.name);
   assert.ok(source.commands.length <= 25, entry.name + ' exceeds Discord subcommand limit');
@@ -250,8 +255,8 @@ for (const category of allCommandCategories) {
     routedCommandCount += 1;
   }
 }
-assert.equal(routedCommandCount, 376, 'Every one of the 376 commands must have a working full prefix route');
-console.log('All 376 full-name and available short-category prefix routes passed.');
+assert.equal(routedCommandCount, 396, 'Every one of the 396 commands must have a working full prefix route');
+console.log('All 396 full-name and available short-category prefix routes passed.');
 
 // Prefix and no-prefix messages share the same command parser after the prefix gate.
 for (const category of allCommandCategories) {
@@ -273,7 +278,7 @@ for (const page of ['guide', 'moderation', 'protection', 'permissions', 'premium
 for (const label of ['**Slash**', '**Prefix**', '**No-prefix**', 'Prev page', 'Next page', 'Back to list', 'Find a Uranium command']) {
   assert.ok(helpSource.includes(label), 'Help panel missing interactive command detail: ' + label);
 }
-console.log('All 375 commands expose slash, prefix and no-prefix usage in the interactive help panel.');
+console.log('All 396 commands expose slash, prefix and no-prefix usage in the interactive help panel.');
 
 // Gateway startup must accept shardReady while the full client guild cache hydrates.
 async function testGatewayReadyFallback() {
