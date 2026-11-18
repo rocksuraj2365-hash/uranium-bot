@@ -320,29 +320,11 @@ async function alertTest(c) {
 }
 
 
-function requireAntiManager(c){const cfg=fortress.antiConfig(c.g);if(c.i.user.id!==c.g.ownerId&&!(cfg.extraOwners||[]).includes(c.i.user.id)&&!c.i.memberPermissions.has(P.ManageGuild))throw new UserError('Server Owner, Extra Owner, or Manage Server permission required.');return cfg;}
-function parseId(value){return String(value||'').replace(/[<@&!>]/g,'');}
-async function antiNukeCommand(c){
- const cfg=requireAntiManager(c),mode=(c.s('mode')||'status').toLowerCase();
- if(mode==='on'){const features={};for(const key of fortress.FEATURE_KEYS)features[key]=true;fortress.configureAntiNuke(c.g,{enabled:true,features});if(!db.g(c.g.id).config.fortress?.enabled)throw new UserError('Enable Fortress first with /security fortress mode:on. Anti-Nuke is saved but will not enforce until Fortress is active.');return res(title('Anti-Nuke enabled'),'All '+fortress.FEATURE_KEYS.length+' protection switches are ON. Threshold: 3 protected audit actions in 15 seconds. Eligible actors receive a 10-minute timeout; higher-ranked actors trigger an urgent alert.',{icon:'🛡️'});}
- if(mode==='off'){fortress.configureAntiNuke(c.g,{enabled:false});return res(title('Anti-Nuke disabled'),'Automatic Anti-Nuke enforcement is off. Fortress settings are unchanged.',{icon:'🔓'});}
- if(mode==='toggle'){const key=(c.s('feature')||'').toLowerCase(),value=(c.s('enabled')||'on').toLowerCase();if(!fortress.FEATURE_LABELS[key])throw new UserError('Unknown feature key. Use /security antinuke mode:status to see keys.');const enabled=value==='on';fortress.setFeature(c.g,key,enabled);return res(title('Protection updated'),fortress.FEATURE_LABELS[key]+' is now **'+(enabled?'ON':'OFF')+'**.',{icon:'🛡️'});}
- const st=fortress.status(c.g),lines=st.features.map(x=>(x.enabled?'🟢':'🔴')+' **'+x.label+'** ('+x.key+')');
- return res(title('Feature permissions matrix'),['**Anti-Nuke:** '+(st.enabled?'🟢 ENABLED':'🔴 DISABLED'),'**Whitelist entries:** '+st.whitelist.length+' • **Extra Owners:** '+st.extraOwners.length,'**Enforcement:** 3 actions / 15 sec • 10-minute timeout where possible','',...lines].join('\\n'),{icon:'🛡️'});
-}
-function accessCommand(list,action){return async c=>{const cfg=requireAntiManager(c),id=parseId(c.s('target'));if(action==='list'){const values=cfg[list]||[];return res(title(list==='whitelist'?'Whitelist':'Extra Owners'),values.length?values.map((x,i)=>(i+1)+'. '+(x.startsWith('role:')?'<@&'+x.slice(5)+'>':'<@'+x.replace('user:','')+'>')).join('\\n'):'No entries configured.',{icon:'📋'});}if(action==='add'){const value=fortress.addAccess(c.g,list,id);return res(title(list==='whitelist'?'Whitelist updated':'Extra Owner added'),list==='whitelist'?'Added '+(value.startsWith('role:')?'<@&'+id+'>':'<@'+id+'>')+' to the exemption list.':'<@'+id+'> can now manage this server Anti-Nuke configuration.',{icon:'✅'});}const count=fortress.removeAccess(c.g,list,id);return res(title('Access entry removed'),count?'Removed '+id+' from '+list+'.':'No matching entry was found.',{icon:count?'✅':'⚠️'});};}
-
 module.exports = {
   name:'security',
   description:'Server security, permission reviews, audit intelligence and protection controls.',
   commands:[
     C('fortress','Enable or manage Uranium maximum server protection',[{ n:'mode', d:'on, off, or status', t:'str', req:false, choices:['on','off','status'] }],P.ManageGuild,fortressCommand),
-    C('antinuke','Configure the per-feature Anti-Nuke protection matrix',[S('mode','on, off, status, or toggle',false,{choices:['on','off','status','toggle']}),S('feature','Feature key for toggle mode',false,{max:40}),S('enabled','on or off for toggle mode',false,{choices:['on','off']})],null,antiNukeCommand),
-    C('wl-add','Add a user or role to the Anti-Nuke whitelist',[S('target','User ID, role ID, or mention',true,{max:30})],null,accessCommand('whitelist','add')),
-    C('wl-remove','Remove a user or role from the Anti-Nuke whitelist',[S('target','User ID, role ID, or mention',true,{max:30})],null,accessCommand('whitelist','remove')),
-    C('wl-list','List Anti-Nuke whitelist entries',[],null,accessCommand('whitelist','list')),
-    C('extraowner-add','Grant a trusted member Extra Owner access',[S('target','Member ID or mention',true,{max:30})],null,accessCommand('extraOwners','add')),
-    C('extraowner-remove','Remove Extra Owner access',[S('target','Member ID or mention',true,{max:30})],null,accessCommand('extraOwners','remove')),
     C('extraowner-list','List Extra Owners',[],null,accessCommand('extraOwners','list')),
     C('scan','Scan roles and channel overrides for sensitive permissions',[],null,scan),
     C('audit','Premium: review recent server audit-log activity',[],P.ViewAuditLog,audit,PREMIUM),
