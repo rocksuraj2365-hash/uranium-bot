@@ -41,10 +41,11 @@ async function applyAfkNickname(guild, userId, originalNickname, reason) {
   const me = guild.members.me || await guild.members.fetchMe().catch(() => null);
   if (!me?.permissions.has(P.ManageNicknames)) return { ok: false, reason: 'Uranium is missing **Manage Nicknames** permission.' };
   if (!member.manageable) return { ok: false, reason: 'Uranium role is not high enough to manage this member’s nickname.' };
+  const original = member.nickname;
   const base = (member.nickname || member.user.username).replace(/\\s*\\[afk\\]$/i, '');
   try {
     await member.setNickname((base.slice(0, 26) + ' [afk]').slice(0, 32), reason);
-    return { ok: true, originalNickname: member.nickname === null ? null : originalNickname };
+    return { ok: true, originalNickname: original };
   } catch (error) {
     const missing = Number(error?.code) === 50013 || /Missing Permissions/i.test(String(error?.message || ''));
     return { ok: false, reason: missing ? 'Discord denied nickname changes. Check **Manage Nicknames** and role hierarchy.' : 'Nickname could not be changed: ' + String(error?.message || 'unknown error').slice(0, 100) };
@@ -68,12 +69,10 @@ async function setAfk(c) {
   const nicknameLine = failed.length
     ? E('warn')+' **Nickname tag not applied in '+failed.length+' server(s).**\\n'+failed.slice(0,5).map(x=>'• **'+x.guild.name+'**: '+x.reason).join('\\n')+(failed.length>5?'\\n• And '+(failed.length-5)+' more server(s).':'')
     : E('check')+' Nickname tag applied in '+changed+' server(s).';
-  return res('AFK enabled',null,{embed:cv2.message([
+  return res('AFK enabled',null,{cv2:cv2.message([
     cv2.section(['# '+E('fox_sleep')+' AFK mode enabled','**Reason:** '+reason+'\\n**Scope:** '+(global?'All servers':'This server')+'\\n**Mention DMs:** '+(dm==='on'?'Enabled':'Disabled')],cv2.thumbnail(c.i.user.displayAvatarURL({size:128}),'AFK profile')),
     cv2.separator(),
-    cv2.text(nicknameLine),
-    cv2.separator(),
-    cv2.row([cv2.button('afk:clear','Clear my AFK',2,E('cross'))])
+    cv2.text(nicknameLine)
   ],failed.length?0xffb84d:0x39d98a)});
 }
 async function clearAfk(uid,gid,client) {
