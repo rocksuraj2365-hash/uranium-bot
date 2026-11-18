@@ -238,6 +238,16 @@ const allCommandCategories = catalog.categories.map((entry) => {
   return category;
 });
 prefix.init(allCommandCategories);
+for (const category of addedCats) {
+  assert.equal(prefix.CAT_SHORT[category.name], ({ reminders:'rem', directory:'dir', engagement:'eng', devtools:'dev' })[category.name]);
+  for (const command of category.commands) {
+    assert.ok(!Object.hasOwn(prefix.CURATED, command.name), 'New prefix command must not reuse a legacy alias: ' + command.name);
+    const direct = prefix.resolve(prefix.tokenize(command.name));
+    assert.ok(direct, 'Direct one-word prefix shortcut missing: ' + command.name);
+    assert.equal(direct.cat.name, category.name);
+    assert.equal(direct.def, command);
+  }
+}
 assert.equal(prefix.resolve(prefix.tokenize('stats overview')).cat.name, 'stats', 'Stats category prefix must not be shadowed by the legacy server stats shortcut');
 assert.equal(prefix.resolve(prefix.tokenize('stt overview')).def.name, 'overview', 'Short stats category route must resolve');
 assert.equal(prefix.resolve(prefix.tokenize('serverstats')).def.name, 'stats', 'Legacy server stats shortcut must remain available as serverstats');
