@@ -72,7 +72,7 @@ if (PORT) http.createServer(async (req, res) => {
   if (!match || !['GET', 'POST'].includes(req.method)) return sendJson(res, 404, { error: 'Not found' });
   if (!allowApiRequest(req, res, 45)) return;
   const secret = process.env.DASHBOARD_API_SECRET;
-  if (!secret || !safeEqual(req.headers['x-dashboard-api-secret'], secret)) return sendJson(res, 401, { error: 'Unauthorized dashboard request' });
+  if (!secret || !safeEqual(req.headers['x-dashboard-secret'], secret)) return sendJson(res, 401, { error: 'Unauthorized dashboard request' });
   const userId = String(req.headers['x-discord-user-id'] || '');
   if (!/^\d{17,20}$/.test(userId)) return sendJson(res, 401, { error: 'Invalid Discord user' });
   if (!client || !started) return sendJson(res, 503, { error: 'Bot is still starting. Retry shortly.' });
