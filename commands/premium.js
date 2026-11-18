@@ -246,12 +246,33 @@ module.exports = {
       setTimeout(() => { db.flush(); process.exit(0); }, 2500); return own('Restarting', 'Uranium will be back in about a minute.', { icon: '♻️' });
     }, { ...O, danger: 'The bot will **restart** and be offline for a minute.' }),
     C('live-stats', 'Owner only: live animated bot statistics', [], null, liveStats, { ...O, custom: true }),
-    C('emoji-add', 'Premium: add an emoji to this server', [S('name', 'Emoji name', true, { max: 32 }), S('source', 'Image URL or a custom emoji', true, { max: 300 })], P.ManageGuildExpressions, async (c) => {
-      let url = c.s('source'); const m = /^<(a?):\w+:(\d+)>$/.exec(url); if (m) url = `https://cdn.discordapp.com/emojis/${m[2]}.${m[1] ? 'gif' : 'png'}`;
-      if (!/^https?:\/\//i.test(url)) throw new UserError('Give an image link or a custom emoji', 'Example: https://.../image.png');
-      const e = await c.g.emojis.create({ attachment: url, name: c.s('name').replace(/\W/g, '_'), reason: c.audit() });
-      return own('Emoji added', `${e} \`:${e.name}:\``, { icon: '😀', undo: { label: 'Emoji deleted', fn: () => e.delete() } });
-    }, PREMIUM_ACCESS),
+    C('emoji-add', 'Owner only: import an emoji from any public HTTPS image link', [S('source', 'Direct HTTPS image URL or custom Discord emoji', true, { max: 400 }), S('name', 'Optional emoji name (auto-detected if omitted)', false, { max: 32 })], null, async (c) => {
+      if (!c.me.permissions.has(P.ManageGuildExpressions)) throw new UserError('Uranium needs Manage Expressions', 'Give the bot role the **Manage Expressions** permission, then retry.');
+      let url = c.s('source').trim();
+      const custom = /^<(a?):[A-Za-z0-9_]{2,32}:(\\d{17,20})>$/.exec(url);
+      if (custom) url = 'https://cdn.discordapp.com/emojis/' + custom[2] + '.' + (custom[1] ? 'gif' : 'png');
+      const data = await imageDataFromUrl(url);
+      const match = /^data:(image\\/(?:png|jpeg|webp|gif));base64,([A-Za-z0-9+/=]+)$/.exec(data);
+      if (!match) throw new UserError('Unsupported image data', 'Use a direct PNG, JPG, WEBP or GIF image link. GIF links keep their animation.');
+      const extension = ({ 'image/png': 'png', 'image/jpeg': 'jpg', 'image/webp': 'webp', 'image/gif': 'gif' })[match[1]];
+      const bytes = Buffer.from(match[2], 'base64');
+      let base = c.s('name') || decodeURIComponent(new URL(url).pathname.split('/').pop() || '').replace(/\\.[^.]+$/, '');
+      base = base.toLowerCase().replace(/[^a-z0-9_]+/g, '_').replace(/^_+|_+$/g, '').slice(0, 32);
+      if (base.length < 2) base = 'uranium_emoji';
+      const existing = await c.g.emojis.fetch().catch(() => c.g.emojis.cache);
+      let name = base, suffix = 2;
+      while (existing.some((emoji) => emoji.name === name)) {
+        const tail = '_' + suffix++; name = base.slice(0, 32 - tail.length) + tail;
+      }
+      let emoji;
+      try {
+        emoji = await c.g.emojis.create({ attachment: bytes, name, reason: 'Imported by Uranium owner ' + c.i.user.id });
+      } catch (error) {
+        throw new UserError('Discord could not add this emoji', String(error?.rawError?.message || error?.message || 'Check the server emoji slot limit and bot permissions.').slice(0, 240));
+      }
+      const animation = extension === 'gif' ? ' • Animation preserved' : '';
+      return own('Emoji imported successfully', String(emoji) + '  :' + emoji.name + ':\\nType: **' + extension.toUpperCase() + '**' + animation + '\\nServer: **' + c.g.name + '**', { icon: '😀', undo: { label: 'Emoji deleted', fn: () => emoji.delete() } });
+    }, O),
     C('embed-builder', 'Premium: build and send a custom embed with buttons', [CH('channel', 'Where to send (default: here)')], null, builder, { ...PREMIUM_ACCESS, custom: true }),
     C('poll', 'Premium: live poll with buttons', [S('question', 'Poll question', true, { max: 200 }), S('options', 'Options separated by | or commas (2-5)', true, { max: 400 })], null, async (c) => {
       const opts = c.s('options').split(/[|,]/).map((x) => x.trim()).filter(Boolean).slice(0, 5); if (opts.length < 2) throw new UserError('Give at least 2 options', 'Example: yes | no | maybe');
