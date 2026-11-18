@@ -55,6 +55,10 @@ const newCats = ['utility', 'community', 'fun', 'servertools'].map((name) => req
 const template = require('../commands/template');
 const support = require('../commands/support');
 const security = require('../commands/security');
+const securityChecklist = require('../lib/security-checklist');
+assert.equal(securityChecklist.checks.length, 100, 'Security audit must contain exactly 100 checks');
+assert.equal(new Set(securityChecklist.checks.map(check => check.id)).size, 100, 'Security audit check IDs must be unique');
+assert.equal(securityChecklist.categories.length, 10, 'Security audit must contain 10 categories');
 security.map = new Map(security.commands.map((command) => [command.name, command]));
 template.map = new Map(template.commands.map((command) => [command.name, command]));
 support.map = new Map(support.commands.map((command) => [command.name, command]));
@@ -116,7 +120,7 @@ for (const def of security.commands) {
   assert.ok(hit, 'Security prefix route missing: ' + def.name);
   assert.equal(hit.cat, security);
   assert.equal(hit.def, def);
-  if (def.name !== 'fortress') assert.equal(def.premium, true, 'Existing security intelligence commands must require Premium access');
+  if (!['fortress','scan','report'].includes(def.name)) assert.equal(def.premium, true, 'Only the core Fortress, scan and 100-point report are free security commands');
 }
 const templateHit = prefix.resolve(prefix.tokenize('template support'));
 assert.ok(templateHit, 'Support template prefix command must resolve');

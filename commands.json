@@ -2567,10 +2567,10 @@
         },
         {
           "name": "scan",
-          "description": "Premium: scan roles and channel overrides for sensitive permissions",
+          "description": "Scan roles and channel overrides for sensitive permissions",
           "slash": "/security scan",
           "prefix": "!security scan",
-          "access": "Premium access required"
+          "access": "Available to server managers; no Premium required."
         },
         {
           "name": "audit",
@@ -2707,10 +2707,10 @@
         },
         {
           "name": "report",
-          "description": "Premium: create a compact overview of important server security settings",
+          "description": "Run the 100-point server security audit",
           "slash": "/security report",
           "prefix": "!security report",
-          "access": "Premium access required"
+          "access": "Available to server managers; no Premium required."
         },
         {
           "name": "modlog-check",

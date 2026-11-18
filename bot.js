@@ -403,7 +403,7 @@ const onReady = async () => {
 };
 function makeClient(withContent) {
   contentIntent = withContent;
-  const intents = [GatewayIntentBits.Guilds, GatewayIntentBits.GuildVoiceStates, GatewayIntentBits.GuildMessages, GatewayIntentBits.GuildMessageReactions, GatewayIntentBits.DirectMessages];
+  const intents = [GatewayIntentBits.Guilds, GatewayIntentBits.GuildModeration, GatewayIntentBits.GuildVoiceStates, GatewayIntentBits.GuildMessages, GatewayIntentBits.GuildMessageReactions, GatewayIntentBits.DirectMessages];
   if (withContent) intents.push(GatewayIntentBits.MessageContent);
   if (process.env.ENABLE_GUILD_MEMBERS_INTENT === 'true') intents.push(GatewayIntentBits.GuildMembers);
   client = new Client({ intents, partials: [Partials.Channel, Partials.Message, Partials.Reaction, Partials.User] });
@@ -412,6 +412,9 @@ function makeClient(withContent) {
     run?.catch((e) => console.error('Interaction error:', e));
   });
   client.on('messageCreate', onMessage);
+  client.on('guildAuditLogEntryCreate', (entry, guild) => {
+    fortress.inspectAuditEntry(entry, guild, client.user?.id).catch((error) => console.error('[fortress anti-nuke]', error.message));
+  });
   client.on('guildMemberAdd', async (member) => {
     fortress.onMemberJoin(member).catch((error) => console.error('[fortress join]', error.message));
     try {
