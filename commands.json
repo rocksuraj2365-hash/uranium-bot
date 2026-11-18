@@ -1,7 +1,7 @@
 {
   "version": 1,
   "generatedFrom": "commands/*.js",
-  "total": 396,
+  "total": 496,
   "categories": [
     {
       "name": "member",
@@ -2897,6 +2897,730 @@
           "description": "Clear your AFK status",
           "slash": "/stats afk-clear",
           "prefix": "!stt afk-clear",
+          "access": "Available subject to command permissions"
+        }
+      ]
+    },
+    {
+      "name": "reminders",
+      "description": "Personal reminders and scheduled server notices",
+      "commands": [
+        {
+          "name": "remind",
+          "description": "Schedule a personal DM reminder",
+          "slash": "/reminders remind",
+          "prefix": "!remind",
+          "access": "Available subject to command permissions"
+        },
+        {
+          "name": "remind-list",
+          "description": "List your pending reminders",
+          "slash": "/reminders remind-list",
+          "prefix": "!remind-list",
+          "access": "Available subject to command permissions"
+        },
+        {
+          "name": "remind-cancel",
+          "description": "Cancel one of your reminders",
+          "slash": "/reminders remind-cancel",
+          "prefix": "!remind-cancel",
+          "access": "Available subject to command permissions"
+        },
+        {
+          "name": "remind-clear",
+          "description": "Cancel all your pending reminders",
+          "slash": "/reminders remind-clear",
+          "prefix": "!remind-clear",
+          "access": "Available subject to command permissions"
+        },
+        {
+          "name": "remind-snooze",
+          "description": "Move one reminder to a later time",
+          "slash": "/reminders remind-snooze",
+          "prefix": "!remind-snooze",
+          "access": "Available subject to command permissions"
+        },
+        {
+          "name": "remind-server",
+          "description": "Schedule a public server notice",
+          "slash": "/reminders remind-server",
+          "prefix": "!remind-server",
+          "access": "Available subject to command permissions"
+        },
+        {
+          "name": "remind-server-list",
+          "description": "List scheduled server notices",
+          "slash": "/reminders remind-server-list",
+          "prefix": "!remind-server-list",
+          "access": "Available subject to command permissions"
+        },
+        {
+          "name": "remind-server-cancel",
+          "description": "Cancel a scheduled server notice",
+          "slash": "/reminders remind-server-cancel",
+          "prefix": "!remind-server-cancel",
+          "access": "Available subject to command permissions"
+        },
+        {
+          "name": "remind-default",
+          "description": "Set your default reminder delay",
+          "slash": "/reminders remind-default",
+          "prefix": "!remind-default",
+          "access": "Available subject to command permissions"
+        },
+        {
+          "name": "remind-template-set",
+          "description": "Set the server reminder message template",
+          "slash": "/reminders remind-template-set",
+          "prefix": "!remind-template-set",
+          "access": "Available subject to command permissions"
+        },
+        {
+          "name": "remind-template-clear",
+          "description": "Reset the reminder message template",
+          "slash": "/reminders remind-template-clear",
+          "prefix": "!remind-template-clear",
+          "access": "Available subject to command permissions"
+        },
+        {
+          "name": "remind-template-show",
+          "description": "Show the active reminder template",
+          "slash": "/reminders remind-template-show",
+          "prefix": "!remind-template-show",
+          "access": "Available subject to command permissions"
+        },
+        {
+          "name": "remind-count",
+          "description": "Count your pending reminders",
+          "slash": "/reminders remind-count",
+          "prefix": "!remind-count",
+          "access": "Available subject to command permissions"
+        },
+        {
+          "name": "remind-next",
+          "description": "Show your next reminder",
+          "slash": "/reminders remind-next",
+          "prefix": "!remind-next",
+          "access": "Available subject to command permissions"
+        },
+        {
+          "name": "remind-history",
+          "description": "View recently delivered reminders",
+          "slash": "/reminders remind-history",
+          "prefix": "!remind-history",
+          "access": "Available subject to command permissions"
+        },
+        {
+          "name": "remind-config",
+          "description": "View reminder settings",
+          "slash": "/reminders remind-config",
+          "prefix": "!remind-config",
+          "access": "Available subject to command permissions"
+        },
+        {
+          "name": "remind-channel-set",
+          "description": "Set the public reminder destination",
+          "slash": "/reminders remind-channel-set",
+          "prefix": "!remind-channel-set",
+          "access": "Available subject to command permissions"
+        },
+        {
+          "name": "remind-channel-clear",
+          "description": "Use the command channel for server notices",
+          "slash": "/reminders remind-channel-clear",
+          "prefix": "!remind-channel-clear",
+          "access": "Available subject to command permissions"
+        },
+        {
+          "name": "remind-enable",
+          "description": "Enable reminders in this server",
+          "slash": "/reminders remind-enable",
+          "prefix": "!remind-enable",
+          "access": "Available subject to command permissions"
+        },
+        {
+          "name": "remind-disable",
+          "description": "Disable new reminders in this server",
+          "slash": "/reminders remind-disable",
+          "prefix": "!remind-disable",
+          "access": "Available subject to command permissions"
+        },
+        {
+          "name": "remind-test",
+          "description": "Send yourself a reminder delivery test",
+          "slash": "/reminders remind-test",
+          "prefix": "!remind-test",
+          "access": "Available subject to command permissions"
+        },
+        {
+          "name": "remind-export",
+          "description": "Export your pending reminder list",
+          "slash": "/reminders remind-export",
+          "prefix": "!remind-export",
+          "access": "Available subject to command permissions"
+        },
+        {
+          "name": "remind-purge",
+          "description": "Clear delivered reminder history",
+          "slash": "/reminders remind-purge",
+          "prefix": "!remind-purge",
+          "access": "Available subject to command permissions"
+        },
+        {
+          "name": "remind-max",
+          "description": "Set the maximum pending reminders per member",
+          "slash": "/reminders remind-max",
+          "prefix": "!remind-max",
+          "access": "Available subject to command permissions"
+        },
+        {
+          "name": "remind-usage",
+          "description": "Show reminder command usage",
+          "slash": "/reminders remind-usage",
+          "prefix": "!remind-usage",
+          "access": "Available subject to command permissions"
+        }
+      ]
+    },
+    {
+      "name": "directory",
+      "description": "Manage searchable server resources, links and directories",
+      "commands": [
+        {
+          "name": "directory-add",
+          "description": "Add a resource to the server directory",
+          "slash": "/directory directory-add",
+          "prefix": "!directory-add",
+          "access": "Available subject to command permissions"
+        },
+        {
+          "name": "directory-edit",
+          "description": "Edit an existing directory entry",
+          "slash": "/directory directory-edit",
+          "prefix": "!directory-edit",
+          "access": "Available subject to command permissions"
+        },
+        {
+          "name": "directory-remove",
+          "description": "Remove a directory entry",
+          "slash": "/directory directory-remove",
+          "prefix": "!directory-remove",
+          "access": "Available subject to command permissions"
+        },
+        {
+          "name": "directory-get",
+          "description": "View one directory entry",
+          "slash": "/directory directory-get",
+          "prefix": "!directory-get",
+          "access": "Available subject to command permissions"
+        },
+        {
+          "name": "directory-list",
+          "description": "List directory resources",
+          "slash": "/directory directory-list",
+          "prefix": "!directory-list",
+          "access": "Available subject to command permissions"
+        },
+        {
+          "name": "directory-search",
+          "description": "Search names, descriptions and tags",
+          "slash": "/directory directory-search",
+          "prefix": "!directory-search",
+          "access": "Available subject to command permissions"
+        },
+        {
+          "name": "directory-tag",
+          "description": "Add a tag to a resource",
+          "slash": "/directory directory-tag",
+          "prefix": "!directory-tag",
+          "access": "Available subject to command permissions"
+        },
+        {
+          "name": "directory-untag",
+          "description": "Remove a tag from a resource",
+          "slash": "/directory directory-untag",
+          "prefix": "!directory-untag",
+          "access": "Available subject to command permissions"
+        },
+        {
+          "name": "directory-tags",
+          "description": "List every tag in the directory",
+          "slash": "/directory directory-tags",
+          "prefix": "!directory-tags",
+          "access": "Available subject to command permissions"
+        },
+        {
+          "name": "directory-category-add",
+          "description": "Create a directory category",
+          "slash": "/directory directory-category-add",
+          "prefix": "!directory-category-add",
+          "access": "Available subject to command permissions"
+        },
+        {
+          "name": "directory-category-remove",
+          "description": "Remove a directory category",
+          "slash": "/directory directory-category-remove",
+          "prefix": "!directory-category-remove",
+          "access": "Available subject to command permissions"
+        },
+        {
+          "name": "directory-category-list",
+          "description": "List directory categories",
+          "slash": "/directory directory-category-list",
+          "prefix": "!directory-category-list",
+          "access": "Available subject to command permissions"
+        },
+        {
+          "name": "directory-pin",
+          "description": "Pin a resource to the top",
+          "slash": "/directory directory-pin",
+          "prefix": "!directory-pin",
+          "access": "Available subject to command permissions"
+        },
+        {
+          "name": "directory-unpin",
+          "description": "Unpin a directory resource",
+          "slash": "/directory directory-unpin",
+          "prefix": "!directory-unpin",
+          "access": "Available subject to command permissions"
+        },
+        {
+          "name": "directory-pinned",
+          "description": "Show pinned directory resources",
+          "slash": "/directory directory-pinned",
+          "prefix": "!directory-pinned",
+          "access": "Available subject to command permissions"
+        },
+        {
+          "name": "directory-mine",
+          "description": "Show resources you submitted",
+          "slash": "/directory directory-mine",
+          "prefix": "!directory-mine",
+          "access": "Available subject to command permissions"
+        },
+        {
+          "name": "directory-recent",
+          "description": "Show recently added resources",
+          "slash": "/directory directory-recent",
+          "prefix": "!directory-recent",
+          "access": "Available subject to command permissions"
+        },
+        {
+          "name": "directory-count",
+          "description": "Count directory resources",
+          "slash": "/directory directory-count",
+          "prefix": "!directory-count",
+          "access": "Available subject to command permissions"
+        },
+        {
+          "name": "directory-export",
+          "description": "Export directory entries as text",
+          "slash": "/directory directory-export",
+          "prefix": "!directory-export",
+          "access": "Available subject to command permissions"
+        },
+        {
+          "name": "directory-import",
+          "description": "Import resources from pipe-separated lines",
+          "slash": "/directory directory-import",
+          "prefix": "!directory-import",
+          "access": "Available subject to command permissions"
+        },
+        {
+          "name": "directory-clear",
+          "description": "Remove every directory entry",
+          "slash": "/directory directory-clear",
+          "prefix": "!directory-clear",
+          "access": "Available subject to command permissions"
+        },
+        {
+          "name": "directory-config",
+          "description": "Show directory configuration",
+          "slash": "/directory directory-config",
+          "prefix": "!directory-config",
+          "access": "Available subject to command permissions"
+        },
+        {
+          "name": "directory-link",
+          "description": "Show a resource link by its exact name",
+          "slash": "/directory directory-link",
+          "prefix": "!directory-link",
+          "access": "Available subject to command permissions"
+        },
+        {
+          "name": "directory-verify",
+          "description": "Check whether a resource has a valid HTTPS address",
+          "slash": "/directory directory-verify",
+          "prefix": "!directory-verify",
+          "access": "Available subject to command permissions"
+        },
+        {
+          "name": "directory-help",
+          "description": "Show directory command examples",
+          "slash": "/directory directory-help",
+          "prefix": "!directory-help",
+          "access": "Available subject to command permissions"
+        }
+      ]
+    },
+    {
+      "name": "engagement",
+      "description": "XP, levels, activity rewards and member progression",
+      "commands": [
+        {
+          "name": "engage-profile",
+          "description": "Show your engagement profile",
+          "slash": "/engagement engage-profile",
+          "prefix": "!engage-profile",
+          "access": "Available subject to command permissions"
+        },
+        {
+          "name": "engage-rank",
+          "description": "Show your position on the XP leaderboard",
+          "slash": "/engagement engage-rank",
+          "prefix": "!engage-rank",
+          "access": "Available subject to command permissions"
+        },
+        {
+          "name": "engage-top",
+          "description": "Show the top XP members",
+          "slash": "/engagement engage-top",
+          "prefix": "!engage-top",
+          "access": "Available subject to command permissions"
+        },
+        {
+          "name": "engage-config",
+          "description": "View engagement system settings",
+          "slash": "/engagement engage-config",
+          "prefix": "!engage-config",
+          "access": "Available subject to command permissions"
+        },
+        {
+          "name": "engage-enable",
+          "description": "Enable XP and level tracking",
+          "slash": "/engagement engage-enable",
+          "prefix": "!engage-enable",
+          "access": "Available subject to command permissions"
+        },
+        {
+          "name": "engage-disable",
+          "description": "Disable XP and level tracking",
+          "slash": "/engagement engage-disable",
+          "prefix": "!engage-disable",
+          "access": "Available subject to command permissions"
+        },
+        {
+          "name": "engage-rate",
+          "description": "Set the XP multiplier",
+          "slash": "/engagement engage-rate",
+          "prefix": "!engage-rate",
+          "access": "Available subject to command permissions"
+        },
+        {
+          "name": "engage-cooldown",
+          "description": "Set the message XP cooldown",
+          "slash": "/engagement engage-cooldown",
+          "prefix": "!engage-cooldown",
+          "access": "Available subject to command permissions"
+        },
+        {
+          "name": "engage-grant",
+          "description": "Grant XP to a member",
+          "slash": "/engagement engage-grant",
+          "prefix": "!engage-grant",
+          "access": "Available subject to command permissions"
+        },
+        {
+          "name": "engage-remove",
+          "description": "Remove XP from a member",
+          "slash": "/engagement engage-remove",
+          "prefix": "!engage-remove",
+          "access": "Available subject to command permissions"
+        },
+        {
+          "name": "engage-reset",
+          "description": "Reset one member engagement profile",
+          "slash": "/engagement engage-reset",
+          "prefix": "!engage-reset",
+          "access": "Available subject to command permissions"
+        },
+        {
+          "name": "engage-reset-all",
+          "description": "Reset all engagement profiles",
+          "slash": "/engagement engage-reset-all",
+          "prefix": "!engage-reset-all",
+          "access": "Available subject to command permissions"
+        },
+        {
+          "name": "engage-level",
+          "description": "Check a member level and next milestone",
+          "slash": "/engagement engage-level",
+          "prefix": "!engage-level",
+          "access": "Available subject to command permissions"
+        },
+        {
+          "name": "engage-rewards",
+          "description": "Show level reward overview",
+          "slash": "/engagement engage-rewards",
+          "prefix": "!engage-rewards",
+          "access": "Available subject to command permissions"
+        },
+        {
+          "name": "engage-reward-add",
+          "description": "Add a role reward for a level",
+          "slash": "/engagement engage-reward-add",
+          "prefix": "!engage-reward-add",
+          "access": "Available subject to command permissions"
+        },
+        {
+          "name": "engage-reward-remove",
+          "description": "Remove a level reward",
+          "slash": "/engagement engage-reward-remove",
+          "prefix": "!engage-reward-remove",
+          "access": "Available subject to command permissions"
+        },
+        {
+          "name": "engage-reward-list",
+          "description": "List configured reward roles",
+          "slash": "/engagement engage-reward-list",
+          "prefix": "!engage-reward-list",
+          "access": "Available subject to command permissions"
+        },
+        {
+          "name": "engage-reward-sync",
+          "description": "Apply the highest earned reward role",
+          "slash": "/engagement engage-reward-sync",
+          "prefix": "!engage-reward-sync",
+          "access": "Available subject to command permissions"
+        },
+        {
+          "name": "engage-streak",
+          "description": "Show your daily activity streak",
+          "slash": "/engagement engage-streak",
+          "prefix": "!engage-streak",
+          "access": "Available subject to command permissions"
+        },
+        {
+          "name": "engage-daily",
+          "description": "Claim your daily XP bonus",
+          "slash": "/engagement engage-daily",
+          "prefix": "!engage-daily",
+          "access": "Available subject to command permissions"
+        },
+        {
+          "name": "engage-weekly",
+          "description": "Claim your weekly XP bonus",
+          "slash": "/engagement engage-weekly",
+          "prefix": "!engage-weekly",
+          "access": "Available subject to command permissions"
+        },
+        {
+          "name": "engage-activity",
+          "description": "Show server engagement totals",
+          "slash": "/engagement engage-activity",
+          "prefix": "!engage-activity",
+          "access": "Available subject to command permissions"
+        },
+        {
+          "name": "engage-active",
+          "description": "List members active in the last 24 hours",
+          "slash": "/engagement engage-active",
+          "prefix": "!engage-active",
+          "access": "Available subject to command permissions"
+        },
+        {
+          "name": "engage-ignore-channel",
+          "description": "Exclude a channel from XP tracking",
+          "slash": "/engagement engage-ignore-channel",
+          "prefix": "!engage-ignore-channel",
+          "access": "Available subject to command permissions"
+        },
+        {
+          "name": "engage-unignore-channel",
+          "description": "Restore XP tracking in a channel",
+          "slash": "/engagement engage-unignore-channel",
+          "prefix": "!engage-unignore-channel",
+          "access": "Available subject to command permissions"
+        }
+      ]
+    },
+    {
+      "name": "devtools",
+      "description": "Safe text, encoding, JSON and developer utilities",
+      "commands": [
+        {
+          "name": "dev-base64-encode",
+          "description": "Encode text as Base64",
+          "slash": "/devtools dev-base64-encode",
+          "prefix": "!dev-base64-encode",
+          "access": "Available subject to command permissions"
+        },
+        {
+          "name": "dev-base64-decode",
+          "description": "Decode a Base64 string",
+          "slash": "/devtools dev-base64-decode",
+          "prefix": "!dev-base64-decode",
+          "access": "Available subject to command permissions"
+        },
+        {
+          "name": "dev-url-encode",
+          "description": "Percent-encode text for URLs",
+          "slash": "/devtools dev-url-encode",
+          "prefix": "!dev-url-encode",
+          "access": "Available subject to command permissions"
+        },
+        {
+          "name": "dev-url-decode",
+          "description": "Decode percent-encoded URL text",
+          "slash": "/devtools dev-url-decode",
+          "prefix": "!dev-url-decode",
+          "access": "Available subject to command permissions"
+        },
+        {
+          "name": "dev-json-format",
+          "description": "Format JSON with indentation",
+          "slash": "/devtools dev-json-format",
+          "prefix": "!dev-json-format",
+          "access": "Available subject to command permissions"
+        },
+        {
+          "name": "dev-json-minify",
+          "description": "Minify JSON into one line",
+          "slash": "/devtools dev-json-minify",
+          "prefix": "!dev-json-minify",
+          "access": "Available subject to command permissions"
+        },
+        {
+          "name": "dev-json-check",
+          "description": "Validate JSON syntax",
+          "slash": "/devtools dev-json-check",
+          "prefix": "!dev-json-check",
+          "access": "Available subject to command permissions"
+        },
+        {
+          "name": "dev-sha256",
+          "description": "Create a SHA-256 text digest",
+          "slash": "/devtools dev-sha256",
+          "prefix": "!dev-sha256",
+          "access": "Available subject to command permissions"
+        },
+        {
+          "name": "dev-uuid",
+          "description": "Generate a random UUID",
+          "slash": "/devtools dev-uuid",
+          "prefix": "!dev-uuid",
+          "access": "Available subject to command permissions"
+        },
+        {
+          "name": "dev-slug",
+          "description": "Convert text into a URL-friendly slug",
+          "slash": "/devtools dev-slug",
+          "prefix": "!dev-slug",
+          "access": "Available subject to command permissions"
+        },
+        {
+          "name": "dev-md-escape",
+          "description": "Escape Markdown formatting characters",
+          "slash": "/devtools dev-md-escape",
+          "prefix": "!dev-md-escape",
+          "access": "Available subject to command permissions"
+        },
+        {
+          "name": "dev-clean-mentions",
+          "description": "Neutralize mass-mention text",
+          "slash": "/devtools dev-clean-mentions",
+          "prefix": "!dev-clean-mentions",
+          "access": "Available subject to command permissions"
+        },
+        {
+          "name": "dev-char-count",
+          "description": "Count characters and show frequent symbols",
+          "slash": "/devtools dev-char-count",
+          "prefix": "!dev-char-count",
+          "access": "Available subject to command permissions"
+        },
+        {
+          "name": "dev-line-sort",
+          "description": "Sort text lines alphabetically",
+          "slash": "/devtools dev-line-sort",
+          "prefix": "!dev-line-sort",
+          "access": "Available subject to command permissions"
+        },
+        {
+          "name": "dev-line-unique",
+          "description": "Remove duplicate lines",
+          "slash": "/devtools dev-line-unique",
+          "prefix": "!dev-line-unique",
+          "access": "Available subject to command permissions"
+        },
+        {
+          "name": "dev-trim-lines",
+          "description": "Trim whitespace from every line",
+          "slash": "/devtools dev-trim-lines",
+          "prefix": "!dev-trim-lines",
+          "access": "Available subject to command permissions"
+        },
+        {
+          "name": "dev-wrap",
+          "description": "Wrap text to a chosen line width",
+          "slash": "/devtools dev-wrap",
+          "prefix": "!dev-wrap",
+          "access": "Available subject to command permissions"
+        },
+        {
+          "name": "dev-byte-count",
+          "description": "Count UTF-8 bytes",
+          "slash": "/devtools dev-byte-count",
+          "prefix": "!dev-byte-count",
+          "access": "Available subject to command permissions"
+        },
+        {
+          "name": "dev-utf8-hex",
+          "description": "Convert text to UTF-8 hexadecimal",
+          "slash": "/devtools dev-utf8-hex",
+          "prefix": "!dev-utf8-hex",
+          "access": "Available subject to command permissions"
+        },
+        {
+          "name": "dev-binary-encode",
+          "description": "Convert text to binary bytes",
+          "slash": "/devtools dev-binary-encode",
+          "prefix": "!dev-binary-encode",
+          "access": "Available subject to command permissions"
+        },
+        {
+          "name": "dev-binary-decode",
+          "description": "Decode binary bytes into text",
+          "slash": "/devtools dev-binary-decode",
+          "prefix": "!dev-binary-decode",
+          "access": "Available subject to command permissions"
+        },
+        {
+          "name": "dev-morse-encode",
+          "description": "Encode letters and digits as Morse code",
+          "slash": "/devtools dev-morse-encode",
+          "prefix": "!dev-morse-encode",
+          "access": "Available subject to command permissions"
+        },
+        {
+          "name": "dev-morse-decode",
+          "description": "Decode Morse code into text",
+          "slash": "/devtools dev-morse-decode",
+          "prefix": "!dev-morse-decode",
+          "access": "Available subject to command permissions"
+        },
+        {
+          "name": "dev-palindrome",
+          "description": "Check whether text is a palindrome",
+          "slash": "/devtools dev-palindrome",
+          "prefix": "!dev-palindrome",
+          "access": "Available subject to command permissions"
+        },
+        {
+          "name": "dev-acronym",
+          "description": "Create an acronym from a phrase",
+          "slash": "/devtools dev-acronym",
+          "prefix": "!dev-acronym",
           "access": "Available subject to command permissions"
         }
       ]
