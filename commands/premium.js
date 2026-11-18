@@ -248,14 +248,17 @@ module.exports = {
     }, { ...O, danger: 'The bot will **restart** and be offline for a minute.' }),
     C('live-stats', 'Owner only: live animated bot statistics', [], null, liveStats, { ...O, custom: true }),
     C('emoji-add', 'Premium: add an emoji to this server', [S('name', 'Emoji name', true, { max: 32 }), S('source', 'Image URL or a custom emoji', true, { max: 300 })], P.ManageGuildExpressions, async (c) => {
-      let url = c.s('source'); const m = /^<(a?):\\w+:(\\d+)>$/.exec(url); if (m) url = `https://cdn.discordapp.com/emojis/${m[2]}.${m[1] ? 'gif' : 'png'}`;
-      if (!/^https?:\\/\\//i.test(url)) throw new UserError('Give an image link or a custom emoji', 'Example: https://.../image.png');
-      const e = await c.g.emojis.create({ attachment: url, name: c.s('name').replace(/\\W/g, '_'), reason: c.audit() });
+      let url = c.s('source'); const m = /^<(a?):\w+:(\d+)>$/.exec(url); if (m) url = `https://cdn.discordapp.com/emojis/${m[2]}.${m[1] ? 'gif' : 'png'}`;
+      if (!/^https?:\/\//i.test(url)) throw new UserError('Give an image link or a custom emoji', 'Example: https://.../image.png');
+      const e = await c.g.emojis.create({ attachment: url, name: c.s('name').replace(/\W/g, '_'), reason: c.audit() });
       return own('Emoji added to this server', `${e} \`:${e.name}:\``, { icon: '😀', undo: { label: 'Emoji deleted', fn: () => e.delete() } });
     }, PREMIUM_ACCESS),
     C('epadd', 'Owner only: upload a linked emoji to Uranium application emojis', [S('source', 'Direct HTTPS image URL or Discord emoji link', true, { max: 500 }), S('name', 'Optional name; defaults from the link', false, { max: 32 })], null, async (c) => {
-      const image = await appEmojiTools.fetchEmojiImage(c.s('source'));
-      const name = appEmojiTools.normalizeEmojiName(c.s('name'), appEmojiTools.deriveEmojiName(appEmojiTools.sourceUrl(c.s('source'))));
+      const source = c.s('source').trim();
+      const customMention = /^<a?:([a-zA-Z0-9_]{2,32}):(\\d{17,20})>$/.exec(source);
+      const sourceLink = appEmojiTools.sourceUrl(source);
+      const image = await appEmojiTools.fetchEmojiImage(source);
+      const name = appEmojiTools.normalizeEmojiName(c.s('name'), customMention?.[1] || appEmojiTools.deriveEmojiName(sourceLink));
       const app = c.i.client.application;
       const existing = await app.emojis.fetch();
       if (existing.size >= 2000) throw new UserError('Application emoji limit reached', 'Discord allows up to 2,000 emojis for an application. Delete an unused app emoji in the Developer Portal first.');
