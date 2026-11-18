@@ -111,7 +111,7 @@ for (const [shortcut, expected] of [['add','grant'],['remove','revoke'],['check'
 }
 const catalog = require('../commands.json');
 assert.equal(catalog.total, 383, 'Published catalog total must match the implemented command set');
-assert.equal(catalog.categories.length, 20, 'Every command category must be published');
+assert.equal(catalog.categories.length, 21, 'Every command category must be published');
 for (const entry of catalog.categories) {
   const source = require('../commands/' + entry.name);
   assert.ok(source.commands.length <= 25, entry.name + ' exceeds Discord subcommand limit');
