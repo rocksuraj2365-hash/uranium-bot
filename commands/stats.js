@@ -2,21 +2,22 @@ const { PermissionFlagsBits: P, ChannelType: CT } = require('discord.js');
 const { C, S } = require('../lib/cmd');
 const { UserError, res } = require('../lib/util');
 const db = require('../lib/db');
+const cv2 = require('../lib/cv2');
+const { E } = require('../lib/emojis');
 const dayKey = (t) => new Date(t || Date.now()).toISOString().slice(0, 10);
 const statsOf = (g) => { const d=db.g(g.id); d.stats ||= {days:{},users:{},voiceOpen:{},counters:[]}; d.stats.days ||= {}; d.stats.users ||= {}; d.stats.voiceOpen ||= {}; d.stats.counters ||= []; return d.stats; };
 const bucket = (g,t) => { const s=statsOf(g), k=dayKey(t); s.days[k] ||= {joins:0,leaves:0,messages:0,voiceSeconds:0}; return s.days[k]; };
 const afkStore = (id) => { const d=db.g(id); d.afkUsers ||= {}; return d.afkUsers; };
 const fmt = (n) => { const h=Math.floor(n/3600),m=Math.floor(n%3600/60); return h ? h+'h '+m+'m' : m+'m'; };
 async function ask(c,prompt,choices) {
-  const options = choices.map((value) => ({
-    type: 2, style: value === 'cancel' ? 2 : 1,
-    label: value === 'cancel' ? 'Cancel' : value[0].toUpperCase() + value.slice(1),
-    custom_id: 'afk:' + value
-  }));
-  const sent = await c.i.channel.send({
-    content: prompt,
-    components: [{ type: 1, components: options }]
-  });
+  const icons = { server: E('server'), global: E('members'), on: E('verify'), off: E('mute'), cancel: E('cross') };
+  const labels = { server: 'This server', global: 'All servers', on: 'Enable DMs', off: 'Disable DMs', cancel: 'Cancel' };
+  const buttons = choices.map((value) => cv2.button('afk:'+value, labels[value] || value, value === 'cancel' ? 2 : 1, icons[value]));
+  const sent = await c.i.channel.send(cv2.message([
+    cv2.section([prompt, '_Choose an option below. This prompt expires in 60 seconds._'], cv2.thumbnail(c.i.user.displayAvatarURL({ size: 128 }), 'Your avatar')),
+    cv2.separator(),
+    cv2.row(buttons)
+  ], 0x8b5cf6));
   try {
     const picked = await sent.awaitMessageComponent({
       filter: (interaction) => interaction.user.id === c.i.user.id && interaction.customId.startsWith('afk:'),
@@ -34,27 +35,46 @@ async function ask(c,prompt,choices) {
     throw error;
   }
 }
+async function applyAfkNickname(guild, userId, originalNickname, reason) {
+  const member = await guild.members.fetch(userId).catch(() => null);
+  if (!member) return { ok: false, reason: 'Member is not available in this server.' };
+  const me = guild.members.me || await guild.members.fetchMe().catch(() => null);
+  if (!me?.permissions.has(P.ManageNicknames)) return { ok: false, reason: 'Uranium is missing **Manage Nicknames** permission.' };
+  if (!member.manageable) return { ok: false, reason: 'Uranium role is not high enough to manage this member’s nickname.' };
+  const base = (member.nickname || member.user.username).replace(/\\s*\\[afk\\]$/i, '');
+  try {
+    await member.setNickname((base.slice(0, 26) + ' [afk]').slice(0, 32), reason);
+    return { ok: true, originalNickname: member.nickname === null ? null : originalNickname };
+  } catch (error) {
+    const missing = Number(error?.code) === 50013 || /Missing Permissions/i.test(String(error?.message || ''));
+    return { ok: false, reason: missing ? 'Discord denied nickname changes. Check **Manage Nicknames** and role hierarchy.' : 'Nickname could not be changed: ' + String(error?.message || 'unknown error').slice(0, 100) };
+  }
+}
 async function setAfk(c) {
   const reason=String(c.s('reason')||'AFK').slice(0,120);
-  const scope=await ask(c,'🌙 Should AFK apply only here or everywhere?',['server','global','cancel']);
-  if(!['server','global'].includes(scope)) throw new UserError('AFK setup cancelled','Reply server or global.');
-  const dm=await ask(c,'📩 DM you when someone mentions you?',['on','off','cancel']);
-  if(!['on','off'].includes(dm)) throw new UserError('AFK setup cancelled','Reply on or off.');
-  const global=scope==='global', key=global?'__global':c.g.id, nicknames={};
+  const scope=await ask(c,'## '+E('fox_sleep')+' AFK visibility\nShould your AFK status apply only in this server or across all servers?',['server','global','cancel']);
+  const dm=await ask(c,'## '+E('message')+' Mention notifications\nShould Uranium DM you when someone mentions you while you are AFK?',['on','off','cancel']);
+  const global=scope==='global', key=global?'__global':c.g.id, nicknames={}, nicknameResults=[];
   const store=afkStore(key);
-  if(global) {
-    for(const g of c.i.client.guilds.cache.values()) {
-      const m=await g.members.fetch(c.i.user.id).catch(()=>null); if(!m) continue;
-      nicknames[g.id]=m.nickname;
-      const base=(m.nickname||m.user.username).replace(/\s*\[afk\]$/i,'');
-      await m.setNickname((base.slice(0,26)+' [afk]').slice(0,32),'Uranium global AFK').catch(()=>{});
-    }
-  } else {
-    const m=await c.g.members.fetch(c.i.user.id).catch(()=>null);
-    if(m) { nicknames[c.g.id]=m.nickname; const base=(m.nickname||m.user.username).replace(/\s*\[afk\]$/i,''); await m.setNickname((base.slice(0,26)+' [afk]').slice(0,32),'Uranium AFK').catch(()=>{}); }
+  const guilds = global ? [...c.i.client.guilds.cache.values()] : [c.g];
+  for (const guild of guilds) {
+    const result = await applyAfkNickname(guild, c.i.user.id, null, global ? 'Uranium global AFK' : 'Uranium AFK');
+    if (result.ok) nicknames[guild.id] = result.originalNickname;
+    nicknameResults.push({ guild, ...result });
   }
-  store[c.i.user.id]={reason:reason,at:Date.now(),dm:dm==='on',scope:scope,nicknames:nicknames}; db.save();
-  return res('AFK enabled 🌙','**'+reason+'**\nScope: **'+scope+'**\nMention DMs: **'+dm+'**\nNickname tag: **[afk]**',{icon:'🌙'});
+  store[c.i.user.id]={reason,at:Date.now(),dm:dm==='on',scope,nicknames}; db.save();
+  const changed = nicknameResults.filter(x=>x.ok).length;
+  const failed = nicknameResults.filter(x=>!x.ok);
+  const nicknameLine = failed.length
+    ? E('warn')+' **Nickname tag not applied in '+failed.length+' server(s).**\\n'+failed.slice(0,5).map(x=>'• **'+x.guild.name+'**: '+x.reason).join('\\n')+(failed.length>5?'\\n• And '+(failed.length-5)+' more server(s).':'')
+    : E('check')+' Nickname tag applied in '+changed+' server(s).';
+  return res('AFK enabled',null,{embed:cv2.message([
+    cv2.section(['# '+E('fox_sleep')+' AFK mode enabled','**Reason:** '+reason+'\\n**Scope:** '+(global?'All servers':'This server')+'\\n**Mention DMs:** '+(dm==='on'?'Enabled':'Disabled')],cv2.thumbnail(c.i.user.displayAvatarURL({size:128}),'AFK profile')),
+    cv2.separator(),
+    cv2.text(nicknameLine),
+    cv2.separator(),
+    cv2.row([cv2.button('afk:clear','Clear my AFK',2,E('cross'))])
+  ],failed.length?0xffb84d:0x39d98a)});
 }
 async function clearAfk(uid,gid,client) {
   let rec=null; const local=afkStore(gid), global=afkStore('__global');
@@ -64,7 +84,7 @@ async function clearAfk(uid,gid,client) {
   for(const id of Object.keys(rec.nicknames||{})) {
     const g=client.guilds.cache.get(id); if(!g) continue;
     const m=await g.members.fetch(uid).catch(()=>null);
-    if(m && /\s*\[afk\]$/i.test(m.nickname||'')) await m.setNickname(rec.nicknames[id]||null,'Uranium AFK cleared').catch(()=>{});
+    if(m && /\\s*\\[afk\\]$/i.test(m.nickname||'')) await m.setNickname(rec.nicknames[id]||null,'Uranium AFK cleared').catch(()=>{});
   }
   db.save(); return rec;
 }
