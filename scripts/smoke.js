@@ -278,7 +278,7 @@ for (const page of ['guide', 'moderation', 'protection', 'permissions', 'premium
 for (const label of ['**Slash**', '**Prefix**', '**No-prefix**', 'Prev page', 'Next page', 'Back to list', 'Find a Uranium command']) {
   assert.ok(helpSource.includes(label), 'Help panel missing interactive command detail: ' + label);
 }
-console.log('All 395 commands expose slash, prefix and no-prefix usage in the interactive help panel.');
+console.log('All 396 commands expose slash, prefix and no-prefix usage in the interactive help panel.');
 
 // Gateway startup must accept shardReady while the full client guild cache hydrates.
 async function testGatewayReadyFallback() {
