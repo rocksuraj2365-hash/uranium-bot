@@ -1753,13 +1753,6 @@
           "slash": "/premium bot-banner",
           "prefix": "!premium bot-banner",
           "access": "Premium access"
-        },
-        {
-          "name": "epadd",
-          "description": "Owner only: upload a linked emoji to Uranium application emojis",
-          "slash": "/premium epadd",
-          "prefix": "!epadd",
-          "access": "Owner only"
         }
       ]
     },
@@ -2739,6 +2732,19 @@
           "slash": "/security alert-test",
           "prefix": "!security alert-test",
           "access": "Premium access required"
+        }
+      ]
+    },
+    {
+      "name": "application",
+      "description": "Uranium application management commands.",
+      "commands": [
+        {
+          "name": "epadd",
+          "description": "Owner only: upload a linked emoji to Uranium application emojis",
+          "slash": "/application epadd",
+          "prefix": "!epadd",
+          "access": "Owner only"
         }
       ]
     }
