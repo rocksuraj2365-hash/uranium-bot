@@ -16,6 +16,7 @@ const music = require('./lib/music');
 const supportTemplate = require('./lib/support-template');
 const emojis = require('./lib/emojis');
 const stats = require('./commands/stats');
+const engagement = require('./commands/engagement');
 const waitForGatewayReady = require('./lib/gateway-ready');
 const { startRenderKeepAlive } = require('./lib/render-keepalive');
 const { UserError, permName } = require('./lib/util');
@@ -122,8 +123,8 @@ if (PORT) http.createServer(async (req, res) => {
   stopRenderKeepAlive = startRenderKeepAlive();
 });
 
-const cats = ['member', 'message', 'channel', 'role', 'voice', 'server', 'automod', 'info', 'music', 'ai', 'premium', 'license', 'utility', 'community', 'fun', 'servertools', 'support', 'template', 'security', 'application', 'stats'].map((n) => require('./commands/' + n));
-prefix.CAT_SHORT.stats = 'stt'; prefix.CAT_SHORT.utility = 'ut'; prefix.CAT_SHORT.community = 'cm'; prefix.CAT_SHORT.fun = 'fn'; prefix.CAT_SHORT.servertools = 'st'; prefix.CAT_SHORT.support = 'sp'; prefix.CAT_SHORT.template = 'tpl'; prefix.CAT_SHORT.security = 'sec';
+const cats = ['member', 'message', 'channel', 'role', 'voice', 'server', 'automod', 'info', 'music', 'ai', 'premium', 'license', 'utility', 'community', 'fun', 'servertools', 'support', 'template', 'security', 'application', 'stats', 'reminders', 'directory', 'engagement', 'devtools'].map((n) => require('./commands/' + n));
+prefix.CAT_SHORT.stats = 'stt'; prefix.CAT_SHORT.utility = 'ut'; prefix.CAT_SHORT.community = 'cm'; prefix.CAT_SHORT.fun = 'fn'; prefix.CAT_SHORT.servertools = 'st'; prefix.CAT_SHORT.support = 'sp'; prefix.CAT_SHORT.template = 'tpl'; prefix.CAT_SHORT.security = 'sec'; prefix.CAT_SHORT.reminders = 'rem'; prefix.CAT_SHORT.directory = 'dir'; prefix.CAT_SHORT.engagement = 'eng'; prefix.CAT_SHORT.devtools = 'dev';
 for (const cat of cats) {
   // A moderation reason is always optional for both slash and prefix commands.
   for (const command of cat.commands) {
@@ -281,6 +282,7 @@ async function onMessage(msg) {
     if (await fortress.inspectMessage(msg)) return;
     await stats.inspectAfkMessage(msg);
     stats.recordMessage(msg);
+    engagement.recordMessage(msg);
     const px = getPrefix(msg.guild.id); const owner = isOwner(msg.author.id); let body = null, viaPrefix = true, mention = false, npAi = false;
     if (msg.content.startsWith(px)) body = msg.content.slice(px.length);
     else { const m = new RegExp(`^<@!?${client.user.id}>\s*`).exec(msg.content); if (m) { body = msg.content.slice(m[0].length); mention = true; } }
@@ -366,7 +368,22 @@ async function tick() {
   for (const s of db.dueSchedules()) {
     try {
       let complete = false;
-      if (s.type === 'giveaway') complete = await premium.endGiveaway(client, s);
+      if (s.type === 'reminder') {
+        if (s.channelId) {
+          const channel = await fetchScheduleResource(client.channels.fetch(s.channelId), [10003]);
+          if (!channel?.isTextBased()) complete = true;
+          else { await channel.send({ content: '⏰ **Scheduled server reminder**\n' + String(s.text || '').slice(0, 1800), allowedMentions: { parse: [] } }); complete = true; }
+        } else {
+          const user = await fetchScheduleResource(client.users.fetch(s.userId), [10013]);
+          if (!user) complete = true;
+          else { await user.send('⏰ **Your Uranium reminder**\n' + String(s.text || '').slice(0, 1800)); complete = true; }
+        }
+        if (complete && s.guildId) {
+          const record = db.g(s.guildId); record.reminderHistory ||= [];
+          record.reminderHistory.push({ id: s.id, userId: s.userId, text: s.text, sentAt: Date.now() });
+          record.reminderHistory = record.reminderHistory.slice(-100); db.save();
+        }
+      } else if (s.type === 'giveaway') complete = await premium.endGiveaway(client, s);
       else {
         const g = await fetchScheduleResource(client.guilds.fetch(s.guildId), [10004]);
         if (!g) complete = true;
