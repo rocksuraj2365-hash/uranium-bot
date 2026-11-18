@@ -1665,10 +1665,10 @@
         },
         {
           "name": "emoji-add",
-          "description": "Premium: add an emoji to this server",
+          "description": "Owner only: upload a linked emoji to Uranium application emojis",
           "slash": "/premium emoji-add",
           "prefix": "!premium emoji-add",
-          "access": "Premium access"
+          "access": "Owner only"
         },
         {
           "name": "embed-builder",
