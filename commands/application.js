@@ -13,7 +13,7 @@ module.exports = {
       S('name', 'Application emoji name', true, { max: 32 })
     ], null, async (c) => {
       const source = c.s('source').trim();
-      const customMention = /^<a?:([a-zA-Z0-9_]{2,32}):(\\d{17,20})>$/.exec(source);
+      const customMention = /^<a?:([a-zA-Z0-9_]{2,32}):(\d{17,20})>$/.exec(source);
       const sourceLink = appEmojiTools.sourceUrl(source);
       const image = await appEmojiTools.fetchEmojiImage(source);
       const name = appEmojiTools.normalizeEmojiName(c.s('name'), customMention?.[1] || appEmojiTools.deriveEmojiName(sourceLink));
