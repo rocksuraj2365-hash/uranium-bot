@@ -77,6 +77,8 @@ assert.equal(normalizeRemotePayload('not-json'), null, 'Malformed state must be 
 const license = { name: 'license', commands: ['grant', 'revoke', 'access', 'profile'].map((name) => ({ name })) };
 license.map = new Map(license.commands.map((command) => [command.name, command]));
 const newCats = ['utility', 'community', 'fun', 'servertools'].map((name) => require('../commands/' + name));
+const addedCats = ['reminders', 'directory', 'engagement', 'devtools'].map((name) => require('../commands/' + name));
+for (const cat of addedCats) cat.map = new Map(cat.commands.map((command) => [command.name, command]));
 const template = require('../commands/template');
 const support = require('../commands/support');
 const security = require('../commands/security');
@@ -93,7 +95,7 @@ for (const cat of newCats) {
   assert.equal(new Set(cat.commands.map((x) => x.name)).size, 25, cat.name + ' command names must be unique');
 }
 assert.equal(newCats.reduce((n, cat) => n + cat.commands.length, 0), 100);
-prefix.init([...newCats, template, license, security, support]);
+prefix.init([...newCats, ...addedCats, template, license, security, support]);
 for (const cat of newCats) {
   for (const def of cat.commands) {
     const hit = prefix.resolve(prefix.tokenize(cat.name + ' ' + def.name));
@@ -115,8 +117,10 @@ assert.equal(new Set(statsCommands.commands.map(x => x.name)).size, 20, 'Stats a
 assert.equal(typeof statsCommands.recordMessage, 'function');
 assert.equal(typeof statsCommands.inspectAfkMessage, 'function');
 const catalog = require('../commands.json');
-assert.equal(catalog.total, 396, 'Published catalog total must match the implemented command set');
-assert.equal(catalog.categories.length, 21, 'Every command category must be published');
+assert.equal(addedCats.reduce((n, cat) => n + cat.commands.length, 0), 100, 'Four new categories must add exactly 100 commands');
+assert.equal(addedCats.every(cat => cat.commands.length === 25), true, 'Every new category must contain 25 commands');
+assert.equal(catalog.total, 496, 'Published catalog total must match the implemented command set');
+assert.equal(catalog.categories.length, 25, 'Every command category must be published');
 for (const entry of catalog.categories) {
   const source = require('../commands/' + entry.name);
   assert.ok(source.commands.length <= 25, entry.name + ' exceeds Discord subcommand limit');
@@ -258,8 +262,8 @@ for (const category of allCommandCategories) {
     routedCommandCount += 1;
   }
 }
-assert.equal(routedCommandCount, 396, 'Every one of the 396 commands must have a working full prefix route');
-console.log('All 396 full-name and available short-category prefix routes passed.');
+assert.equal(routedCommandCount, 496, 'Every one of the 496 commands must have a working full prefix route');
+console.log('All 496 full-name and available short-category prefix routes passed.');
 
 // Prefix and no-prefix messages share the same command parser after the prefix gate.
 for (const category of allCommandCategories) {
@@ -275,13 +279,16 @@ const helpSource = require('node:fs').readFileSync(require.resolve('../lib/help'
 assert.match(helpSource, /const passes = \(d\) => !d\.owner/, 'Owner-only commands must be excluded from category and search results');
 assert.ok(!helpSource.includes("{ id: 'owner', label: 'Owner' }"), 'Public help filters must not expose an Owner command filter');
 assert.match(helpSource, /if \(d\.owner\) continue;/, 'Owner-only commands must be excluded from help search results');
+for (const category of ['reminders', 'directory', 'engagement', 'devtools']) {
+  assert.ok(helpSource.includes(category), 'Interactive help must include the ' + category + ' category');
+}
 for (const page of ['guide', 'moderation', 'protection', 'permissions', 'premium-guide']) {
   assert.ok(helpSource.includes("name: '" + page + "'"), 'Help page missing: ' + page);
 }
 for (const label of ['**Slash**', '**Prefix**', '**No-prefix**', 'Prev page', 'Next page', 'Back to list', 'Find a Uranium command']) {
   assert.ok(helpSource.includes(label), 'Help panel missing interactive command detail: ' + label);
 }
-console.log('All 396 commands expose slash, prefix and no-prefix usage in the interactive help panel.');
+console.log('All 496 commands expose slash, prefix and no-prefix usage in the interactive help panel.');
 
 // Gateway startup must accept shardReady while the full client guild cache hydrates.
 async function testGatewayReadyFallback() {
