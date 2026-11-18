@@ -12,7 +12,7 @@ const { startRenderKeepAlive, DEFAULT_INTERVAL_MS } = require('../lib/render-kee
 const appEmojiTools = require('../lib/application-emojis');
 const premiumCommands = require('../commands/premium').commands;
 const serverEmojiCommand = premiumCommands.find((command) => command.name === 'emoji-add');
-const appEmojiCommand = require('../commands/application').commands.find((command) => command.name === 'epadd');
+const applicationCommands = require('../commands/application').commands;\nconst appEmojiCommand = applicationCommands.find((command) => command.name === 'epadd');\nconst appEmojiListCommand = applicationCommands.find((command) => command.name === 'list-emojis');
 assert.ok(serverEmojiCommand && !serverEmojiCommand.owner, 'eadd must remain the server emoji command');
 assert.match(serverEmojiCommand.desc, /this server/i);
 assert.ok(appEmojiCommand?.owner, 'epadd application emoji upload must be owner-only');
@@ -20,7 +20,7 @@ assert.equal(appEmojiCommand.opts[0].n, 'source', 'The emoji source must be the 
 assert.equal(appEmojiCommand.opts[0].req, true);
 assert.equal(appEmojiCommand.opts[1].n, 'name');
 assert.equal(appEmojiCommand.opts[1].req, true, 'Emoji name is required in epadd <emoji> <name> syntax');
-assert.match(appEmojiCommand.desc, /application emojis/i);
+assert.match(appEmojiCommand.desc, /application emojis/i);\nassert.ok(appEmojiListCommand?.owner && appEmojiListCommand.custom && appEmojiListCommand.ephemeral, 'Application emoji listing must be owner-only, interactive and private');
 assert.equal(appEmojiTools.sourceUrl('<:hello:123456789012345678>').pathname, '/emojis/123456789012345678.png');
 assert.equal(appEmojiTools.sourceUrl('<a:hello:123456789012345678>').pathname, '/emojis/123456789012345678.gif');
 assert.equal(appEmojiTools.sourceUrl('😎').hostname, 'cdn.jsdelivr.net');
@@ -107,7 +107,7 @@ for (const [shortcut, expected] of [['add','grant'],['remove','revoke'],['check'
   assert.equal(hit.used, 2);
 }
 const catalog = require('../commands.json');
-assert.equal(catalog.total, 375, 'Published catalog total must match the implemented command set');
+assert.equal(catalog.total, 376, 'Published catalog total must match the implemented command set');
 assert.equal(catalog.categories.length, 20, 'Every command category must be published');
 for (const entry of catalog.categories) {
   const source = require('../commands/' + entry.name);
@@ -247,8 +247,8 @@ for (const category of allCommandCategories) {
     routedCommandCount += 1;
   }
 }
-assert.equal(routedCommandCount, 375, 'Every one of the 375 commands must have a working full prefix route');
-console.log('All 374 full-name and available short-category prefix routes passed.');
+assert.equal(routedCommandCount, 376, 'Every one of the 376 commands must have a working full prefix route');
+console.log('All 376 full-name and available short-category prefix routes passed.');
 
 // Prefix and no-prefix messages share the same command parser after the prefix gate.
 for (const category of allCommandCategories) {
