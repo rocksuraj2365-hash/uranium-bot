@@ -110,7 +110,7 @@ for (const [shortcut, expected] of [['add','grant'],['remove','revoke'],['check'
   assert.equal(hit.used, 2);
 }
 const catalog = require('../commands.json');
-assert.equal(catalog.total, 376, 'Published catalog total must match the implemented command set');
+assert.equal(catalog.total, 383, 'Published catalog total must match the implemented command set');
 assert.equal(catalog.categories.length, 20, 'Every command category must be published');
 for (const entry of catalog.categories) {
   const source = require('../commands/' + entry.name);
@@ -250,8 +250,8 @@ for (const category of allCommandCategories) {
     routedCommandCount += 1;
   }
 }
-assert.equal(routedCommandCount, 376, 'Every one of the 376 commands must have a working full prefix route');
-console.log('All 376 full-name and available short-category prefix routes passed.');
+assert.equal(routedCommandCount, 383, 'Every one of the 383 commands must have a working full prefix route');
+console.log('All 383 full-name and available short-category prefix routes passed.');
 
 // Prefix and no-prefix messages share the same command parser after the prefix gate.
 for (const category of allCommandCategories) {
@@ -273,7 +273,7 @@ for (const page of ['guide', 'moderation', 'protection', 'permissions', 'premium
 for (const label of ['**Slash**', '**Prefix**', '**No-prefix**', 'Prev page', 'Next page', 'Back to list', 'Find a Uranium command']) {
   assert.ok(helpSource.includes(label), 'Help panel missing interactive command detail: ' + label);
 }
-console.log('All 375 commands expose slash, prefix and no-prefix usage in the interactive help panel.');
+console.log('All 382 commands expose slash, prefix and no-prefix usage in the interactive help panel.');
 
 // Gateway startup must accept shardReady while the full client guild cache hydrates.
 async function testGatewayReadyFallback() {
