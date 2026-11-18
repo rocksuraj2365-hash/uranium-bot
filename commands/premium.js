@@ -267,7 +267,7 @@ module.exports = {
       const emoji = await app.emojis.create({ attachment: image.bytes, name });
       return own('Application emoji uploaded', `${emoji} \`:${emoji.name}:\` is now stored in **Uranium → Developer Portal → Emojis**.`, {
         icon: '😀',
-        fields: [['Name', `\`:${emoji.name}:\`, true], ['Type', image.animated || emoji.animated ? 'Animated' : 'Static', true], ['File size', `${image.bytes.length} / 262,144 bytes`, true]]
+        fields: [['Name', `:${emoji.name}:`, true], ['Type', image.animated || emoji.animated ? 'Animated' : 'Static', true], ['File size', `${image.bytes.length} / 262,144 bytes`, true]]
       });
     }, { ...O, ephemeral: true }),
     C('embed-builder', 'Premium: build and send a custom embed with buttons', [CH('channel', 'Where to send (default: here)')], null, builder, { ...PREMIUM_ACCESS, custom: true }),
