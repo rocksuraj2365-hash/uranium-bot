@@ -75,6 +75,18 @@ async function extraOwnerList(ctx) {
   if (!isSecurityManager(ctx)) throw new UserError('Only the server owner or an Extra Owner can view the Extra Owner list.');
   return securityTrustList(ctx, 'securityExtraOwners', 'Extra Owners');
 }
+async function trust(ctx) {
+  const type = ctx.s('type');
+  const action = ctx.s('action');
+  if (type === 'whitelist') {
+    if (action === 'add') return whitelistAdd(ctx);
+    if (action === 'remove') return whitelistRemove(ctx);
+    return whitelistList(ctx);
+  }
+  if (action === 'add') return extraOwnerAdd(ctx);
+  if (action === 'remove') return extraOwnerRemove(ctx);
+  return extraOwnerList(ctx);
+}
 const flags = [
   ['Administrator', P.Administrator], ['Manage Server', P.ManageGuild],
   ['Manage Roles', P.ManageRoles], ['Manage Channels', P.ManageChannels],
@@ -391,12 +403,7 @@ module.exports = {
   name:'security',
   description:'Server security, permission reviews, audit intelligence and protection controls.',
   commands:[
-    C('whitelist-add','Add a trusted user to this server’s security whitelist',[U(true,'user','User to trust')],null,whitelistAdd),
-    C('whitelist-remove','Remove a user from this server’s security whitelist',[U(true,'user','User to remove')],null,whitelistRemove),
-    C('whitelist-list','Show this server’s security whitelist',[],null,whitelistList),
-    C('extraowner-add','Server owner: delegate Uranium security management to a user',[U(true,'user','New Extra Owner')],null,extraOwnerAdd),
-    C('extraowner-remove','Server owner: revoke a user’s Extra Owner access',[U(true,'user','Extra Owner to remove')],null,extraOwnerRemove),
-    C('extraowner-list','Show this server’s delegated Extra Owners',[],null,extraOwnerList),
+    C('trust','Manage the server security whitelist and delegated Extra Owners',[S('type','whitelist or extraowner',true,{ choices:['whitelist','extraowner'] }),S('action','add, remove or list',true,{ choices:['add','remove','list'] }),U(false,'user','User to add or remove')],null,trust),
     C('fortress','Enable or manage Uranium maximum server protection',[{ n:'mode', d:'on, off, or status', t:'str', req:false, choices:['on','off','status'] }],P.ManageGuild,fortressCommand),
     C('scan','Scan roles and channel overrides for sensitive permissions',[],null,scan),
     C('audit','Premium: review recent server audit-log activity',[],P.ViewAuditLog,audit,PREMIUM),
@@ -410,7 +417,6 @@ module.exports = {
     C('lockdown','Premium: lock this text channel and save its previous permission',[],P.ManageChannels,lockdown,PREMIUM),
     C('unlockdown','Premium: restore the channel permission saved by Uranium',[],P.ManageChannels,unlockdown,PREMIUM),
     C('slowmode','Premium: set slowmode in this channel',[I('seconds','Seconds (0-21600)',true,0,21600)],P.ManageChannels,setSlowmode,PREMIUM),
-    C('slowmode-off','Premium: turn off slowmode in this channel',[],P.ManageChannels,async (c) => { if (!c.ch?.setRateLimitPerUser) throw new UserError('This channel does not support slowmode.'); await c.ch.setRateLimitPerUser(0,c.audit()); return res(title('Slowmode disabled'),'Slowmode is now off in this channel.',{icon:'✅'}); },PREMIUM),
     C('role-audit','Premium: list roles with sensitive permissions',[],null,roleAudit,PREMIUM),
     C('admin-audit','Premium: list every role with Administrator permission',[],null,adminAudit,PREMIUM),
     C('channel-audit','Premium: inspect explicit sensitive @everyone channel grants',[],null,channelAudit,PREMIUM),
