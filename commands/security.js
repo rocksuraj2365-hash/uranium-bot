@@ -6,7 +6,75 @@ const fortress = require('../lib/fortress');
 const securityChecklist = require('../lib/security-checklist');
 const PREMIUM = { premium: true };
 const title = (name) => '☢ Uranium Security • ' + name;
-function requireManager(ctx) { if (!ctx.i.memberPermissions.has(P.ManageGuild)) throw new UserError('You need Manage Server permission to use this security tool.'); }
+function isSecurityManager(ctx) {
+  const id = String(ctx.i.user.id);
+  const cfg = db.g(ctx.g.id).config;
+  return id === String(ctx.g.ownerId) || !!ctx.isOwner || (cfg.securityExtraOwners || []).map(String).includes(id);
+}
+function requireManager(ctx) {
+  if (!ctx.i.memberPermissions.has(P.ManageGuild) && !isSecurityManager(ctx)) {
+    throw new UserError('You need Manage Server permission or server-owner delegated security access to use this tool.');
+  }
+}
+function requireOwnerForExtraOwners(ctx) {
+  if (String(ctx.i.user.id) !== String(ctx.g.ownerId) && !ctx.isOwner) {
+    throw new UserError('Only this Discord server owner or the Uranium bot owner can manage Extra Owners.');
+  }
+}
+function canManageSecurityTrust(ctx) {
+  if (!isSecurityManager(ctx)) throw new UserError('Only the server owner or a configured Extra Owner can manage the security trust list.');
+}
+function securityTrustList(ctx, key, label) {
+  const ids = [...new Set((db.g(ctx.g.id).config[key] || []).map(String))];
+  const body = ids.length ? ids.map(id => '• <@' + id + '> • ID: ' + id).join('\n') : 'No users are configured.';
+  return res(title(label), body, { icon:'🔐', fields:[['Trusted users',String(ids.length),true]] });
+}
+async function whitelistAdd(ctx) {
+  canManageSecurityTrust(ctx);
+  const user = ctx.u('user');
+  if (!user || user.bot) throw new UserError('Choose a valid non-bot Discord user.');
+  const cfg = db.g(ctx.g.id).config;
+  cfg.securityWhitelist = [...new Set([...(cfg.securityWhitelist || []).map(String), user.id])];
+  db.save();
+  return res(title('Whitelist updated'), 'Added <@' + user.id + '> to this server’s security whitelist. They are exempt from Uranium Fortress anti-nuke actor alerts and spam sanctions.', { icon:'✅' });
+}
+async function whitelistRemove(ctx) {
+  canManageSecurityTrust(ctx);
+  const user = ctx.u('user');
+  if (!user) throw new UserError('Choose a Discord user to remove.');
+  const cfg = db.g(ctx.g.id).config;
+  const before = cfg.securityWhitelist || [];
+  cfg.securityWhitelist = before.filter(id => String(id) !== user.id);
+  db.save();
+  return res(title('Whitelist updated'), before.length === cfg.securityWhitelist.length ? 'That user was not on this server’s whitelist.' : 'Removed <@' + user.id + '> from the security whitelist.', { icon:'🧹' });
+}
+async function whitelistList(ctx) {
+  canManageSecurityTrust(ctx);
+  return securityTrustList(ctx, 'securityWhitelist', 'Security whitelist');
+}
+async function extraOwnerAdd(ctx) {
+  requireOwnerForExtraOwners(ctx);
+  const user = ctx.u('user');
+  if (!user || user.bot || user.id === ctx.g.ownerId) throw new UserError('Choose a valid non-bot user other than the server owner.');
+  const cfg = db.g(ctx.g.id).config;
+  cfg.securityExtraOwners = [...new Set([...(cfg.securityExtraOwners || []).map(String), user.id])];
+  db.save();
+  return res(title('Extra Owner added'), '<@' + user.id + '> can now manage this server’s Uranium security settings. Only the server owner can appoint or remove Extra Owners.', { icon:'👑' });
+}
+async function extraOwnerRemove(ctx) {
+  requireOwnerForExtraOwners(ctx);
+  const user = ctx.u('user');
+  if (!user) throw new UserError('Choose an Extra Owner to remove.');
+  const cfg = db.g(ctx.g.id).config;
+  const before = cfg.securityExtraOwners || [];
+  cfg.securityExtraOwners = before.filter(id => String(id) !== user.id);
+  db.save();
+  return res(title('Extra Owner updated'), before.length === cfg.securityExtraOwners.length ? 'That user was not an Extra Owner.' : 'Removed <@' + user.id + '> from Extra Owners.', { icon:'🧹' });
+}
+async function extraOwnerList(ctx) {
+  if (!isSecurityManager(ctx)) throw new UserError('Only the server owner or an Extra Owner can view the Extra Owner list.');
+  return securityTrustList(ctx, 'securityExtraOwners', 'Extra Owners');
+}
 const flags = [
   ['Administrator', P.Administrator], ['Manage Server', P.ManageGuild],
   ['Manage Roles', P.ManageRoles], ['Manage Channels', P.ManageChannels],
@@ -323,6 +391,12 @@ module.exports = {
   name:'security',
   description:'Server security, permission reviews, audit intelligence and protection controls.',
   commands:[
+    C('whitelist-add','Add a trusted user to this server’s security whitelist',[U(true,'user','User to trust')],null,whitelistAdd),
+    C('whitelist-remove','Remove a user from this server’s security whitelist',[U(true,'user','User to remove')],null,whitelistRemove),
+    C('whitelist-list','Show this server’s security whitelist',[],null,whitelistList),
+    C('extraowner-add','Server owner: delegate Uranium security management to a user',[U(true,'user','New Extra Owner')],null,extraOwnerAdd),
+    C('extraowner-remove','Server owner: revoke a user’s Extra Owner access',[U(true,'user','Extra Owner to remove')],null,extraOwnerRemove),
+    C('extraowner-list','Show this server’s delegated Extra Owners',[],null,extraOwnerList),
     C('fortress','Enable or manage Uranium maximum server protection',[{ n:'mode', d:'on, off, or status', t:'str', req:false, choices:['on','off','status'] }],P.ManageGuild,fortressCommand),
     C('scan','Scan roles and channel overrides for sensitive permissions',[],null,scan),
     C('audit','Premium: review recent server audit-log activity',[],P.ViewAuditLog,audit,PREMIUM),

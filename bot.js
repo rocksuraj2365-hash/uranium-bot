@@ -242,7 +242,8 @@ async function execute(i, cat, def) {
     if (def.premium && !premium.hasAccess(i.guildId, i.user.id)) throw new UserError('💎 This server feature requires Premium access.', 'Only the bot owner can grant it with `/license grant` or `!premium add @member`.');
     const me = await i.guild.members.fetchMe();
     if (def.perm) {
-      if (!i.memberPermissions.has(def.perm)) throw new UserError(`You need the **${permName(def.perm)}** permission to use \`${label}\`.`, 'Ask a server admin to give you that permission or a role that has it.');
+      const securityExtraOwner = cat.name === 'security' && (db.g(i.guildId).config.securityExtraOwners || []).map(String).includes(String(i.user.id));
+      if (!i.memberPermissions.has(def.perm) && !securityExtraOwner && !isOwner(i.user.id) && String(i.user.id) !== String(i.guild.ownerId)) throw new UserError(`You need the **${permName(def.perm)}** permission to use \`${label}\`.`, 'Ask a server admin to give you that permission or have the server owner delegate security access.');
       if (!me.permissions.has(def.perm)) throw new UserError(`I (Uranium) am missing the **${permName(def.perm)}** permission.`, 'Give my role that permission in Server Settings → Roles. Run the setup check to see everything I need.');
     }
     const c = ctx(i, me);
