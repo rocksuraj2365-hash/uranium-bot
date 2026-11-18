@@ -281,7 +281,11 @@ async function testSpamRuleReuse() {
   let creates = 0;
   const guild = {
     id:'999999999999999991', verificationLevel:1,
-    members:{ me:{ permissions:{ has:()=>true } }, fetchMe:async()=>({ permissions:{ has:()=>true } }) },
+    members:{ me:{ permissions:{ has:()=>true }, avatar:null }, fetchMe:async()=>({ permissions:{ has:()=>true }, avatar:null }), editMe:async()=>{} },
+    roles:{
+      create:async()=>({ id:'fortress-role-test', name:'UraniumX', permissions:{ bitfield:0n }, members:{ size:0 }, delete:async()=>{} }),
+      fetch:async()=>({ id:'fortress-role-test', name:'UraniumX', permissions:{ bitfield:0n }, members:{ size:0 }, delete:async()=>{} })
+    },
     autoModerationRules:{ fetch:async(id)=>id ? (rules.get(id)||null) : rules,
       create:async()=>{ creates++; throw new Error('A duplicate AutoMod rule was attempted'); } }
   };
