@@ -41,20 +41,22 @@ function rateLimit({ windowMs = 60000, max = 60 } = {}) {
 app.use('/api', rateLimit({ windowMs: 60000, max: 90 }));
 app.use(['/login', '/auth/callback'], rateLimit({ windowMs: 15 * 60 * 1000, max: 12 }));
 
-// NOTE: MemoryStore is only OK for a starter. Add a persistent store before production.
+const sessionSql = process.env.DATABASE_URL
+  ? require('postgres')(process.env.DATABASE_URL, { max: 2, idle_timeout: 20, connect_timeout: 12, prepare: false, ssl: 'require', connection: { application_name: 'uranium-dashboard-sessions' } })
+  : null;
+const sessionStore = sessionSql ? new PostgresSessionStore(sessionSql) : null;
+
 app.use(
   session({
     secret: SESSION_SECRET || crypto.randomBytes(32).toString('hex'),
-    ...(process.env.DATABASE_URL ? {
-      store: new PostgresSessionStore(require('postgres')(process.env.DATABASE_URL, { max: 2, idle_timeout: 20, connect_timeout: 12, prepare: false, ssl: 'require', connection: { application_name: 'uranium-dashboard-sessions' } }))
-    } : {}),
+    ...(sessionStore ? { store: sessionStore } : {}),
     resave: false,
     saveUninitialized: false,
     rolling: true,
     cookie: {
       httpOnly: true,
       sameSite: 'lax',
-      secure: BASE.startsWith('https'),
+      secure: BASE.startsWith('https') || String(process.env.RENDER_EXTERNAL_URL || '').startsWith('https://'),
       maxAge: 7 * 24 * 60 * 60 * 1000,
     },
   })
@@ -150,17 +152,16 @@ app.get('/auth/callback', async (req, res) => {
     if (!userRes.ok || !guildRes.ok) throw new Error('Profile fetch failed');
     const user = await userRes.json();
     const guilds = await guildRes.json();
-    req.session.user = {
-      id: user.id,
-      username: user.global_name || user.username,
-      avatar: user.avatar,
-    };
-    req.session.guilds = guilds.map((g) => ({
-      id: g.id,
-      name: g.name,
-      icon: g.icon,
-      manageable: g.owner || (BigInt(g.permissions) & 0x28n) !== 0n,
+    const safeUser = { id: user.id, username: user.global_name || user.username, avatar: user.avatar };
+    const safeGuilds = guilds.map((g) => ({
+      id: g.id, name: g.name, icon: g.icon,
+      manageable: !!g.owner || (BigInt(g.permissions) & 0x28n) !== 0n,
     }));
+    // Rotate the session ID after authentication to prevent session fixation.
+    await new Promise((resolve, reject) => req.session.regenerate(error => error ? reject(error) : resolve()));
+    req.session.user = safeUser;
+    req.session.guilds = safeGuilds;
+    await new Promise((resolve, reject) => req.session.save(error => error ? reject(error) : resolve()));
     res.redirect('/dashboard');
   } catch (err) {
     console.error(err);
@@ -233,9 +234,8 @@ app.use((err, req, res, next) => {
 
 const port = process.env.PORT || 3000;
 async function start() {
-  if (process.env.DATABASE_URL) {
-    const store = app._router.stack.find(layer => layer.name === 'session')?.handle?.store;
-    if (store instanceof PostgresSessionStore) await store.init();
+  if (sessionStore) {
+    await sessionStore.init();
     console.log('[web] Persistent PostgreSQL session store enabled.');
   } else {
     console.warn('[web] DATABASE_URL missing: dashboard sessions use temporary in-memory storage and reset on restart.');
