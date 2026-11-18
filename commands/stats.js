@@ -8,15 +8,37 @@ const bucket = (g,t) => { const s=statsOf(g), k=dayKey(t); s.days[k] ||= {joins:
 const afkStore = (id) => { const d=db.g(id); d.afkUsers ||= {}; return d.afkUsers; };
 const fmt = (n) => { const h=Math.floor(n/3600),m=Math.floor(n%3600/60); return h ? h+'h '+m+'m' : m+'m'; };
 async function ask(c,prompt,choices) {
-  await c.i.channel.send(prompt+'\n'+choices);
-  const got=await c.i.channel.awaitMessages({filter:m=>m.author.id===c.i.user.id&&!m.author.bot,max:1,time:60000,errors:['time']});
-  return got.first().content.trim().toLowerCase();
+  const options = choices.map((value) => ({
+    type: 2, style: value === 'cancel' ? 2 : 1,
+    label: value === 'cancel' ? 'Cancel' : value[0].toUpperCase() + value.slice(1),
+    custom_id: 'afk:' + value
+  }));
+  const sent = await c.i.channel.send({
+    content: prompt,
+    components: [{ type: 1, components: options }]
+  });
+  try {
+    const picked = await sent.awaitMessageComponent({
+      filter: (interaction) => interaction.user.id === c.i.user.id && interaction.customId.startsWith('afk:'),
+      time: 60000
+    });
+    await picked.deferUpdate();
+    await sent.edit({ components: [] }).catch(() => {});
+    const value = picked.customId.slice(4);
+    if (value === 'cancel') throw new UserError('AFK setup cancelled.', 'Nothing was changed.');
+    return value;
+  } catch (error) {
+    await sent.edit({ components: [] }).catch(() => {});
+    if (error instanceof UserError) throw error;
+    if (error?.message === 'time') throw new UserError('AFK setup timed out.', 'Run !afk again and choose an option within 60 seconds.');
+    throw error;
+  }
 }
 async function setAfk(c) {
   const reason=String(c.s('reason')||'AFK').slice(0,120);
-  const scope=await ask(c,'🌙 Should AFK apply only here or everywhere?','Reply server or global.');
+  const scope=await ask(c,'🌙 Should AFK apply only here or everywhere?',['server','global','cancel']);
   if(!['server','global'].includes(scope)) throw new UserError('AFK setup cancelled','Reply server or global.');
-  const dm=await ask(c,'📩 DM you when someone mentions you?','Reply on or off.');
+  const dm=await ask(c,'📩 DM you when someone mentions you?',['on','off','cancel']);
   if(!['on','off'].includes(dm)) throw new UserError('AFK setup cancelled','Reply on or off.');
   const global=scope==='global', key=global?'__global':c.g.id, nicknames={};
   const store=afkStore(key);
