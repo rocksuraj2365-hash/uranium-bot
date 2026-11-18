@@ -12,7 +12,9 @@ const { startRenderKeepAlive, DEFAULT_INTERVAL_MS } = require('../lib/render-kee
 const appEmojiTools = require('../lib/application-emojis');
 const premiumCommands = require('../commands/premium').commands;
 const serverEmojiCommand = premiumCommands.find((command) => command.name === 'emoji-add');
-const applicationCommands = require('../commands/application').commands;\nconst appEmojiCommand = applicationCommands.find((command) => command.name === 'epadd');\nconst appEmojiListCommand = applicationCommands.find((command) => command.name === 'list-emojis');
+const applicationCommands = require('../commands/application').commands;
+const appEmojiCommand = applicationCommands.find((command) => command.name === 'epadd');
+const appEmojiListCommand = applicationCommands.find((command) => command.name === 'list-emojis');
 assert.ok(serverEmojiCommand && !serverEmojiCommand.owner, 'eadd must remain the server emoji command');
 assert.match(serverEmojiCommand.desc, /this server/i);
 assert.ok(appEmojiCommand?.owner, 'epadd application emoji upload must be owner-only');
@@ -20,7 +22,8 @@ assert.equal(appEmojiCommand.opts[0].n, 'source', 'The emoji source must be the 
 assert.equal(appEmojiCommand.opts[0].req, true);
 assert.equal(appEmojiCommand.opts[1].n, 'name');
 assert.equal(appEmojiCommand.opts[1].req, true, 'Emoji name is required in epadd <emoji> <name> syntax');
-assert.match(appEmojiCommand.desc, /application emojis/i);\nassert.ok(appEmojiListCommand?.owner && appEmojiListCommand.custom && appEmojiListCommand.ephemeral, 'Application emoji listing must be owner-only, interactive and private');
+assert.match(appEmojiCommand.desc, /application emojis/i);
+assert.ok(appEmojiListCommand?.owner && appEmojiListCommand.custom && appEmojiListCommand.ephemeral, 'Application emoji listing must be owner-only, interactive and private');
 assert.equal(appEmojiTools.sourceUrl('<:hello:123456789012345678>').pathname, '/emojis/123456789012345678.png');
 assert.equal(appEmojiTools.sourceUrl('<a:hello:123456789012345678>').pathname, '/emojis/123456789012345678.gif');
 assert.equal(appEmojiTools.sourceUrl('😎').hostname, 'cdn.jsdelivr.net');
@@ -142,7 +145,7 @@ for (const def of security.commands) {
   assert.ok(hit, 'Security prefix route missing: ' + def.name);
   assert.equal(hit.cat, security);
   assert.equal(hit.def, def);
-  if (!['fortress','scan','report'].includes(def.name)) assert.equal(def.premium, true, 'Only the core Fortress, scan and 100-point report are free security commands');
+  if (!['fortress','scan','report','trust'].includes(def.name)) assert.equal(def.premium, true, 'Only the core Fortress, scan and 100-point report are free security commands');
 }
 const templateHit = prefix.resolve(prefix.tokenize('template support'));
 assert.ok(templateHit, 'Support template prefix command must resolve');

@@ -2559,6 +2559,13 @@
       "description": "Server security, permission reviews, audit intelligence and protection controls.",
       "commands": [
         {
+          "name": "trust",
+          "description": "Manage the server security whitelist and delegated Extra Owners",
+          "slash": "/security trust",
+          "prefix": "!security trust",
+          "access": "Available to the server owner or delegated Extra Owners"
+        },
+        {
           "name": "fortress",
           "description": "Enable or manage Uranium maximum server protection",
           "slash": "/security fortress",
@@ -2640,13 +2647,6 @@
           "description": "Premium: set slowmode in this channel",
           "slash": "/security slowmode",
           "prefix": "!security slowmode",
-          "access": "Premium access required"
-        },
-        {
-          "name": "slowmode-off",
-          "description": "Premium: turn off slowmode in this channel",
-          "slash": "/security slowmode-off",
-          "prefix": "!security slowmode-off",
           "access": "Premium access required"
         },
         {
@@ -2756,4 +2756,4 @@
       ]
     }
   ]
-}\n
+}
