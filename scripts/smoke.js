@@ -11,15 +11,19 @@ const { friendlyDiscordError } = require('../lib/ui');
 const { startRenderKeepAlive, DEFAULT_INTERVAL_MS } = require('../lib/render-keepalive');
 const appEmojiTools = require('../lib/application-emojis');
 const premiumCommands = require('../commands/premium').commands;
-const appEmojiCommand = premiumCommands.find((command) => command.name === 'emoji-add');
-assert.ok(appEmojiCommand?.owner, 'Application emoji upload must be owner-only');
-assert.equal(appEmojiCommand.opts[0].n, 'source', 'The image link must be the only required input');
+const serverEmojiCommand = premiumCommands.find((command) => command.name === 'emoji-add');
+const appEmojiCommand = require('../commands/application').commands.find((command) => command.name === 'epadd');
+assert.ok(serverEmojiCommand && !serverEmojiCommand.owner, 'eadd must remain the server emoji command');
+assert.match(serverEmojiCommand.desc, /this server/i);
+assert.ok(appEmojiCommand?.owner, 'epadd application emoji upload must be owner-only');
+assert.equal(appEmojiCommand.opts[0].n, 'source', 'The emoji source must be the first input');
 assert.equal(appEmojiCommand.opts[0].req, true);
 assert.equal(appEmojiCommand.opts[1].n, 'name');
-assert.equal(appEmojiCommand.opts[1].req, false, 'Emoji name must be optional');
+assert.equal(appEmojiCommand.opts[1].req, true, 'Emoji name is required in epadd <emoji> <name> syntax');
 assert.match(appEmojiCommand.desc, /application emojis/i);
 assert.equal(appEmojiTools.sourceUrl('<:hello:123456789012345678>').pathname, '/emojis/123456789012345678.png');
 assert.equal(appEmojiTools.sourceUrl('<a:hello:123456789012345678>').pathname, '/emojis/123456789012345678.gif');
+assert.equal(appEmojiTools.sourceUrl('😎').hostname, 'cdn.jsdelivr.net');
 assert.equal(appEmojiTools.deriveEmojiName(new URL('https://images.example.org/Some-Emoji.gif?x=1')), 'some_emoji');
 assert.equal(appEmojiTools.normalizeEmojiName('My Emoji!!', 'fallback'), 'my_emoji');
 assert.equal(appEmojiTools.imageType(Buffer.from('GIF89a000000')), 'image/gif');
@@ -103,8 +107,8 @@ for (const [shortcut, expected] of [['add','grant'],['remove','revoke'],['check'
   assert.equal(hit.used, 2);
 }
 const catalog = require('../commands.json');
-assert.equal(catalog.total, 374, 'Published catalog total must match the implemented command set');
-assert.equal(catalog.categories.length, 19, 'Every command category must be published');
+assert.equal(catalog.total, 375, 'Published catalog total must match the implemented command set');
+assert.equal(catalog.categories.length, 20, 'Every command category must be published');
 for (const entry of catalog.categories) {
   const source = require('../commands/' + entry.name);
   assert.ok(source.commands.length <= 25, entry.name + ' exceeds Discord subcommand limit');
@@ -215,13 +219,14 @@ async function testSharedRenderer() {
   assert.ok(sent.components[0].components.some((part) => part.type === 13), 'Attachment results must use a V2 File component');
 }
 testSharedRenderer().then(() => console.log('Shared Components V2 command renderer checks passed.')).catch((error) => { console.error(error); process.exitCode = 1; });
-// Rebuild the actual 19-category router and verify every published command resolves.
+// Rebuild the actual command router and verify every published command resolves.
 const allCommandCategories = catalog.categories.map((entry) => {
   const category = require('../commands/' + entry.name);
   category.map = new Map(category.commands.map((command) => [command.name, command]));
   return category;
 });
 prefix.init(allCommandCategories);
+assert.equal(prefix.resolve(prefix.tokenize('epadd 😎 cool')).cat.name, 'application', 'epadd emoji-name prefix syntax must resolve');
 let routedCommandCount = 0;
 for (const category of allCommandCategories) {
   for (const command of category.commands) {
@@ -242,7 +247,7 @@ for (const category of allCommandCategories) {
     routedCommandCount += 1;
   }
 }
-assert.equal(routedCommandCount, 374, 'Every one of the 374 commands must have a working full prefix route');
+assert.equal(routedCommandCount, 375, 'Every one of the 375 commands must have a working full prefix route');
 console.log('All 374 full-name and available short-category prefix routes passed.');
 
 // Prefix and no-prefix messages share the same command parser after the prefix gate.
@@ -265,7 +270,7 @@ for (const page of ['guide', 'moderation', 'protection', 'permissions', 'premium
 for (const label of ['**Slash**', '**Prefix**', '**No-prefix**', 'Prev page', 'Next page', 'Back to list', 'Find a Uranium command']) {
   assert.ok(helpSource.includes(label), 'Help panel missing interactive command detail: ' + label);
 }
-console.log('All 374 commands expose slash, prefix and no-prefix usage in the interactive help panel.');
+console.log('All 375 commands expose slash, prefix and no-prefix usage in the interactive help panel.');
 
 // Gateway startup must accept shardReady while the full client guild cache hydrates.
 async function testGatewayReadyFallback() {

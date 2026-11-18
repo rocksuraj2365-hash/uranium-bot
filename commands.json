@@ -1,7 +1,7 @@
 {
   "version": 1,
   "generatedFrom": "commands/*.js",
-  "total": 374,
+  "total": 375,
   "categories": [
     {
       "name": "member",
@@ -1665,10 +1665,10 @@
         },
         {
           "name": "emoji-add",
-          "description": "Owner only: upload a linked emoji to Uranium application emojis",
+          "description": "Premium: add an emoji to this server",
           "slash": "/premium emoji-add",
           "prefix": "!premium emoji-add",
-          "access": "Owner only"
+          "access": "ManageGuildExpressions"
         },
         {
           "name": "embed-builder",
@@ -2732,6 +2732,19 @@
           "slash": "/security alert-test",
           "prefix": "!security alert-test",
           "access": "Premium access required"
+        }
+      ]
+    },
+    {
+      "name": "application",
+      "description": "Uranium application management commands.",
+      "commands": [
+        {
+          "name": "epadd",
+          "description": "Owner only: upload a Unicode or Discord emoji to Uranium application emojis",
+          "slash": "/application epadd",
+          "prefix": "!epadd",
+          "access": "Owner only"
         }
       ]
     }
