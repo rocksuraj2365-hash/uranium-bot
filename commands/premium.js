@@ -255,7 +255,7 @@ module.exports = {
     }, PREMIUM_ACCESS),
     C('epadd', 'Owner only: upload a linked emoji to Uranium application emojis', [S('source', 'Direct HTTPS image URL or Discord emoji link', true, { max: 500 }), S('name', 'Optional name; defaults from the link', false, { max: 32 })], null, async (c) => {
       const source = c.s('source').trim();
-      const customMention = /^<a?:([a-zA-Z0-9_]{2,32}):(\\d{17,20})>$/.exec(source);
+      const customMention = /^<a?:([a-zA-Z0-9_]{2,32}):([0-9]{17,20})>$/.exec(source);
       const sourceLink = appEmojiTools.sourceUrl(source);
       const image = await appEmojiTools.fetchEmojiImage(source);
       const name = appEmojiTools.normalizeEmojiName(c.s('name'), customMention?.[1] || appEmojiTools.deriveEmojiName(sourceLink));
