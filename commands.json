@@ -1,7 +1,7 @@
 {
   "version": 1,
   "generatedFrom": "commands/*.js",
-  "total": 376,
+  "total": 383,
   "categories": [
     {
       "name": "member",
