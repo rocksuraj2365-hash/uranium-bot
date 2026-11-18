@@ -120,7 +120,7 @@ async function fortressCommand(c) {
   if (mode === 'status') {
     const state = db.g(c.g.id).config.fortress;
     return res(title('Fortress status'), state?.enabled
-      ? '🛡️ **MAXIMUM PROTECTION ACTIVE**\\nJoin-rate monitoring, spam detection and Discord AutoMod safeguards are enabled.'
+      ? '🛡️ **MAXIMUM PROTECTION ACTIVE**\\nJoin-rate monitoring, spam detection and Discord AutoMod safeguards are enabled.\\n**UraniumX role:** ' + (state.fortressRoleId ? '<@&' + state.fortressRoleId + '>' : 'Not recorded') + '\\n**Server MAX avatar:** ' + (state.avatarChanged ? 'Active' : 'Not configured')
       : 'Fortress protection is currently off. Run `!fortress` to enable it.', { icon: state?.enabled ? '🛡️' : '🔎' });
   }
   if (mode === 'off') {
@@ -134,6 +134,7 @@ async function fortressCommand(c) {
     ['Discord AutoMod', 'Spam and mention-spam rules', true],
     ['Sanctions', 'Message removal + short timeout for detected spam', true],
     ['DM notices', 'Attempts to notify sanctioned members', true],
+    ['UraniumX identity', 'Dark-red server role created; server-only MAX avatar when configured', true],
   ] });
 }
 
