@@ -323,7 +323,7 @@ module.exports = {
   description:'Server security, permission reviews, audit intelligence and protection controls.',
   commands:[
     C('fortress','Enable or manage Uranium maximum server protection',[{ n:'mode', d:'on, off, or status', t:'str', req:false, choices:['on','off','status'] }],P.ManageGuild,fortressCommand),
-    C('scan','Premium: scan roles and channel overrides for sensitive permissions',[],null,scan,PREMIUM),
+    C('scan','Scan roles and channel overrides for sensitive permissions',[],null,scan),
     C('audit','Premium: review recent server audit-log activity',[],P.ViewAuditLog,audit,PREMIUM),
     C('invites','Premium: inspect active server invites and usage limits',[],P.ManageGuild,invites,PREMIUM),
     C('webhooks','Premium: inventory server webhooks without exposing tokens',[],P.ManageWebhooks,webhooks,PREMIUM),
@@ -344,7 +344,7 @@ module.exports = {
     C('invite-audit','Premium: review active invites, creators, limits and expiry',[],P.ManageGuild,inviteAudit,PREMIUM),
     C('webhook-audit','Premium: review webhook names, channels and owners without tokens',[],P.ManageWebhooks,webhookAudit,PREMIUM),
     C('baseline-clear','Premium: remove the saved security comparison snapshot',[],null,clearBaseline,{...PREMIUM,danger:'This removes the saved security baseline. It does not change server settings.'}),
-    C('report','Premium: create a compact overview of important server security settings',[],null,securityReport,PREMIUM),
+    C('report','Run the 100-point server security audit',[],null,securityReport),
     C('modlog-check','Premium: check whether Uranium can access the configured moderation log',[],null,modlogCheck,PREMIUM),
     C('permission-check','Premium: inspect sensitive permissions for a member in this channel',[U(false,'member','Member to inspect')],null,permissionCheck,PREMIUM),
     C('alert-test','Premium: send a test notice to the configured moderation log',[],P.ManageGuild,alertTest,PREMIUM),
