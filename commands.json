@@ -1,7 +1,7 @@
 {
   "version": 1,
   "generatedFrom": "commands/*.js",
-  "total": 375,
+  "total": 376,
   "categories": [
     {
       "name": "member",
@@ -2745,8 +2745,15 @@
           "slash": "/application epadd",
           "prefix": "!epadd",
           "access": "Owner only"
+        },
+        {
+          "name": "list-emojis",
+          "description": "Owner only: view every Uranium application emoji",
+          "slash": "/application list-emojis",
+          "prefix": "!appemojis",
+          "access": "Owner only"
         }
       ]
     }
   ]
-}
+}\n
