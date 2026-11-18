@@ -14,7 +14,7 @@ const premiumCommands = require('../commands/premium').commands;
 const serverEmojiCommand = premiumCommands.find((command) => command.name === 'emoji-add');
 const appEmojiCommand = require('../commands/application').commands.find((command) => command.name === 'epadd');
 assert.ok(serverEmojiCommand && !serverEmojiCommand.owner, 'eadd must remain the server emoji command');
-assert.match(serverEmojiCommand.desc, /current server/i);
+assert.match(serverEmojiCommand.desc, /this server/i);
 assert.ok(appEmojiCommand?.owner, 'epadd application emoji upload must be owner-only');
 assert.equal(appEmojiCommand.opts[0].n, 'source', 'The emoji source must be the first input');
 assert.equal(appEmojiCommand.opts[0].req, true);
