@@ -41,8 +41,9 @@ function rateLimit({ windowMs = 60000, max = 60 } = {}) {
 app.use('/api', rateLimit({ windowMs: 60000, max: 90 }));
 app.use(['/login', '/auth/callback'], rateLimit({ windowMs: 15 * 60 * 1000, max: 12 }));
 
-const sessionSql = process.env.DATABASE_URL
-  ? require('postgres')(process.env.DATABASE_URL, { max: 2, idle_timeout: 20, connect_timeout: 12, prepare: false, ssl: 'require', connection: { application_name: 'uranium-dashboard-sessions' } })
+const sessionDatabaseUrl = process.env.SESSION_DATABASE_URL || process.env.DATABASE_URL;
+const sessionSql = sessionDatabaseUrl
+  ? require('postgres')(sessionDatabaseUrl, { max: 2, idle_timeout: 20, connect_timeout: 12, prepare: false, ssl: 'require', connection: { application_name: 'uranium-dashboard-sessions' } })
   : null;
 const sessionStore = sessionSql ? new PostgresSessionStore(sessionSql) : null;
 
