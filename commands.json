@@ -1742,7 +1742,7 @@
         },
         {
           "name": "snipe",
-          "description": "Premium: see the last deleted message here",
+          "description": "Premium + Manage Messages: see the last deleted message here",
           "slash": "/premium snipe",
           "prefix": "!premium snipe",
           "access": "Premium access"
