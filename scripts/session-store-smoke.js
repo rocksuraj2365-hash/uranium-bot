@@ -16,7 +16,7 @@ async function main() {
   assert.equal(calls.length, 4, 'Initialization creates the schema, session table, index and removes expired rows');
   assert.match(calls[0].query, /CREATE SCHEMA IF NOT EXISTS uranium/);
   await new Promise((resolve, reject) => store.set('session-1', expected, error => error ? reject(error) : resolve()));
-  assert.equal(calls.length, 4, 'Session writes are persisted');
+  assert.equal(calls.length, 5, 'Session writes are persisted');
   const loaded = await new Promise((resolve, reject) => store.get('session-1', (error, value) => error ? reject(error) : resolve(value)));
   assert.equal(loaded.user.id, '123', 'Session reads return the stored session');
   await new Promise((resolve, reject) => store.touch('session-1', expected, error => error ? reject(error) : resolve()));
