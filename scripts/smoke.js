@@ -124,8 +124,9 @@ assert.equal(catalog.categories.length, 26, 'Every command category must be publ
 for (const entry of catalog.categories) {
   const source = require('../commands/' + entry.name);
   assert.ok(source.commands.length <= 25, entry.name + ' exceeds Discord subcommand limit');
-  assert.equal(entry.commands.length, source.commands.length, entry.name + ' catalog count mismatch');
-  const sourceByName = new Map(source.commands.map(command => [command.name, command]));
+  const publishedCommands = source.commands.filter(command => !command.custom);
+  assert.equal(entry.commands.length, publishedCommands.length, entry.name + ' catalog count mismatch');
+  const sourceByName = new Map(publishedCommands.map(command => [command.name, command]));
   for (const item of entry.commands) {
     const command = sourceByName.get(item.name);
     assert.ok(command, 'Catalog command missing from source: ' + entry.name + ' ' + item.name);
