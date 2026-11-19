@@ -3,6 +3,7 @@ const { PermissionFlagsBits: P } = require('discord.js');
 const { UserError, res } = require('../lib/util');
 const db = require('../lib/db');
 const fortress = require('../lib/fortress');
+const ui = require('../lib/antinuke-ui');
 const title = name => '☢ Uranium Anti-Nuke • ' + name;
 function requireManager(c) {
   const cfg=fortress.antiConfig(c.g);
@@ -16,10 +17,9 @@ async function configure(c) {
   requireManager(c);
   const mode=(c.s('mode')||'status').toLowerCase();
   if(mode==='on') {
-    if(!db.g(c.g.id).config.fortress?.enabled) throw new UserError('Enable Fortress first with /security fortress mode:on.');
     const features={}; for(const key of fortress.FEATURE_KEYS) features[key]=true;
     fortress.configureAntiNuke(c.g,{enabled:true,features});
-    return res(title('Protection enabled'),'All '+fortress.FEATURE_KEYS.length+' switches are ON. Three protected audit actions within 15 seconds trigger a 10-minute timeout when the actor is moderatable.',{icon:'🛡️'});
+    return res(title('Protection enabled'),'All '+fortress.FEATURE_KEYS.length+' switches are ON. Anti-Nuke now works on its own, Fortress is not needed. Open `!antinuke` for the control panel.',{icon:'🛡️'});
   }
   if(mode==='off') { fortress.configureAntiNuke(c.g,{enabled:false}); return res(title('Protection disabled'),'Anti-Nuke enforcement is off. Fortress remains unchanged.',{icon:'🔓'}); }
   if(mode==='toggle') {
@@ -32,6 +32,7 @@ async function configure(c) {
   const lines=st.features.map(x=>(x.enabled?'🟢':'🔴')+' **'+x.label+'** ('+x.key+')');
   return res(title('Feature permissions matrix'),['**Anti-Nuke:** '+(st.enabled?'🟢 ENABLED':'🔴 DISABLED'),'**Whitelist:** '+st.whitelist.length+' entries • **Extra Owners:** '+st.extraOwners.length,'**Enforcement:** 3 actions / 15 sec • 10-minute timeout where possible','',...lines].join('\n'),{icon:'🛡️'});
 }
+async function panel(c) { requireManager(c); return ui.open(c); }
 function access(list,action) { return async c=>{
   const cfg=requireManager(c), id=parseId(c.s('target'));
   if(action==='list') {
@@ -61,6 +62,7 @@ function access(list,action) { return async c=>{
 module.exports={
   name:'antinuke', description:'Per-feature Anti-Nuke, whitelist and Extra Owner controls.',
   commands:[
+    C('panel','Open the interactive Anti-Nuke control panel',[],null,panel,{custom:true}),
     C('config','Enable, disable or inspect the Anti-Nuke matrix',[S('mode','on, off, status, or toggle',false,{choices:['on','off','status','toggle']}),S('feature','Feature key for toggle mode',false,{max:40}),S('enabled','on or off for toggle mode',false,{choices:['on','off']})],null,configure),
     C('wl-add','Add a user or role to the Anti-Nuke whitelist',[S('target','User ID, role ID, or mention',true,{max:30})],null,access('whitelist','add')),
     C('wl-remove','Remove a user or role from the Anti-Nuke whitelist',[S('target','User ID, role ID, or mention',true,{max:30})],null,access('whitelist','remove')),
