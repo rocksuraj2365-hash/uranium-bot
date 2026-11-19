@@ -274,8 +274,8 @@ for (const category of allCommandCategories) {
     routedCommandCount += 1;
   }
 }
-assert.equal(routedCommandCount, 503, 'Every one of the 503 commands must have a working full prefix route');
-console.log('All 503 full-name and available short-category prefix routes passed.');
+assert.equal(routedCommandCount, 504, 'Every one of the 504 registered commands must have a working full prefix route');
+console.log('All 504 full-name and available short-category prefix routes passed.');
 
 // Prefix and no-prefix messages share the same command parser after the prefix gate.
 for (const category of allCommandCategories) {
