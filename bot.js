@@ -86,7 +86,7 @@ if (PORT) http.createServer(async (req, res) => {
     if (req.method === 'GET') {
       await guild.channels.fetch().catch(() => {});
       const channels = [...guild.channels.cache.values()].filter(ch => [0, 5].includes(ch.type)).sort((a,b) => a.rawPosition-b.rawPosition).map(ch => ({ id: ch.id, name: ch.name, type: ch.type }));
-      const aiLocked = process.env.AI_ENABLED !== 'true' || !process.env.GEMINI_API_KEY;
+      const aiLocked = process.env.AI_ENABLED !== 'true' || !ai.status().key;
       return sendJson(res, 200, { settings: { ai: !aiLocked && ai.available(guild.id), aiLocked, prefix: config.prefix || '!', aiChannel: config.aiChannel || '', modlog: config.modlog || '' }, channels });
     }
     if (!String(req.headers['content-type'] || '').toLowerCase().startsWith('application/json')) return sendJson(res, 415, { error: 'Content-Type must be application/json.' });
@@ -101,7 +101,7 @@ if (PORT) http.createServer(async (req, res) => {
     if (input.ai !== undefined && typeof input.ai !== 'boolean') return sendJson(res, 400, { error: 'The ai setting must be true or false.' });
     const nextPrefix = String(input.prefix ?? config.prefix ?? '!');
     if (!nextPrefix || nextPrefix.length > 3 || /[`\s]/.test(nextPrefix)) return sendJson(res, 400, { error: 'Prefix must be 1 to 3 characters with no spaces.' });
-    const aiLocked = process.env.AI_ENABLED !== 'true' || !process.env.GEMINI_API_KEY;
+    const aiLocked = process.env.AI_ENABLED !== 'true' || !ai.status().key;
     if (aiLocked && input.ai === true) return sendJson(res, 403, { error: 'AI is globally disabled while provider compliance is reviewed.' });
     const selected = {};
     for (const key of ['aiChannel', 'modlog']) {
