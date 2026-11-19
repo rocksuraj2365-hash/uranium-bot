@@ -1,7 +1,7 @@
 {
   "version": 1,
   "generatedFrom": "commands/*.js",
-  "total": 496,
+  "total": 503,
   "categories": [
     {
       "name": "member",
@@ -3622,6 +3622,61 @@
           "slash": "/devtools dev-acronym",
           "prefix": "!dev-acronym",
           "access": "Available subject to command permissions"
+        }
+      ]
+    },
+    {
+      "name": "antinuke",
+      "description": "Configurable anti-nuke protection, whitelist and trusted Extra Owners.",
+      "commands": [
+        {
+          "name": "config",
+          "description": "Enable, disable or inspect the Anti-Nuke matrix",
+          "slash": "/antinuke config",
+          "prefix": "!antinuke",
+          "access": "Server owner, Extra Owner, or Manage Server"
+        },
+        {
+          "name": "wl-add",
+          "description": "Add a user or role to the Anti-Nuke whitelist",
+          "slash": "/antinuke wl-add",
+          "prefix": "!wladd",
+          "access": "Server owner, Extra Owner, or Manage Server"
+        },
+        {
+          "name": "wl-remove",
+          "description": "Remove a user or role from the Anti-Nuke whitelist",
+          "slash": "/antinuke wl-remove",
+          "prefix": "!wlremove",
+          "access": "Server owner, Extra Owner, or Manage Server"
+        },
+        {
+          "name": "wl-list",
+          "description": "List Anti-Nuke whitelist entries",
+          "slash": "/antinuke wl-list",
+          "prefix": "!wllist",
+          "access": "Server owner, Extra Owner, or Manage Server"
+        },
+        {
+          "name": "extraowner-add",
+          "description": "Grant a trusted member Extra Owner access",
+          "slash": "/antinuke extraowner-add",
+          "prefix": "!extraowneradd",
+          "access": "Server owner, Extra Owner, or Manage Server"
+        },
+        {
+          "name": "extraowner-remove",
+          "description": "Remove Extra Owner access",
+          "slash": "/antinuke extraowner-remove",
+          "prefix": "!extraownerremove",
+          "access": "Server owner, Extra Owner, or Manage Server"
+        },
+        {
+          "name": "extraowner-list",
+          "description": "List Extra Owners",
+          "slash": "/antinuke extraowner-list",
+          "prefix": "!extraownerlist",
+          "access": "Server owner, Extra Owner, or Manage Server"
         }
       ]
     }
