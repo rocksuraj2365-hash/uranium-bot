@@ -19,7 +19,19 @@ async function rule(c) {
   return r;
 }
 function kw(r) { if (r.triggerType !== TT.Keyword) throw new UserError('That rule is not a keyword rule', 'Pick a rule created with /automod keyword-create.'); return r; }
-const make = (c, name, triggerType, triggerMetadata, actions = [BLOCK]) => c.g.autoModerationRules.create({ name, eventType: EV.MessageSend, triggerType, triggerMetadata, actions, enabled: true, reason: c.audit() });
+const make = async (c, name, triggerType, triggerMetadata, actions = [BLOCK]) => {
+  if (triggerType === TT.Keyword) {
+    const rules = [...(await c.g.autoModerationRules.fetch()).values()];
+    const keywordRules = rules.filter((rule) => rule.triggerType === TT.Keyword);
+    if (keywordRules.some((rule) => rule.name.toLowerCase() === String(name).toLowerCase())) {
+      throw new UserError('A keyword rule with this name already exists', 'Run /automod rules to inspect existing rules, then edit or rename the existing rule instead of creating a duplicate.');
+    }
+    if (keywordRules.length >= 6) {
+      throw new UserError('Discord keyword-rule limit reached', 'Discord allows up to six keyword/regex AutoMod rules per server. Remove an unused rule or reuse an existing rule, then retry.');
+    }
+  }
+  return c.g.autoModerationRules.create({ name, eventType: EV.MessageSend, triggerType, triggerMetadata, actions, enabled: true, reason: c.audit() });
+};
 const made = (r, what) => res(`${what} created`, `Rule **${r.name}** is active.`, { icon: '🛡️', fields: [['Rule ID', `\`${r.id}\``]], undo: { label: 'Rule deleted', fn: () => r.delete() } });
 async function regex(c, name, pats) { return made(await make(c, name, TT.Keyword, { regexPatterns: pats }), name); }
 async function preset(c, p, label) {
