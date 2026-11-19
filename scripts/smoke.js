@@ -355,6 +355,26 @@ async function testSpamRuleReuse() {
 }
 testSpamRuleReuse().catch(error=>{console.error(error);process.exitCode=1;});
 
+// Do not attempt a seventh Discord keyword/regex AutoMod rule.
+async function testKeywordRuleLimit() {
+  const { AutoModerationRuleTriggerType: Trigger } = require('discord.js');
+  const automod = require('../commands/automod');
+  const rules = new Map(Array.from({ length: 6 }, (_, index) => {
+    const rule = { id: 'keyword-' + index, name: 'Existing keyword rule ' + index, triggerType: Trigger.Keyword };
+    return [rule.id, rule];
+  }));
+  let creates = 0;
+  const guild = { autoModerationRules: {
+    fetch: async () => rules,
+    create: async () => { creates += 1; throw new Error('Discord rule limit should have been caught locally'); }
+  } };
+  const blockLinks = automod.commands.find(command => command.name === 'block-links');
+  await assert.rejects(() => blockLinks.run({ g: guild, audit: () => 'smoke test' }), /Discord keyword-rule limit reached/);
+  assert.equal(creates, 0, 'Uranium must check Discord limits before attempting to create another keyword rule');
+  console.log('Discord AutoMod keyword-rule limit guard checks passed.');
+}
+testKeywordRuleLimit().catch(error=>{console.error(error);process.exitCode=1;});
+
 // Anti-Nuke feature controls and legacy-safe prefix shortcuts.
 const antiNuke = require('../commands/antinuke');
 assert.equal(antiNuke.commands.length, 7, 'Anti-Nuke must register seven executable commands');
