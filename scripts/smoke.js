@@ -124,8 +124,10 @@ assert.equal(catalog.categories.length, 26, 'Every command category must be publ
 for (const entry of catalog.categories) {
   const source = require('../commands/' + entry.name);
   assert.ok(source.commands.length <= 25, entry.name + ' exceeds Discord subcommand limit');
-  assert.equal(entry.commands.length, source.commands.length, entry.name + ' catalog count mismatch');
   const sourceByName = new Map(source.commands.map(command => [command.name, command]));
+  for (const command of source.commands.filter(command => !command.custom)) {
+    assert.ok(entry.commands.some(item => item.name === command.name), entry.name + ' catalog is missing public command ' + command.name);
+  }
   for (const item of entry.commands) {
     const command = sourceByName.get(item.name);
     assert.ok(command, 'Catalog command missing from source: ' + entry.name + ' ' + item.name);
@@ -272,8 +274,8 @@ for (const category of allCommandCategories) {
     routedCommandCount += 1;
   }
 }
-assert.equal(routedCommandCount, 503, 'Every one of the 503 commands must have a working full prefix route');
-console.log('All 503 full-name and available short-category prefix routes passed.');
+assert.equal(routedCommandCount, 504, 'Every one of the 504 registered commands must have a working full prefix route');
+console.log('All 504 full-name and available short-category prefix routes passed.');
 
 // Prefix and no-prefix messages share the same command parser after the prefix gate.
 for (const category of allCommandCategories) {
@@ -357,10 +359,10 @@ testSpamRuleReuse().catch(error=>{console.error(error);process.exitCode=1;});
 
 // Anti-Nuke feature controls and legacy-safe prefix shortcuts.
 const antiNuke = require('../commands/antinuke');
-assert.equal(antiNuke.commands.length, 7, 'Anti-Nuke must register seven executable commands');
-assert.equal(new Set(antiNuke.commands.map(x => x.name)).size, 7, 'Anti-Nuke command names must be unique');
+assert.equal(antiNuke.commands.length, 8, 'Anti-Nuke must register eight commands including its interactive panel');
+assert.equal(new Set(antiNuke.commands.map(x => x.name)).size, 8, 'Anti-Nuke command names must be unique');
 for (const command of antiNuke.commands) assert.equal(typeof command.run, 'function', 'Anti-Nuke command must have an executable handler: ' + command.name);
-for (const [alias,name] of [['antinuke','config'],['wladd','wl-add'],['wlremove','wl-remove'],['wllist','wl-list'],['extraowneradd','extraowner-add'],['extraownerremove','extraowner-remove'],['extraownerlist','extraowner-list']]) {
+for (const [alias,name] of [['antinuke','panel'],['wladd','wl-add'],['wlremove','wl-remove'],['wllist','wl-list'],['extraowneradd','extraowner-add'],['extraownerremove','extraowner-remove'],['extraownerlist','extraowner-list']]) {
   const hit=prefix.resolve(prefix.tokenize(alias));
   assert.ok(hit,'Anti-Nuke shortcut must resolve: '+alias);
   assert.equal(hit.def.name,name);
