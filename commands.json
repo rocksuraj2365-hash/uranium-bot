@@ -2760,9 +2760,9 @@
       "description": "Per-feature Anti-Nuke, whitelist and Extra Owner controls.",
       "commands": [
         {
-          "name": "antinuke",
-          "description": "Configure the per-feature Anti-Nuke protection matrix",
-          "slash": "/antinuke antinuke",
+          "name": "config",
+          "description": "Enable, disable or inspect the Anti-Nuke matrix",
+          "slash": "/antinuke config",
           "prefix": "!antinuke",
           "access": "Server owner, Extra Owner, or Manage Server"
         },
