@@ -359,8 +359,8 @@ testSpamRuleReuse().catch(error=>{console.error(error);process.exitCode=1;});
 
 // Anti-Nuke feature controls and legacy-safe prefix shortcuts.
 const antiNuke = require('../commands/antinuke');
-assert.equal(antiNuke.commands.length, 7, 'Anti-Nuke must register seven executable commands');
-assert.equal(new Set(antiNuke.commands.map(x => x.name)).size, 7, 'Anti-Nuke command names must be unique');
+assert.equal(antiNuke.commands.length, 8, 'Anti-Nuke must register eight commands including its interactive panel');
+assert.equal(new Set(antiNuke.commands.map(x => x.name)).size, 8, 'Anti-Nuke command names must be unique');
 for (const command of antiNuke.commands) assert.equal(typeof command.run, 'function', 'Anti-Nuke command must have an executable handler: ' + command.name);
 for (const [alias,name] of [['antinuke','config'],['wladd','wl-add'],['wlremove','wl-remove'],['wllist','wl-list'],['extraowneradd','extraowner-add'],['extraownerremove','extraowner-remove'],['extraownerlist','extraowner-list']]) {
   const hit=prefix.resolve(prefix.tokenize(alias));
