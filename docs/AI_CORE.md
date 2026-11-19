@@ -10,7 +10,7 @@ messages while keeping Discord permissions as the authority for server actions.
   are protected from rewriting. The original text remains available for auditing.
 - Per-user, per-channel, in-memory conversation context with a TTL and explicit forget.
   It does not persist raw conversations into the guild database.
-- Optional OpenAI-compatible local model endpoint. Configure
+- OpenAI-compatible local model endpoint. Configure
   `AI_PROVIDER=local`, `AI_LOCAL_BASE_URL`, and `AI_LOCAL_MODEL`. Remote endpoints
   must use HTTPS; HTTP is allowed only for loopback development. An operator must
   separately verify hosting, model licence, age eligibility and data handling.
@@ -21,8 +21,8 @@ messages while keeping Discord permissions as the authority for server actions.
 
 ## Configuration
 
-AI remains disabled unless `AI_ENABLED=true`. The provider must be approved by the
-eligible service operator and comply with the provider's age, usage and data terms.
+AI remains disabled unless `AI_ENABLED=true` and a valid local endpoint is configured. An
+eligible operator must review the model licence, hosting, age eligibility and data handling.
 
 For a separately operated local model server:
 - `AI_PROVIDER=local`
@@ -51,5 +51,5 @@ Do not put API keys in Discord, source files, logs or prompts.
 This foundation does not itself provide a trained foundation model, hosted compute,
 OAuth app registrations, external connector credentials, or a production web-search
 provider. Those must be provisioned and tested separately. The local provider currently
-supports text chat only; it does not advertise model tool-calling until a validated
-provider-specific adapter is added.
+supports text chat only. Discord command execution and owner developer tools are not
+available through AI until a separately reviewed tool-calling adapter is implemented.
