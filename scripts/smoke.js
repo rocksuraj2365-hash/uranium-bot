@@ -362,7 +362,7 @@ const antiNuke = require('../commands/antinuke');
 assert.equal(antiNuke.commands.length, 8, 'Anti-Nuke must register eight commands including its interactive panel');
 assert.equal(new Set(antiNuke.commands.map(x => x.name)).size, 8, 'Anti-Nuke command names must be unique');
 for (const command of antiNuke.commands) assert.equal(typeof command.run, 'function', 'Anti-Nuke command must have an executable handler: ' + command.name);
-for (const [alias,name] of [['antinuke','config'],['wladd','wl-add'],['wlremove','wl-remove'],['wllist','wl-list'],['extraowneradd','extraowner-add'],['extraownerremove','extraowner-remove'],['extraownerlist','extraowner-list']]) {
+for (const [alias,name] of [['antinuke','panel'],['wladd','wl-add'],['wlremove','wl-remove'],['wllist','wl-list'],['extraowneradd','extraowner-add'],['extraownerremove','extraowner-remove'],['extraownerlist','extraowner-list']]) {
   const hit=prefix.resolve(prefix.tokenize(alias));
   assert.ok(hit,'Anti-Nuke shortcut must resolve: '+alias);
   assert.equal(hit.def.name,name);
