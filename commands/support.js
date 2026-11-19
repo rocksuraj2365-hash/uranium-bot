@@ -1,5 +1,6 @@
 const cv2 = require('../lib/cv2');
 const icons = require('../lib/emojis');
+const { PermissionFlagsBits: P } = require('discord.js');
 const { C, S, I } = require('../lib/cmd');
 const { UserError, res, trunc } = require('../lib/util');
 
@@ -22,7 +23,12 @@ async function submitReport(c) {
   const reportChannelId = String(process.env.BOT_REPORT_CHANNEL_ID || '').trim();
   if (reportChannelId) {
     const channel = await c.i.client.channels.fetch(reportChannelId).catch(() => null);
-    if (channel?.isTextBased?.() && typeof channel.send === 'function') {
+    // Reports can contain sensitive server details. Never post them to a
+    // channel visible to @everyone; fall back to owner DMs instead.
+    const everyoneCanView = channel?.guild
+      ? channel.permissionsFor(channel.guild.roles.everyone)?.has(P.ViewChannel) !== false
+      : true;
+    if (channel?.isTextBased?.() && typeof channel.send === 'function' && !everyoneCanView) {
       await channel.send(payload).then(() => { delivered = true; }).catch(() => {});
     }
   }

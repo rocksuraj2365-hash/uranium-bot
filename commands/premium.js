@@ -304,7 +304,7 @@ module.exports = {
       const top = Object.entries(by).sort((a, b) => b[1] - a[1]).slice(0, 10); const mx = top[0]?.[1] || 1;
       return own('Moderator leaderboard', top.length ? top.map(([id, n], k) => `${['🥇', '🥈', '🥉'][k] || `**${k + 1}.**`} <@${id}> • **${n}**\n\`${bar(n / mx)}\``).join('\n') : '_No actions yet._', { icon: '🏆' });
     }, PREMIUM_ACCESS),
-    C('snipe', 'Premium: see the last deleted message here', [], null, async (c) => {
+    C('snipe', 'Premium + Manage Messages: see the last deleted message here', [], P.ManageMessages, async (c) => {
       const s = snipes.get(c.ch.id); if (!s) throw new UserError('Nothing to snipe here', 'No deleted message was seen in this channel since the bot started.');
       return own('Sniped message', trunc(s.content || '(no text)', 1500), { icon: '🎯', fields: [['Author', `<@${s.authorId}> (${s.author})`, true], ['Deleted', ts(s.at), true]] });
     }, PREMIUM_ACCESS),
