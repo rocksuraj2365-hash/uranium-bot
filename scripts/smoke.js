@@ -119,8 +119,8 @@ assert.equal(typeof statsCommands.inspectAfkMessage, 'function');
 const catalog = require('../commands.json');
 assert.equal(addedCats.reduce((n, cat) => n + cat.commands.length, 0), 100, 'Four new categories must add exactly 100 commands');
 assert.equal(addedCats.every(cat => cat.commands.length === 25), true, 'Every new category must contain 25 commands');
-assert.equal(catalog.total, 496, 'Published catalog total must match the implemented command set');
-assert.equal(catalog.categories.length, 25, 'Every command category must be published');
+assert.equal(catalog.total, 503, 'Published catalog total must match the implemented command set');
+assert.equal(catalog.categories.length, 26, 'Every command category must be published');
 for (const entry of catalog.categories) {
   const source = require('../commands/' + entry.name);
   assert.ok(source.commands.length <= 25, entry.name + ' exceeds Discord subcommand limit');
@@ -272,8 +272,8 @@ for (const category of allCommandCategories) {
     routedCommandCount += 1;
   }
 }
-assert.equal(routedCommandCount, 496, 'Every one of the 496 commands must have a working full prefix route');
-console.log('All 496 full-name and available short-category prefix routes passed.');
+assert.equal(routedCommandCount, 503, 'Every one of the 496 commands must have a working full prefix route');
+console.log('All 503 full-name and available short-category prefix routes passed.');
 
 // Prefix and no-prefix messages share the same command parser after the prefix gate.
 for (const category of allCommandCategories) {
@@ -289,7 +289,7 @@ const helpSource = require('node:fs').readFileSync(require.resolve('../lib/help'
 assert.match(helpSource, /const passes = \(d\) => !d\.owner/, 'Owner-only commands must be excluded from category and search results');
 assert.ok(!helpSource.includes("{ id: 'owner', label: 'Owner' }"), 'Public help filters must not expose an Owner command filter');
 assert.match(helpSource, /if \(d\.owner\) continue;/, 'Owner-only commands must be excluded from help search results');
-for (const category of ['reminders', 'directory', 'engagement', 'devtools']) {
+for (const category of ['reminders', 'directory', 'engagement', 'devtools', 'antinuke']) {
   assert.ok(helpSource.includes(category), 'Interactive help must include the ' + category + ' category');
 }
 for (const page of ['guide', 'moderation', 'protection', 'permissions', 'premium-guide']) {
@@ -354,3 +354,15 @@ async function testSpamRuleReuse() {
   console.log('Discord AutoMod single-SPAM-rule reuse checks passed.');
 }
 testSpamRuleReuse().catch(error=>{console.error(error);process.exitCode=1;});
+
+// Anti-Nuke feature controls and legacy-safe prefix shortcuts.
+const antiNuke = require('../commands/antinuke');
+assert.equal(antiNuke.commands.length, 7, 'Anti-Nuke must register seven executable commands');
+assert.equal(new Set(antiNuke.commands.map(x => x.name)).size, 7, 'Anti-Nuke command names must be unique');
+for (const command of antiNuke.commands) assert.equal(typeof command.run, 'function', 'Anti-Nuke command must have an executable handler: ' + command.name);
+for (const [alias,name] of [['antinuke','config'],['wladd','wl-add'],['wlremove','wl-remove'],['wllist','wl-list'],['extraowneradd','extraowner-add'],['extraownerremove','extraowner-remove'],['extraownerlist','extraowner-list']]) {
+  const hit=prefix.resolve(prefix.tokenize(alias));
+  assert.ok(hit,'Anti-Nuke shortcut must resolve: '+alias);
+  assert.equal(hit.def.name,name);
+}
+console.log('Anti-Nuke command and shortcut checks passed.');
