@@ -119,7 +119,7 @@ assert.equal(typeof statsCommands.inspectAfkMessage, 'function');
 const catalog = require('../commands.json');
 assert.equal(addedCats.reduce((n, cat) => n + cat.commands.length, 0), 100, 'Four new categories must add exactly 100 commands');
 assert.equal(addedCats.every(cat => cat.commands.length === 25), true, 'Every new category must contain 25 commands');
-assert.equal(catalog.total, 503, 'Published catalog total must match the implemented command set');
+assert.equal(catalog.total, 504, 'Published catalog total must match the implemented command set');
 assert.equal(catalog.categories.length, 26, 'Every command category must be published');
 for (const entry of catalog.categories) {
   const source = require('../commands/' + entry.name);
@@ -300,7 +300,7 @@ for (const page of ['guide', 'moderation', 'protection', 'permissions', 'premium
 for (const label of ['**Slash**', '**Prefix**', '**No-prefix**', 'Prev page', 'Next page', 'Back to list', 'Find a Uranium command']) {
   assert.ok(helpSource.includes(label), 'Help panel missing interactive command detail: ' + label);
 }
-console.log('All 496 commands expose slash, prefix and no-prefix usage in the interactive help panel.');
+console.log('All 504 commands expose slash, prefix and no-prefix usage in the interactive help panel.');
 
 // Gateway startup must accept shardReady while the full client guild cache hydrates.
 async function testGatewayReadyFallback() {
