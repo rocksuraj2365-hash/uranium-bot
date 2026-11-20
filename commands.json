@@ -1,7 +1,7 @@
 {
   "version": 1,
   "generatedFrom": "commands/*.js",
-  "total": 503,
+  "total": 504,
   "categories": [
     {
       "name": "member",
@@ -3630,10 +3630,17 @@
       "description": "Configurable anti-nuke protection, whitelist and trusted Extra Owners.",
       "commands": [
         {
+          "name": "panel",
+          "description": "Open the interactive Anti-Nuke control panel",
+          "slash": "/antinuke panel",
+          "prefix": "!antinuke",
+          "access": "Server owner, Extra Owner, or Manage Server"
+        },
+        {
           "name": "config",
           "description": "Enable, disable or inspect the Anti-Nuke matrix",
           "slash": "/antinuke config",
-          "prefix": "!antinuke",
+          "prefix": "!anconfig",
           "access": "Server owner, Extra Owner, or Manage Server"
         },
         {

@@ -119,7 +119,7 @@ assert.equal(typeof statsCommands.inspectAfkMessage, 'function');
 const catalog = require('../commands.json');
 assert.equal(addedCats.reduce((n, cat) => n + cat.commands.length, 0), 100, 'Four new categories must add exactly 100 commands');
 assert.equal(addedCats.every(cat => cat.commands.length === 25), true, 'Every new category must contain 25 commands');
-assert.equal(catalog.total, 503, 'Published catalog total must match the implemented command set');
+assert.equal(catalog.total, 504, 'Published catalog total must match the implemented command set');
 assert.equal(catalog.categories.length, 26, 'Every command category must be published');
 for (const entry of catalog.categories) {
   const source = require('../commands/' + entry.name);
@@ -272,8 +272,8 @@ for (const category of allCommandCategories) {
     routedCommandCount += 1;
   }
 }
-assert.equal(routedCommandCount, 503, 'Every one of the 503 commands must have a working full prefix route');
-console.log('All 503 full-name and available short-category prefix routes passed.');
+assert.equal(routedCommandCount, 504, 'Every one of the 504 commands must have a working full prefix route');
+console.log('All 504 full-name and available short-category prefix routes passed.');
 
 // Prefix and no-prefix messages share the same command parser after the prefix gate.
 for (const category of allCommandCategories) {
@@ -298,7 +298,7 @@ for (const page of ['guide', 'moderation', 'protection', 'permissions', 'premium
 for (const label of ['**Slash**', '**Prefix**', '**No-prefix**', 'Prev page', 'Next page', 'Back to list', 'Find a Uranium command']) {
   assert.ok(helpSource.includes(label), 'Help panel missing interactive command detail: ' + label);
 }
-console.log('All 496 commands expose slash, prefix and no-prefix usage in the interactive help panel.');
+console.log('All 504 commands expose slash, prefix and no-prefix usage in the interactive help panel.');
 
 // Gateway startup must accept shardReady while the full client guild cache hydrates.
 async function testGatewayReadyFallback() {
@@ -357,10 +357,10 @@ testSpamRuleReuse().catch(error=>{console.error(error);process.exitCode=1;});
 
 // Anti-Nuke feature controls and legacy-safe prefix shortcuts.
 const antiNuke = require('../commands/antinuke');
-assert.equal(antiNuke.commands.length, 7, 'Anti-Nuke must register seven executable commands');
-assert.equal(new Set(antiNuke.commands.map(x => x.name)).size, 7, 'Anti-Nuke command names must be unique');
+assert.equal(antiNuke.commands.length, 8, 'Anti-Nuke must register eight executable commands');
+assert.equal(new Set(antiNuke.commands.map(x => x.name)).size, 8, 'Anti-Nuke command names must be unique');
 for (const command of antiNuke.commands) assert.equal(typeof command.run, 'function', 'Anti-Nuke command must have an executable handler: ' + command.name);
-for (const [alias,name] of [['antinuke','config'],['wladd','wl-add'],['wlremove','wl-remove'],['wllist','wl-list'],['extraowneradd','extraowner-add'],['extraownerremove','extraowner-remove'],['extraownerlist','extraowner-list']]) {
+for (const [alias,name] of [['antinuke','panel'],['anconfig','config'],['wladd','wl-add'],['wlremove','wl-remove'],['wllist','wl-list'],['extraowneradd','extraowner-add'],['extraownerremove','extraowner-remove'],['extraownerlist','extraowner-list']]) {
   const hit=prefix.resolve(prefix.tokenize(alias));
   assert.ok(hit,'Anti-Nuke shortcut must resolve: '+alias);
   assert.equal(hit.def.name,name);
