@@ -66,6 +66,7 @@ app.use(
 // Only these files are public (server.js, bot.js etc. stay private)
 const pages = {
   '/': 'index.html',
+  '/premium': 'premium.html',
   '/commands': 'commands.html',
   '/docs': 'docs.html',
   '/getting-started': 'getting-started.html',
