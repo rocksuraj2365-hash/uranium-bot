@@ -43,3 +43,33 @@ services:
         sync: false
       - key: RENDER_API_KEY
         sync: false
+      - key: LAVALINK_HOST
+        sync: false
+      - key: LAVALINK_PORT
+        value: 443
+      - key: LAVALINK_PASSWORD
+        sync: false
+      - key: LAVALINK_SECURE
+        value: true
+
+  - type: web
+    name: uranium-lavalink
+    runtime: docker
+    plan: free
+    dockerfilePath: ./lavalink/Dockerfile
+    healthCheckPath: /version
+    envVars:
+      - key: SERVER_PORT
+        value: 10000
+      - key: SERVER_ADDRESS
+        value: 0.0.0.0
+      - key: _JAVA_OPTIONS
+        value: -Xms128M -Xmx384M -XX:+UseG1GC
+      - key: LAVALINK_SERVER_PASSWORD
+        sync: false
+      - key: SPOTIFY_CLIENT_ID
+        sync: false
+      - key: SPOTIFY_CLIENT_SECRET
+        sync: false
+      - key: APPLE_MUSIC_API_TOKEN
+        sync: false
