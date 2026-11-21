@@ -18,6 +18,7 @@ module.exports = {
       const ch = vcOf(c);
       const query = c.s('query') || c.s('url');
       if (query && lavalink.enabled()) {
+        music.leave(c.g.id);
         const result = await lavalink.play(c.g, ch.id, query);
         return m(result.queued > 1 ? 'Added to queue' : 'Now playing', `**[${result.track.info?.title || 'Unknown track'}](${result.track.info?.uri || 'https://lavalink.dev'})**\nby **${result.track.info?.author || 'Unknown artist'}**\nConnected in **${ch.name}**`, { fields: [['Queue', `${result.queued} track(s) added • ${Math.max(0, result.queued - 1)} waiting`], ['Tip', 'Use `/music skip` and `/music queue` to control playback.']] });
       }
@@ -26,6 +27,7 @@ module.exports = {
       let station = st ? { name: st[1], url: st[2] } : null;
       if (!station && c.s('url')) { if (!/^https?:\/\//i.test(c.s('url'))) throw new UserError('That is not a link', 'Use a direct audio stream link starting with https://'); station = { name: 'Custom stream', url: c.s('url') }; }
       if (!station) { const first = music.STATIONS[0]; station = { name: first[1], url: first[2] }; }
+      await lavalink.leave(c.g.id).catch(() => {});
       await music.play(c.g, ch.id, station);
       return m('Now playing radio', `${E('play')} **${station.name}**\nin **${ch.name}**`, { fields: [['Tip', 'Use `/music twentyfour7` to keep radio running 24/7.']] });
     }),
