@@ -13,6 +13,7 @@ const devTools = require('./lib/dev-tools');
 const dmAi = require('./lib/dm-ai');
 const np = require('./lib/np');
 const music = require('./lib/music');
+const lavalink = require('./lib/lavalink');
 const supportTemplate = require('./lib/support-template');
 const emojis = require('./lib/emojis');
 const stats = require('./commands/stats');
@@ -136,7 +137,7 @@ const byName = new Map(cats.map((c) => [c.name, c]));
 require('./lib/patch')(byName);
 Object.assign(prefix.CURATED, { ai: 'ai ask', aichan: 'ai channel', aion: 'ai toggle', aistatus: 'ai status', aireset: 'ai reset' });
 prefix.CAT_SHORT.ai = 'ai';
-Object.assign(prefix.CURATED, { play: 'music play', stop: 'music stop', pause: 'music pause', resume: 'music resume', vol: 'music volume', now: 'music nowplaying', radio: 'music stations', mpanel: 'music panel', mjoin: 'music join', mleave: 'music leave', m247: 'music twentyfour7', mstatus: 'music status' });
+Object.assign(prefix.CURATED, { play: 'music play', stop: 'music stop', pause: 'music pause', resume: 'music resume', vol: 'music volume', now: 'music nowplaying', radio: 'music stations', mpanel: 'music panel', mjoin: 'music join', mleave: 'music leave', m247: 'music twentyfour7', mstatus: 'music status', mskip: 'music skip', mqueue: 'music queue' });
 prefix.CAT_SHORT.music = 'mu';
 prefix.init(cats);
 const premium = byName.get('premium');
@@ -453,6 +454,7 @@ function makeClient(withContent) {
   if (withContent) intents.push(GatewayIntentBits.MessageContent);
   if (process.env.ENABLE_GUILD_MEMBERS_INTENT === 'true') intents.push(GatewayIntentBits.GuildMembers);
   client = new Client({ intents, partials: [Partials.Channel, Partials.Message, Partials.Reaction, Partials.User] });
+  lavalink.init(client);
   client.on('interactionCreate', (i) => {
     const run = i.isAutocomplete() ? autocomplete(i) : i.isChatInputCommand() ? slash(i) : (i.isButton() || i.isStringSelectMenu()) ? button(i) : null;
     run?.catch((e) => console.error('Interaction error:', e));
