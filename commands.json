@@ -1,7 +1,7 @@
 {
   "version": 1,
   "generatedFrom": "commands/*.js",
-  "total": 504,
+  "total": 506,
   "categories": [
     {
       "name": "member",
@@ -1446,7 +1446,7 @@
     },
     {
       "name": "music",
-      "description": "Voice playback, radio stations and 24/7 sessions.",
+      "description": "Lavalink track playback, platform links, radio stations and 24/7 sessions.",
       "commands": [
         {
           "name": "join",
@@ -1457,28 +1457,42 @@
         },
         {
           "name": "play",
-          "description": "Play a radio station or a direct audio link",
+          "description": "Play a track, supported platform link or radio station",
           "slash": "/music play",
           "prefix": "!music play",
           "access": "Available subject to command permissions"
         },
         {
+          "name": "skip",
+          "description": "Skip the current Lavalink track",
+          "slash": "/music skip",
+          "prefix": "!music skip",
+          "access": "Available subject to command permissions"
+        },
+        {
+          "name": "queue",
+          "description": "Show the Lavalink music queue",
+          "slash": "/music queue",
+          "prefix": "!music queue",
+          "access": "Available subject to command permissions"
+        },
+        {
           "name": "stop",
-          "description": "Stop the music (stays in the channel)",
+          "description": "Stop music playback",
           "slash": "/music stop",
           "prefix": "!music stop",
           "access": "Available subject to command permissions"
         },
         {
           "name": "pause",
-          "description": "Pause the music",
+          "description": "Pause music playback",
           "slash": "/music pause",
           "prefix": "!music pause",
           "access": "Available subject to command permissions"
         },
         {
           "name": "resume",
-          "description": "Resume the music",
+          "description": "Resume music playback",
           "slash": "/music resume",
           "prefix": "!music resume",
           "access": "Available subject to command permissions"
@@ -1506,28 +1520,28 @@
         },
         {
           "name": "panel",
-          "description": "Post an interactive music control panel",
+          "description": "Post an interactive radio control panel",
           "slash": "/music panel",
           "prefix": "!music panel",
           "access": "Available subject to command permissions"
         },
         {
           "name": "twentyfour7",
-          "description": "Keep the music running 24/7 (auto-rejoin)",
+          "description": "Keep the radio running 24/7 (auto-rejoin)",
           "slash": "/music twentyfour7",
           "prefix": "!music twentyfour7",
           "access": "Available subject to command permissions"
         },
         {
           "name": "leave",
-          "description": "Leave the voice channel (also turns 24/7 off)",
+          "description": "Leave the voice channel and clear playback",
           "slash": "/music leave",
           "prefix": "!music leave",
           "access": "Available subject to command permissions"
         },
         {
           "name": "status",
-          "description": "Show music status and the last error",
+          "description": "Show music and Lavalink connection status",
           "slash": "/music status",
           "prefix": "!music status",
           "access": "Available subject to command permissions"
