@@ -17,6 +17,7 @@ plugins:
       - WEBEMBEDDED
   lavasrc:
     providers:
+      - 'ytsearch:"%ISRC%'
       - "ytsearch:%QUERY%"
     sources:
       spotify: true
