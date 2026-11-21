@@ -1,5 +1,5 @@
 server:
-  port: ${PORT:${SERVER_PORT:10000}}
+  port: 10000
   address: 0.0.0.0
   http2:
     enabled: false
