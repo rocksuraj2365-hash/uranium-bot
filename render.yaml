@@ -46,11 +46,11 @@ services:
       - key: LAVALINK_HOST
         sync: false
       - key: LAVALINK_PORT
-        value: 443
+        value: "443"
       - key: LAVALINK_PASSWORD
         sync: false
       - key: LAVALINK_SECURE
-        value: true
+        value: "true"
 
   - type: web
     name: uranium-lavalink
@@ -60,11 +60,11 @@ services:
     healthCheckPath: /version
     envVars:
       - key: SERVER_PORT
-        value: 10000
+        value: "10000"
       - key: SERVER_ADDRESS
-        value: 0.0.0.0
+        value: "0.0.0.0"
       - key: _JAVA_OPTIONS
-        value: -Xms128M -Xmx384M -XX:+UseG1GC
+        value: "-Xms128M -Xmx320M -XX:+UseG1GC"
       - key: LAVALINK_SERVER_PASSWORD
         sync: false
       - key: SPOTIFY_CLIENT_ID
