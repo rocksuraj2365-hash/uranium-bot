@@ -16,7 +16,7 @@
     "express": "^4.21.1",
     "express-session": "^1.18.1",
     "postgres": "^3.4.7",
-    "shoukaku": "^4.2.0"
+    "shoukaku": "^4.3.0"
   },
   "optionalDependencies": {
     "@resvg/resvg-js": "*",
