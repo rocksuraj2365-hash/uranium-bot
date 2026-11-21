@@ -12,7 +12,7 @@ module.exports = {
   name: 'music', description: 'Music: Lavalink tracks, platform links and 24/7 radio',
   commands: [
     C('join', 'Join your voice channel', [CH('channel', 'Voice channel (default: yours)', false, [CT.GuildVoice, CT.GuildStageVoice])], null, async (c) => {
-      const ch = vcOf(c); await music.join(c.g, ch.id); return m('Joined', `Connected to **${ch.name}**. Pick a station with the panel or use `/music play`.`);
+      const ch = vcOf(c); await music.join(c.g, ch.id); return m('Joined', `Connected to **${ch.name}**. Pick a station with the panel or use the music play command.`);
     }),
     C('play', 'Play a track, supported platform link or radio station', [S('station', 'Radio station name', false, { choices: music.STATIONS.map((s) => ({ name: s[1].slice(0, 100), value: s[0] })) }), S('url', 'Direct audio or platform URL', false, { max: 400 }), S('query', 'Song title or platform link (Lavalink)', false, { max: 400 }), CH('channel', 'Voice channel (default: yours)', false, [CT.GuildVoice, CT.GuildStageVoice])], null, async (c) => {
       const ch = vcOf(c);
