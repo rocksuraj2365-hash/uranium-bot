@@ -89,3 +89,13 @@ The bot adds four slash-command groups, each with 25 working commands:
 Use either the category form (for example, `!utility calculate "(12 + 8) * 3"`, `!community rules`, `!fun rps rock`, `!servertools thread-list`) or the direct command name when it is unique (for example, `!joke`, `!coinflip`, `!server-age`). Category shortcuts are `!ut`, `!cm`, `!fn`, and `!st`. The slash equivalents are grouped under `/utility`, `/community`, `/fun`, and `/servertools`.
 
 Welcome and goodbye messages use `{user}`, `{username}`, `{server}`, and `{memberCount}`. To enable automatic join/leave events, turn on **Server Members Intent** in the Discord Developer Portal and set `ENABLE_GUILD_MEMBERS_INTENT=true` on the bot's Render service. This is optional; the commands work without it.
+
+## Lavalink music backend
+
+The bot can use an optional Lavalink v4 audio node for track search and playback while retaining the built-in 24/7 radio stations. The Render blueprint includes a separate Docker service named `uranium-lavalink`.
+
+Configure the Lavalink service with a private `LAVALINK_SERVER_PASSWORD`. Configure the bot service with `LAVALINK_HOST` (hostname only), `LAVALINK_PORT=443`, `LAVALINK_PASSWORD` (the exact same password), and `LAVALINK_SECURE=true`. Optional provider credentials are documented in [lavalink/README.md](lavalink/README.md).
+
+Use `/music play query:<song or supported link>`, `/music skip`, and `/music queue`. The existing `/music play station:<station>` and 24/7 radio controls remain available. Spotify and Apple Music links are handled by LavaSrc source matching; this does not provide direct Spotify/Apple Music audio streams or bypass DRM. Some providers may require their own API credentials.
+
+The Render Free Lavalink service is for setup/testing only: free instances can sleep and have limited memory, so continuous 24/7 music is not guaranteed.
