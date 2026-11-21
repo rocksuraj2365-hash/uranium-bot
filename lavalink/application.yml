@@ -10,11 +10,15 @@ plugins:
     allowSearch: true
     allowDirectVideoIds: true
     allowDirectPlaylistIds: true
+    # Prefer playback-capable clients that do not rely on the failing WEB
+    # and embedded-player paths seen in the Render logs. MUSIC remains last
+    # as a search/metadata fallback; it cannot stream audio itself.
     clients:
-      - MUSIC
+      - MWEB
+      - ANDROID_MUSIC
       - ANDROID_VR
       - WEB
-      - WEBEMBEDDED
+      - MUSIC
   lavasrc:
     providers:
       - 'ytsearch:"%ISRC%"'
@@ -65,7 +69,8 @@ lavalink:
     frameBufferDurationMs: 5000
     opusEncodingQuality: 8
     resamplingQuality: LOW
-    trackStuckThresholdMs: 10000
+    # Allow client fallback attempts time to finish before declaring a track stuck.
+    trackStuckThresholdMs: 45000
     useSeekGhosting: true
     soundcloudSearchEnabled: true
 
