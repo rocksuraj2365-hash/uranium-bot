@@ -71,6 +71,7 @@ if (PORT) http.createServer(async (req, res) => {
       uptimeSeconds: process.uptime(), memoryMb: Math.round(process.memoryUsage().rss / 1024 / 1024), servers
     });
   }
+  if (url.pathname.startsWith('/pay/')) return require('./lib/pay-api').handle(req, res, url, { sendJson, safeEqual, allowApiRequest, client });
   const match = /^\/control\/guild\/(\d{17,20})$/.exec(url.pathname);
   if (!match || !['GET', 'POST'].includes(req.method)) return sendJson(res, 404, { error: 'Not found' });
   if (!allowApiRequest(req, res, 45)) return;
@@ -337,6 +338,7 @@ async function button(i) {
   if (['cf', 'help', 'eb', 'lst', 'sv', 'appem'].includes(kind)) return; // handled by collectors
   if (kind === 'mu') return music.onComponent(i);
   if (kind === 'anx') return require('./lib/antinuke-ui').onAlertButton(i);
+  if (kind === 'pay') return require('./lib/pay-ui').onButton(i, { isOwner, ownerSessionActive });
   if (kind === 'ai') { ai.resetHistory(i.channelId, i.user.id, i.guildId || 'dm'); return i.reply({ content: '🧠 I forgot our earlier messages here.', flags: ui.EPH }); }
   if (['poll', 'gw', 'rp', 'tk'].includes(kind)) { if (i.inGuild() && blacklisted(i.user.id)) return i.reply({ content: 'You are not allowed to use this bot.', flags: ui.EPH }); return premium.onButton(i); }
   const deny = (m) => i.reply({ embeds: [ui.errorEmbed(m)], flags: ui.EPH });
@@ -422,6 +424,7 @@ async function tick() {
 /* ---------- client ---------- */
 const onReady = async () => {
   if (started) return; started = true;
+  try { require('./lib/pay-ui').notifyPending(client).catch((error) => console.error('[pay] startup notify failed', error.message)); } catch (error) { console.error('[pay] startup notify failed', error.message); }
   console.log(`✅ Uranium online as ${client.user.tag}`);
   const st = G().config.status; const T = { playing: ActivityType.Playing, watching: ActivityType.Watching, listening: ActivityType.Listening, competing: ActivityType.Competing };
   client.user.setActivity(st ? st.text : '/help • !help', { type: st ? T[st.type] : ActivityType.Watching });
