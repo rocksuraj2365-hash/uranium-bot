@@ -67,6 +67,7 @@ app.use(
 const pages = {
   '/': 'index.html',
   '/premium': 'premium.html',
+  '/premium.js': 'premium.js',
   '/commands': 'commands.html',
   '/docs': 'docs.html',
   '/getting-started': 'getting-started.html',
@@ -116,6 +117,7 @@ app.get('/login', (req, res) => {
   if (!DISCORD_CLIENT_ID) return res.status(500).send('DISCORD_CLIENT_ID not set');
   const state = crypto.randomBytes(16).toString('hex');
   req.session.oauthState = state;
+  req.session.returnTo = req.query.next === 'premium' ? '/premium' : undefined;
   const p = new URLSearchParams({
     client_id: DISCORD_CLIENT_ID,
     response_type: 'code',
@@ -132,6 +134,7 @@ app.get('/auth/callback', async (req, res) => {
     return res.status(400).send('Invalid login state. Please try again.');
   }
   delete req.session.oauthState;
+  const returnTo = req.session.returnTo === '/premium' ? '/premium' : '/dashboard';
   try {
     const tokenRes = await fetch(DISCORD_API + '/oauth2/token', {
       method: 'POST',
@@ -164,7 +167,7 @@ app.get('/auth/callback', async (req, res) => {
     req.session.user = safeUser;
     req.session.guilds = safeGuilds;
     await new Promise((resolve, reject) => req.session.save(error => error ? reject(error) : resolve()));
-    res.redirect('/dashboard');
+    res.redirect(returnTo);
   } catch (err) {
     console.error(err);
     res.status(500).send('Login failed. Please try again.');
@@ -176,6 +179,7 @@ function requireAuth(req, res, next) {
   next();
 }
 
+require('./lib/premium-web')(app, { requireAuth, rateLimit });
 app.get('/api/me', requireAuth, (req, res) => { res.setHeader('Cache-Control', 'no-store'); res.json(req.session.user); });
 function requireAdmin(req, res, next) {
   if (!req.session.user) return res.status(401).json({ error: 'Not logged in' });

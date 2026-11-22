@@ -41,6 +41,34 @@
     .included-card p{margin:0;color:#9d95ad;font-size:.76rem;line-height:1.55}
     .premium-footer{text-align:center;margin-top:34px;color:#746d83;font-size:.72rem}
     .premium-footer a{color:#bba4ff}
+    .premium-status.ok{border-color:#2f6b4b;background:#10241a;color:#9ee6bd}
+    .premium-status.err{border-color:#7a3340;background:#2a1118;color:#ffb3bf}
+    .premium-status.info{border-color:#3b3f73;background:#141630;color:#c8ccff}
+    .my-premium,.order-panel{max-width:760px;margin:0 auto 22px;padding:20px;border:1px solid #342b48;border-radius:16px;background:linear-gradient(155deg,#191427,#100e18)}
+    .my-premium h2,.order-panel h2{margin:0 0 14px;font-size:1.1rem}
+    .my-premium h3{margin:18px 0 8px;font-size:.9rem;color:#c4b5fd}
+    .status-grid{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:12px}
+    .status-item{display:grid;gap:5px;padding:14px;border:1px solid #302941;border-radius:12px;background:#14111f}
+    .status-item small{color:#9d95ad}
+    .chip{display:inline-flex;justify-self:start;padding:4px 9px;border-radius:20px;font-size:.66rem;font-weight:850;letter-spacing:.05em;background:#28203a;color:#d8c7ff}
+    .chip.ok,.chip.approved{background:#12351f;color:#8ff0b5}
+    .chip.off,.chip.expired{background:#26232f;color:#9d95ad}
+    .chip.pending{background:#3a2d12;color:#ffd58a}
+    .chip.awaiting_payment{background:#1f2a45;color:#a9c4ff}
+    .chip.rejected{background:#3a1520;color:#ffa9b8}
+    .order-row{display:flex;align-items:center;gap:10px;justify-content:space-between;padding:10px 0;border-top:1px solid #272036;flex-wrap:wrap}
+    .order-row small{display:block;color:#8d86a0;margin-top:3px}
+    .mini-btn{border:1px solid #54416f;border-radius:8px;background:#211a31;color:#e9ddff;padding:6px 10px;font-size:.74rem;font-weight:800;cursor:pointer}
+    .mini-btn:hover{background:#6d3fc1}
+    .pay-grid{display:grid;grid-template-columns:240px 1fr;gap:20px;align-items:start;margin-bottom:16px}
+    .qr-box{display:grid;gap:10px;justify-items:center}
+    .qr{background:#fff;border-radius:12px;padding:6px}
+    .upi-open{display:block;text-align:center;text-decoration:none}
+    .pay-steps{margin:0;padding-left:18px;display:grid;gap:10px;color:#d9d3e5;font-size:.84rem;line-height:1.5}
+    .pay-steps code,.ref-line code{background:#241d36;border-radius:6px;padding:2px 6px;color:#f0e8ff}
+    .order-panel input{width:100%;box-sizing:border-box;margin:6px 0 10px;padding:12px;border-radius:10px;border:1px solid #54416f;background:#0e0c16;color:#fff;font-size:.95rem}
+    .order-panel .warn{margin:12px 0 0;color:#f2cf91;font-size:.78rem;line-height:1.5}
+    @media(max-width:700px){.pay-grid{grid-template-columns:1fr}.status-grid{grid-template-columns:1fr}}
     @media(max-width:700px){.plan-grid{grid-template-columns:1fr}.premium-hero{padding:30px 0 25px}.plan-card{padding:20px}.included-grid{grid-template-columns:1fr}.premium-wrap{padding:20px 13px 50px}}
     @media(prefers-reduced-motion:no-preference){.premium-hero h1{animation:premiumRise .7s ease both}@keyframes premiumRise{from{opacity:0;transform:translateY(12px)}to{opacity:1;transform:translateY(0)}}}
   </style>
@@ -54,7 +82,9 @@
       <p>More control, more capability, and less command friction. Every Premium plan includes No Prefix access automatically.</p>
     </header>
 
-    <div class="premium-status" role="status"><strong>Payments are not open yet.</strong> The manual UPI verification system is still being configured. Do not send money or share a transaction ID until this notice is removed and an official payment flow is available.</div>
+    <div class="premium-status" id="pay-notice" role="status">Loading payment status…</div>
+    <section id="my-premium" class="my-premium" hidden aria-live="polite"></section>
+    <section id="order-panel" class="order-panel" hidden aria-live="polite"></section>
 
     <section aria-label="Premium plans">
       <div class="plan-grid">
@@ -68,7 +98,7 @@
             <li>Does not include Premium features</li>
             <li>Can be purchased separately from Premium</li>
           </ul>
-          <div class="plan-foot"><button class="choose-plan" type="button" disabled>Payments opening soon</button></div>
+          <div class="plan-foot"><button class="choose-plan" type="button" data-plan="noprefix" disabled>Payments opening soon</button></div>
         </article>
 
         <article class="plan-card featured">
@@ -81,7 +111,7 @@
             <li>No Prefix included automatically</li>
             <li>One monthly Premium entitlement</li>
           </ul>
-          <div class="plan-foot"><button class="choose-plan" type="button" disabled>Payments opening soon</button></div>
+          <div class="plan-foot"><button class="choose-plan" type="button" data-plan="premium_monthly" disabled>Payments opening soon</button></div>
         </article>
 
         <article class="plan-card featured">
@@ -94,7 +124,7 @@
             <li>No Prefix included automatically</li>
             <li>One yearly Premium entitlement</li>
           </ul>
-          <div class="plan-foot"><button class="choose-plan" type="button" disabled>Payments opening soon</button></div>
+          <div class="plan-foot"><button class="choose-plan" type="button" data-plan="premium_yearly" disabled>Payments opening soon</button></div>
         </article>
 
         <article class="plan-card">
@@ -107,7 +137,7 @@
             <li>No Prefix included automatically</li>
             <li>Lifetime Premium entitlement</li>
           </ul>
-          <div class="plan-foot"><button class="choose-plan" type="button" disabled>Payments opening soon</button></div>
+          <div class="plan-foot"><button class="choose-plan" type="button" data-plan="premium_lifetime" disabled>Payments opening soon</button></div>
         </article>
       </div>
     </section>
@@ -119,8 +149,9 @@
       <article class="included-card"><b>Separate purchases stay separate</b><p>If standalone No Prefix was purchased separately, it remains active even if a Premium plan expires or is revoked.</p></article>
     </section>
 
-    <div class="premium-note"><strong>Payment safety:</strong> Uranium will activate access only after the owner verifies the actual transaction. A payment screenshot alone is not proof of payment. Never share your UPI PIN, OTP, password or banking credentials.</div>
+    <div class="premium-note"><strong>Payment safety:</strong> Uranium activates access only after the owner sees the actual payment in the bank app. Your status here updates automatically, and a screenshot or a typed transaction ID alone is never proof of payment. Never share your UPI PIN, OTP, password or banking credentials.</div>
     <footer class="premium-footer">Uranium Premium · <a href="/terms-of-service">Terms</a> · <a href="/privacy-policy">Privacy</a> · <a href="/">Home</a></footer>
   </main>
+  <script src="/premium.js" defer></script>
 </body>
 </html>

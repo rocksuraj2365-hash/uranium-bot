@@ -9,13 +9,14 @@
   "scripts": {
     "start": "node server.js",
     "bot": "node bot.js",
-    "test": "node scripts/db-queue-smoke.js && node scripts/session-store-smoke.js && node scripts/smoke.js && node scripts/ai-core-smoke.js"
+    "test": "node scripts/db-queue-smoke.js && node scripts/session-store-smoke.js && node scripts/smoke.js && node scripts/ai-core-smoke.js && node scripts/premium-store-smoke.js"
   },
   "dependencies": {
     "discord.js": "^14.28.1",
     "express": "^4.21.1",
     "express-session": "^1.18.1",
     "postgres": "^3.4.7",
+    "qrcode": "^1.5.4",
     "shoukaku": "^4.3.0"
   },
   "optionalDependencies": {

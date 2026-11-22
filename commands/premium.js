@@ -3,6 +3,7 @@ const os = require('os');
 const { isIP } = require('node:net');
 const { C, U, S, I, CH, R } = require('../lib/cmd');
 const db = require('../lib/db');
+const store = require('../lib/premium-store');
 const { UserError, res, ts, trunc, snowflake, parseDuration, fmt, hexColor, checkRole } = require('../lib/util');
 const { isSafeSelfAssignableRole, blockedSelfAssignablePermissions } = require('../lib/role-safety');
 const { FOOT } = require('../lib/ui');
@@ -192,7 +193,7 @@ const all = (fn) => async (c) => { const out = []; for (const g of c.i.client.gu
 
 module.exports = {
   name: 'premium', description: 'Owner-managed Premium access and server customization', polls, snipes, endGiveaway, onButton,
-  hasAccess(guildId, userId) { const owners = (process.env.OWNER_IDS || '').split(/[\s,]+/).filter(Boolean); return !!(guildId && userId && (owners.includes(userId) || db.g(guildId).premiumUsers?.includes(userId))); },
+  hasAccess(guildId, userId) { const owners = (process.env.OWNER_IDS || '').split(/[\s,]+/).filter(Boolean); return !!(guildId && userId && (owners.includes(userId) || db.g(guildId).premiumUsers?.includes(userId) || store.hasPremium(userId))); },
   commands: [
     C('noprefix', 'Owner only: use commands without any prefix', [S('mode', 'on, off or status', false, { choices: ['on', 'off', 'status'] })], null, async (c) => {
       const g = G(); const m = c.s('mode') || 'status'; if (m !== 'status') { g.config.np = m === 'on'; db.save(); }
