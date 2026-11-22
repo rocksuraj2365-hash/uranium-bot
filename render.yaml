@@ -17,6 +17,10 @@ services:
         sync: false
       - key: PUBLIC_BASE_URL
         sync: false
+      - key: PAYMENT_UPI_ID
+        sync: false
+      - key: PAYMENT_PAYEE_NAME
+        value: Uranium
   - type: web
     name: uranium-bot
     runtime: node
@@ -42,6 +46,8 @@ services:
       - key: GITHUB_TOKEN
         sync: false
       - key: RENDER_API_KEY
+        sync: false
+      - key: PAYMENT_NOTIFY_CHANNEL_ID
         sync: false
       - key: LAVALINK_HOST
         sync: false
