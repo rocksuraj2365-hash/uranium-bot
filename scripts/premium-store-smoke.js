@@ -130,7 +130,7 @@ async function main() {
   assert.equal(store.hasPremium('200000000000000007'), true);
   assert.ok(edits.length >= 1, 'owner card is updated');
   assert.ok(sent.some(([id, p]) => id === '200000000000000007' && /verified/.test(p.content)), 'buyer is told');
-  await press('pay:ok:' + o9.ref, OWNER); assert.ok(JSON.stringify(replies.pop()).includes('already approved'));
+  await press('pay:ok:' + o9.ref, OWNER); assert.ok(JSON.stringify(replies.pop()).includes('Already approved'));
 
   // ---- bot HTTP API + website routes end to end
   const sendJson = (res, statusCode, body) => { res.writeHead(statusCode, { 'content-type': 'application/json' }); res.end(JSON.stringify(body)); };
