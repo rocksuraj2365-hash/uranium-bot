@@ -289,13 +289,34 @@ async function onMessage(msg) {
     else { const m = new RegExp(`^<@!?${client.user.id}>\s*`).exec(msg.content); if (m) { body = msg.content.slice(m[0].length); mention = true; } }
     if (body == null) {
       const inAi = db.g(msg.guild.id).config.aiChannel === msg.channelId;
-      if ((owner && G().config.np !== false) || np.has(msg.author.id)) { body = msg.content; viaPrefix = false; npAi = inAi; }
+      if ((owner && G().config.np !== false) || np.has(msg.author.id) || db.g(msg.guild.id).config.npServer === true) { body = msg.content; viaPrefix = false; npAi = inAi; }
       else if (inAi) return aiGo(msg, msg.content, owner);
       else return;
     }
     body = body.trim();
     if (!body) { if (viaPrefix) await msg.reply({ embeds: [ui.infoEmbed('☢️ Hi, I am Uranium', `My prefix here is \`${px}\`. Type \`${px}help\` to open the menu.`, ui.COLORS.ok)], allowedMentions: { repliedUser: false } }); return; }
     const tokens = prefix.tokenize(body);
+    if (tokens[0]?.text.toLowerCase() === 'np' && tokens[1]?.text.toLowerCase() === 'server') {
+      const action = (tokens[2]?.text || 'help').toLowerCase();
+      const reply = (embed) => msg.reply({ embeds: [embed], allowedMentions: { repliedUser: false } });
+      if (!['add', 'remove', 'status', 'help'].includes(action)) return reply(ui.infoEmbed('⚡ Server no-prefix', 'Use `np server add`, `np server remove`, or `np server status`.'));
+      if (!msg.member?.permissions.has('ManageGuild') && msg.author.id !== msg.guild.ownerId) {
+        return reply(ui.errorEmbed('You need **Manage Server** permission to change server-wide no-prefix access.'));
+      }
+      const cfg = db.g(msg.guild.id).config;
+      if (action === 'add') {
+        if (cfg.npServer === true) return reply(ui.infoEmbed('⚡ Already enabled', 'Server-wide no-prefix access is already **ON**.'));
+        cfg.npServer = true; db.save();
+        return reply(ui.okEmbed('⚡ Server no-prefix enabled', 'Everyone in this server can now use supported Uranium prefix commands without typing the prefix.\n\nNormal command permissions still apply. Owner-only commands, Premium checks, and bot safety restrictions are **not** bypassed.\n\nDisable it with `np server remove`.'));
+      }
+      if (action === 'remove') {
+        if (cfg.npServer !== true) return reply(ui.infoEmbed('💤 Already disabled', 'Server-wide no-prefix access is already **OFF**.'));
+        cfg.npServer = false; db.save();
+        return reply(ui.okEmbed('💤 Server no-prefix disabled', 'Members must use the configured prefix again, unless they have individual no-prefix access.'));
+      }
+      if (action === 'status') return reply(ui.infoEmbed('⚡ Server no-prefix status', `Server-wide no-prefix is **${cfg.npServer === true ? 'ON' : 'OFF'}**.\nUse \`np server add\` to enable it or \`np server remove\` to disable it.`));
+      return reply(ui.infoEmbed('⚡ Server no-prefix', 'Use `np server add`, `np server remove`, or `np server status`.'));
+    }
     if (viaPrefix && tokens[0].text.toLowerCase() === 'prefix') return setPrefix(msg, tokens, px);
     const hit = prefix.resolve(tokens);
     if (!hit) { if (mention) return aiGo(msg, body, owner, true); if (npAi) return aiGo(msg, body, owner); return; }
