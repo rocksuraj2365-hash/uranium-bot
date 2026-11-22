@@ -1601,6 +1601,27 @@
           "access": "Owner only"
         },
         {
+          "name": "np-server-add",
+          "description": "Enable no-prefix commands for everyone in this server",
+          "slash": "Not available",
+          "prefix": "!np server add",
+          "access": "Server owner or Manage Server"
+        },
+        {
+          "name": "np-server-remove",
+          "description": "Disable server-wide no-prefix access",
+          "slash": "Not available",
+          "prefix": "!np server remove",
+          "access": "Server owner or Manage Server"
+        },
+        {
+          "name": "np-server-status",
+          "description": "Show server-wide no-prefix status",
+          "slash": "Not available",
+          "prefix": "!np server status",
+          "access": "Server owner or Manage Server"
+        },
+        {
           "name": "servers",
           "description": "Owner only: list all servers the bot is in",
           "slash": "/premium servers",
