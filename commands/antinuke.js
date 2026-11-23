@@ -85,7 +85,7 @@ async function backupCommand(action) { return async c => {
 }; }
 
 module.exports={
-  name:'antinuke', description:'Per-feature Anti-Nuke, whitelist and Extra Owner controls.',
+  name:'antinuke', description:'Per-feature Anti-Nuke, server backups, chat export, whitelist and Extra Owner controls.',
   commands:[
     C('panel','Open the interactive Anti-Nuke control panel',[],null,panel,{custom:true}),
     C('config','Enable, disable or inspect the Anti-Nuke matrix',[S('mode','on, off, status, or toggle',false,{choices:['on','off','status','toggle']}),S('feature','Feature key for toggle mode',false,{max:40}),S('enabled','on or off for toggle mode',false,{choices:['on','off']})],null,configure),
