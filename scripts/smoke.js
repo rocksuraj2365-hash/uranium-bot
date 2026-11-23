@@ -82,11 +82,11 @@ for (const cat of addedCats) cat.map = new Map(cat.commands.map((command) => [co
 const template = require('../commands/template');
 const support = require('../commands/support');
 const security = require('../commands/security');
-const antiNuke = require('../commands/antinuke');
-const serverBackup = require('../lib/server-backup');
-assert.equal(antiNuke.commands.length, 16, 'Anti-Nuke must include eight server backup and chat archive controls');
-for (const name of ['backup-on','backup-off','backup-save','backup-restore','backup-status','backup-chat-on','backup-chat-off','backup-chat-export']) assert.ok(antiNuke.commands.some(x => x.name === name), 'Missing backup command: ' + name);
-for (const name of ['createSnapshot','snapshotStatus','restoreSnapshot','recoverDeletedChannel','recoverDeletedRole','setChatArchive','archiveMessage','exportChat']) assert.equal(typeof serverBackup[name], 'function', 'Backup engine missing ' + name);
+const backupCommands = require('../commands/antinuke');
+const backupEngine = require('../lib/server-backup');
+assert.equal(backupCommands.commands.length, 16, 'Anti-Nuke must include eight server backup and chat archive controls');
+for (const name of ['backup-on','backup-off','backup-save','backup-restore','backup-status','backup-chat-on','backup-chat-off','backup-chat-export']) assert.ok(backupCommands.commands.some(x => x.name === name), 'Missing backup command: ' + name);
+for (const name of ['createSnapshot','snapshotStatus','restoreSnapshot','recoverDeletedChannel','recoverDeletedRole','setChatArchive','archiveMessage','exportChat']) assert.equal(typeof backupEngine[name], 'function', 'Backup engine missing ' + name);
 const securityChecklist = require('../lib/security-checklist');
 assert.equal(securityChecklist.checks.length, 100, 'Security audit must contain exactly 100 checks');
 assert.equal(new Set(securityChecklist.checks.map(check => check.id)).size, 100, 'Security audit check IDs must be unique');
@@ -384,7 +384,7 @@ testKeywordRuleLimit().catch(error=>{console.error(error);process.exitCode=1;});
 
 // Anti-Nuke feature controls and legacy-safe prefix shortcuts.
 const antiNuke = require('../commands/antinuke');
-assert.equal(antiNuke.commands.length, 8, 'Anti-Nuke must register eight commands including its interactive panel');
+assert.equal(antiNuke.commands.length, 16, 'Anti-Nuke must register sixteen commands including backup and chat archive controls');
 assert.equal(new Set(antiNuke.commands.map(x => x.name)).size, 8, 'Anti-Nuke command names must be unique');
 for (const command of antiNuke.commands) assert.equal(typeof command.run, 'function', 'Anti-Nuke command must have an executable handler: ' + command.name);
 for (const [alias,name] of [['antinuke','panel'],['wladd','wl-add'],['wlremove','wl-remove'],['wllist','wl-list'],['extraowneradd','extraowner-add'],['extraownerremove','extraowner-remove'],['extraownerlist','extraowner-list']]) {
