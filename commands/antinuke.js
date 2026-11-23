@@ -78,7 +78,7 @@ async function backupCommand(action) { return async c => {
   if(action==='chat-export') {
     const channel=c.c('channel');
     const file=await backup.exportChat(c.g,channel?.id||null);
-    if(c.i.isChatInputCommand?.()) await c.i.followUp({content:'🔐 Chat export attached. This file contains messages captured only while the server archive was enabled.',files:[file],ephemeral:true});
+    if(c.i.isChatInputCommand?.()) await c.i.followUp({content:'🔐 Chat export attached. This file contains messages captured only while the server archive was enabled.',files:[file],flags:ui.EPH});
     else await c.ch.send({content:'🔐 Chat export attached.',files:[file]});
     return {handled:true};
   }
