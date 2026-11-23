@@ -3641,7 +3641,7 @@
     },
     {
       "name": "antinuke",
-      "description": "Configurable anti-nuke protection, whitelist and trusted Extra Owners.",
+      "description": "Configurable Anti-Nuke protection, server backups, chat export, whitelist and trusted Extra Owners.",
       "commands": [
         {
           "name": "panel",
