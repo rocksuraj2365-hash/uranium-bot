@@ -82,6 +82,11 @@ for (const cat of addedCats) cat.map = new Map(cat.commands.map((command) => [co
 const template = require('../commands/template');
 const support = require('../commands/support');
 const security = require('../commands/security');
+const antiNuke = require('../commands/antinuke');
+const serverBackup = require('../lib/server-backup');
+assert.equal(antiNuke.commands.length, 16, 'Anti-Nuke must include eight server backup and chat archive controls');
+for (const name of ['backup-on','backup-off','backup-save','backup-restore','backup-status','backup-chat-on','backup-chat-off','backup-chat-export']) assert.ok(antiNuke.commands.some(x => x.name === name), 'Missing backup command: ' + name);
+for (const name of ['createSnapshot','snapshotStatus','restoreSnapshot','recoverDeletedChannel','recoverDeletedRole','setChatArchive','archiveMessage','exportChat']) assert.equal(typeof serverBackup[name], 'function', 'Backup engine missing ' + name);
 const securityChecklist = require('../lib/security-checklist');
 assert.equal(securityChecklist.checks.length, 100, 'Security audit must contain exactly 100 checks');
 assert.equal(new Set(securityChecklist.checks.map(check => check.id)).size, 100, 'Security audit check IDs must be unique');
@@ -119,7 +124,7 @@ assert.equal(typeof statsCommands.inspectAfkMessage, 'function');
 const catalog = require('../commands.json');
 assert.equal(addedCats.reduce((n, cat) => n + cat.commands.length, 0), 100, 'Four new categories must add exactly 100 commands');
 assert.equal(addedCats.every(cat => cat.commands.length === 25), true, 'Every new category must contain 25 commands');
-assert.equal(catalog.total, 506, 'Published catalog total must match the implemented command set');
+assert.equal(catalog.total, 514, 'Published catalog total must match the implemented command set');
 assert.equal(catalog.categories.length, 26, 'Every command category must be published');
 for (const entry of catalog.categories) {
   const source = require('../commands/' + entry.name);
