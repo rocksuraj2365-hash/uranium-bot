@@ -1,7 +1,7 @@
 {
   "version": 1,
   "generatedFrom": "commands/*.js",
-  "total": 506,
+  "total": 514,
   "categories": [
     {
       "name": "member",
@@ -3641,7 +3641,7 @@
     },
     {
       "name": "antinuke",
-      "description": "Configurable anti-nuke protection, whitelist and trusted Extra Owners.",
+      "description": "Configurable Anti-Nuke protection, server backups, chat export, whitelist and trusted Extra Owners.",
       "commands": [
         {
           "name": "panel",
@@ -3697,6 +3697,62 @@
           "description": "List Extra Owners",
           "slash": "/antinuke extraowner-list",
           "prefix": "!extraownerlist",
+          "access": "Server owner, Extra Owner, or Manage Server"
+        },
+        {
+          "name": "backup-on",
+          "description": "Create initial backup and enable automatic recovery",
+          "slash": "/antinuke backup-on",
+          "prefix": "!antinuke backup-on",
+          "access": "Server owner, Extra Owner, or Manage Server"
+        },
+        {
+          "name": "backup-off",
+          "description": "Pause automatic snapshots and recovery",
+          "slash": "/antinuke backup-off",
+          "prefix": "!antinuke backup-off",
+          "access": "Server owner, Extra Owner, or Manage Server"
+        },
+        {
+          "name": "backup-save",
+          "description": "Create a manual server structure backup",
+          "slash": "/antinuke backup-save",
+          "prefix": "!antinuke backup-save",
+          "access": "Server owner, Extra Owner, or Manage Server"
+        },
+        {
+          "name": "backup-restore",
+          "description": "Recreate missing roles and channels from latest backup",
+          "slash": "/antinuke backup-restore",
+          "prefix": "!antinuke backup-restore",
+          "access": "Server owner, Extra Owner, or Manage Server"
+        },
+        {
+          "name": "backup-status",
+          "description": "Show backup and chat archive status",
+          "slash": "/antinuke backup-status",
+          "prefix": "!antinuke backup-status",
+          "access": "Server owner, Extra Owner, or Manage Server"
+        },
+        {
+          "name": "backup-chat-on",
+          "description": "Enable visible, limited chat archiving",
+          "slash": "/antinuke backup-chat-on",
+          "prefix": "!antinuke backup-chat-on",
+          "access": "Server owner, Extra Owner, or Manage Server"
+        },
+        {
+          "name": "backup-chat-off",
+          "description": "Disable chat archiving and clear stored messages",
+          "slash": "/antinuke backup-chat-off",
+          "prefix": "!antinuke backup-chat-off",
+          "access": "Server owner, Extra Owner, or Manage Server"
+        },
+        {
+          "name": "backup-chat-export",
+          "description": "Export archived messages as JSON",
+          "slash": "/antinuke backup-chat-export",
+          "prefix": "!antinuke backup-chat-export",
           "access": "Server owner, Extra Owner, or Manage Server"
         }
       ]

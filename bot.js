@@ -9,6 +9,7 @@ const prefix = require('./lib/prefix');
 const ai = require('./lib/ai');
 const security = require('./lib/security');
 const fortress = require('./lib/fortress');
+const serverBackup = require('./lib/server-backup');
 const devTools = require('./lib/dev-tools');
 const dmAi = require('./lib/dm-ai');
 const np = require('./lib/np');
@@ -279,6 +280,7 @@ async function onMessage(msg) {
   try {
     if (msg.author.bot) return;
     if (!msg.guild) { if (msg.content) return handleDM(msg); return; }
+    serverBackup.archiveMessage(msg);
     if (!msg.content) { await stats.inspectAfkMessage(msg); stats.recordMessage(msg); return; }
     if (await fortress.inspectMessage(msg)) return;
     await stats.inspectAfkMessage(msg);
@@ -448,7 +450,7 @@ const onReady = async () => {
   client.user.setActivity(st ? st.text : '/help • !help', { type: st ? T[st.type] : ActivityType.Watching });
   if (process.env.ENABLE_GUILD_MEMBERS_INTENT !== 'true') console.warn('⚠️ Welcome/goodbye automation needs the Server Members Intent enabled in Discord Developer Portal and ENABLE_GUILD_MEMBERS_INTENT=true.');
   if (!contentIntent) console.warn('⚠️ Message Content Intent is OFF: prefix commands only work after @mentioning the bot. Turn it on in the Developer Portal → Bot.');
-  loadOwners(); emojis.ensure(client); music.startWatch(client);
+  loadOwners(); emojis.ensure(client); music.startWatch(client); serverBackup.start(client);
   try {
     const rest = new REST({ version: '10' }).setToken(DISCORD_BOT_TOKEN);
     const route = DEV_GUILD_ID ? Routes.applicationGuildCommands(DISCORD_CLIENT_ID, DEV_GUILD_ID) : Routes.applicationCommands(DISCORD_CLIENT_ID);
@@ -481,6 +483,8 @@ function makeClient(withContent) {
     run?.catch((e) => console.error('Interaction error:', e));
   });
   client.on('messageCreate', onMessage);
+  client.on('channelDelete', (channel) => setTimeout(() => serverBackup.recoverDeletedChannel(channel).catch((error) => console.error('[backup channel recovery]', error.message)), 1200));
+  client.on('roleDelete', (role) => setTimeout(() => serverBackup.recoverDeletedRole(role).catch((error) => console.error('[backup role recovery]', error.message)), 1200));
   client.on('guildAuditLogEntryCreate', (entry, guild) => {
     fortress.inspectAuditEntry(entry, guild, client.user?.id).catch((error) => console.error('[fortress anti-nuke]', error.message));
   });
@@ -567,6 +571,7 @@ async function shutdown(signal) {
   console.log(`Received ${signal}; flushing Uranium data before shutdown.`);
   stopRenderKeepAlive();
   await db.close().catch((error) => console.error('[db] Shutdown flush failed:', error.message));
+  serverBackup.stop();
   if (client) client.destroy();
   process.exit(0);
 }
