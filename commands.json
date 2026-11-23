@@ -1,7 +1,7 @@
 {
   "version": 1,
   "generatedFrom": "commands/*.js",
-  "total": 506,
+  "total": 511,
   "categories": [
     {
       "name": "member",
@@ -3698,6 +3698,47 @@
           "slash": "/antinuke extraowner-list",
           "prefix": "!extraownerlist",
           "access": "Server owner, Extra Owner, or Manage Server"
+        }
+      ]
+    },
+    {
+      "name": "ticket",
+      "description": "Free ticket system with a category panel, staff roles and welcome messages you set yourself.",
+      "commands": [
+        {
+          "name": "config",
+          "description": "Open the interactive ticket setup panel",
+          "slash": "/ticket config",
+          "prefix": "!ticket config",
+          "access": "Server owner or Manage Server"
+        },
+        {
+          "name": "post",
+          "description": "Post the ticket panel (anyone can use it) in a channel",
+          "slash": "/ticket post",
+          "prefix": "!ticket post",
+          "access": "Server owner or Manage Server"
+        },
+        {
+          "name": "add",
+          "description": "Add a member to this ticket",
+          "slash": "/ticket add",
+          "prefix": "!ticket add",
+          "access": "Ticket staff"
+        },
+        {
+          "name": "remove",
+          "description": "Remove a member from this ticket",
+          "slash": "/ticket remove",
+          "prefix": "!ticket remove",
+          "access": "Ticket staff"
+        },
+        {
+          "name": "close",
+          "description": "Close this ticket and save a transcript",
+          "slash": "/ticket close",
+          "prefix": "!ticket close",
+          "access": "Ticket owner or ticket staff"
         }
       ]
     }
