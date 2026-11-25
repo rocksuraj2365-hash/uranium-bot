@@ -93,7 +93,7 @@ module.exports = {
       S('description', 'Short dropdown description (optional)', false, { max: 100 }),
       CH('ticket_category', 'Discord category where tickets will be created', true, [ChannelType.GuildCategory]),
       R('staff_role', 'Role allowed to view and manage these tickets', true),
-      S('welcome_message', 'Message posted inside new tickets', true, { max: 1500 }),
+      S('welcome_message', 'Message posted inside new tickets (optional)', false, { max: 1500 }),
     ], null, tickets.addCategory, { custom: true, ephemeral: true }),
     C('ticket-category-remove', 'Remove a ticket category without deleting open tickets', [
       S('name', 'Name of the category to remove', true, { max: 80 }),
