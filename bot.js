@@ -16,6 +16,7 @@ const np = require('./lib/np');
 const music = require('./lib/music');
 const lavalink = require('./lib/lavalink');
 const supportTemplate = require('./lib/support-template');
+const tickets = require('./lib/tickets');
 const emojis = require('./lib/emojis');
 const stats = require('./commands/stats');
 const engagement = require('./commands/engagement');
@@ -357,6 +358,7 @@ async function autocomplete(i) {
 async function button(i) {
   const [kind, a] = i.customId.split(':');
   if (kind === 'template') return supportTemplate.onButton(i);
+  if (kind === 'ticket') return tickets.onComponent(i);
   if (['cf', 'help', 'eb', 'lst', 'sv', 'appem'].includes(kind)) return; // handled by collectors
   if (kind === 'mu') return music.onComponent(i);
   if (kind === 'anx') return require('./lib/antinuke-ui').onAlertButton(i);
