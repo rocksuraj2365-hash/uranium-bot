@@ -9,7 +9,8 @@
   "scripts": {
     "start": "node server.js",
     "bot": "node bot.js",
-    "test": "node scripts/db-queue-smoke.js && node scripts/session-store-smoke.js && node scripts/smoke.js && node scripts/ai-core-smoke.js"
+    "test": "node scripts/db-queue-smoke.js && node scripts/session-store-smoke.js && node scripts/smoke.js && node scripts/ai-core-smoke.js",
+    "prestart": "node scripts/generate-command-catalog.js"
   },
   "dependencies": {
     "discord.js": "^14.28.1",
